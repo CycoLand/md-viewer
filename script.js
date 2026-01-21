@@ -762,14 +762,17 @@ ${marked.parse(file.content)}
 function toggleSidebar() {
     sidebarCollapsed = !sidebarCollapsed;
     const sidebar = document.getElementById('sidebar');
-    const toggleBtn = document.getElementById('sidebar-toggle');
+    const mainContent = document.querySelector('.main-content');
+    const headerToggleBtn = document.getElementById('sidebar-toggle-header');
     
     if (sidebarCollapsed) {
         sidebar.classList.add('collapsed');
-        toggleBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        mainContent.classList.add('sidebar-collapsed');
+        if (headerToggleBtn) headerToggleBtn.classList.add('show');
     } else {
         sidebar.classList.remove('collapsed');
-        toggleBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        mainContent.classList.remove('sidebar-collapsed');
+        if (headerToggleBtn) headerToggleBtn.classList.remove('show');
     }
 }
 
@@ -970,6 +973,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('welcome-paste-btn').addEventListener('click', showPasteModal);
 
     document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
+    document.getElementById('sidebar-toggle-header').addEventListener('click', toggleSidebar);
     document.getElementById('theme-toggle').addEventListener('click', toggleThemePanel);
     document.getElementById('close-theme-panel').addEventListener('click', closeThemePanel);
 
