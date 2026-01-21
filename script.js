@@ -438,30 +438,73 @@ class FileManager {
 
             heading.addEventListener('click', () => {
                 const nowCollapsed = !section.classList.contains('collapsed');
+                // Update state first
+                const curState = this.collapseState.get(currentFileId) || {};
+                curState[headingId] = nowCollapsed;
+                this.collapseState.set(currentFileId, curState);
+
                 if (nowCollapsed) {
+                    // Collapse: set class and chevron, animate to 0
                     section.classList.add('collapsed');
                     if (iconWrap) iconWrap.classList.remove('hidden');
                     if (icon) {
                         icon.classList.remove('fa-chevron-down');
                         icon.classList.add('fa-chevron-right');
                     }
-                } else {
-                    section.classList.remove('collapsed');
-                    if (iconWrap) iconWrap.classList.add('hidden');
-                    if (icon) {
-                        icon.classList.remove('fa-chevron-right');
-                        icon.classList.add('fa-chevron-down');
+                    // Animate collapse
+                    const bodyEl = section.querySelector('.md-section-body');
+                    if (bodyEl) {
+                        // set to current height then 0 to animate
+                        bodyEl.style.maxHeight = bodyEl.scrollHeight + 'px';
+                        requestAnimationFrame(() => {
+                            bodyEl.style.maxHeight = '0px';
+                        });
                     }
+                } else {
+                    // Expand
                     const level = parseInt(heading.tagName.substring(1), 10);
                     if (currentFileId && renderCache.has(currentFileId) && level === 1) {
+                        // Rebuild from cache, then animate the same heading's section
                         FileManager.rebuildFromCache();
+                        const newHeading = document.getElementById(headingId);
+                        const newSection = newHeading ? newHeading.closest('.md-section') : null;
+                        const newIconWrap = newHeading ? newHeading.querySelector('.md-toggle-icon') : null;
+                        const newIcon = newHeading ? newHeading.querySelector('.md-toggle-icon i') : null;
+                        if (newSection) {
+                            newSection.classList.remove('collapsed');
+                            const bodyEl = newSection.querySelector('.md-section-body');
+                            if (newIconWrap) newIconWrap.classList.add('hidden');
+                            if (newIcon) {
+                                newIcon.classList.remove('fa-chevron-right');
+                                newIcon.classList.add('fa-chevron-down');
+                            }
+                            if (bodyEl) {
+                                // start at 0 then animate to full height
+                                bodyEl.style.maxHeight = '0px';
+                                requestAnimationFrame(() => {
+                                    bodyEl.style.maxHeight = bodyEl.scrollHeight + 'px';
+                                });
+                            }
+                        }
                     } else {
-                        requestAnimationFrame(() => remeasure(section));
+                        // Non-H1: animate existing section
+                        section.classList.remove('collapsed');
+                        if (iconWrap) iconWrap.classList.add('hidden');
+                        if (icon) {
+                            icon.classList.remove('fa-chevron-right');
+                            icon.classList.add('fa-chevron-down');
+                        }
+                        const bodyEl = section.querySelector('.md-section-body');
+                        if (bodyEl) {
+                            bodyEl.style.maxHeight = '0px';
+                            requestAnimationFrame(() => {
+                                bodyEl.style.maxHeight = bodyEl.scrollHeight + 'px';
+                            });
+                        } else {
+                            requestAnimationFrame(() => remeasure(section));
+                        }
                     }
                 }
-                const curState = this.collapseState.get(currentFileId) || {};
-                curState[headingId] = nowCollapsed;
-                this.collapseState.set(currentFileId, curState);
             });
         });
     }
