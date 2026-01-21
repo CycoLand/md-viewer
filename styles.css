@@ -34,9 +34,16 @@
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     
-    /* Animation */
+    /* Animation Timings */
     --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Collapsible Section Timings */
+    --collapse-duration: 0.3s;
+    --collapse-delay: 0.2s;
+    --chevron-slide-distance: 5px;
+    --chevron-fade-duration: 0.3s;
+    --chevron-color-transition: 0.2s;
 }
 
 /* Reset and Base Styles */
@@ -424,28 +431,32 @@ body {
 .md-section .md-heading {
     position: relative;
     padding-right: 0; /* No space for chevron initially */
-    transition: padding-right 0.3s ease 0.3s; /* Default: delay (for expanding) */
+    transition: padding-right var(--collapse-duration) ease var(--collapse-delay); /* Default: delay (for expanding) */
 }
 
 /* When collapsing, extend line immediately with content collapse */
 .md-section.collapsed .md-heading {
     padding-right: 2.5rem; /* Space for chevron */
-    transition: padding-right 0.3s ease; /* No delay - sync with content */
+    transition: padding-right var(--collapse-duration) ease; /* No delay - sync with content */
 }
 
 .md-section .md-toggle-icon {
     position: absolute;
-    right: 0.5rem; /* Move it even more to the right */
+    right: 0.25rem; /* Move it even more to the right */
     top: 50%;
+    transform: translateY(-50%); /* Center vertically */
     color: var(--text-dim);
-    display: inline-flex;
+    display: flex; /* Use flex instead of inline-flex */
     align-items: center;
+    justify-content: center;
     width: 1em;
+    height: 1em;
     overflow: visible;
     pointer-events: none;
     opacity: 0;
-    transform: translateY(-50%);
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity var(--chevron-fade-duration) ease, 
+                transform var(--chevron-fade-duration) ease, 
+                color var(--chevron-color-transition) ease;
 }
 
 .md-section .md-toggle-icon i {
@@ -457,37 +468,44 @@ body {
 .md-section .md-toggle-icon.hidden {
     opacity: 0;
     transform: translateY(calc(-50% + 10px));
-    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s 0.3s;
+    transition: opacity var(--chevron-fade-duration) ease, 
+                transform var(--chevron-fade-duration) ease, 
+                visibility 0s var(--chevron-fade-duration);
     visibility: hidden;
 }
 
 /* Collapsed sections - chevron is visible and slides up AFTER line extends */
 .md-section.collapsed .md-toggle-icon:not(.hidden) {
     opacity: 1;
-    transform: translateY(calc(-50% - 5px)); /* Slight upward position */
+    transform: translateY(calc(-50% - var(--chevron-slide-distance))); /* Slight upward position */
     pointer-events: auto;
-    transition: opacity 0.3s ease 0.3s, transform 0.3s ease 0.3s; /* 0.3s delay for line extension */
+    transition: opacity var(--chevron-fade-duration) ease var(--collapse-delay), 
+                transform var(--chevron-fade-duration) ease var(--collapse-delay),
+                color var(--chevron-color-transition) ease;
     visibility: visible;
 }
 
-/* Show on hover */
+/* Show on hover - change color but don't move */
 .md-section.collapsed .md-heading:hover .md-toggle-icon:not(.hidden) {
     opacity: 1;
-    transform: translateY(-50%);
+    color: var(--primary-color); /* Change to accent color */
+    transform: translateY(calc(-50% - var(--chevron-slide-distance))); /* Keep same position as collapsed state */
 }
 
 /* When expanding: override to make chevron fade and slide immediately */
 .md-section:not(.collapsed) .md-toggle-icon {
     opacity: 0;
     transform: translateY(calc(-50% + 10px)); /* Slide down */
-    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s 0.3s; /* No delay, hide after fade */
+    transition: opacity var(--chevron-fade-duration) ease, 
+                transform var(--chevron-fade-duration) ease, 
+                visibility 0s var(--chevron-fade-duration);
     visibility: hidden;
 }
 
 /* Collapse animation using content wrapper */
 .md-section-body {
     overflow: hidden;
-    transition: max-height 0.3s ease;
+    transition: max-height var(--collapse-duration) ease;
 }
 
 /* Keep heading visible at all times */
