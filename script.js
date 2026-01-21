@@ -558,9 +558,54 @@ class FileManager {
             b.style.maxHeight = b.scrollHeight + 'px';
         });
 
-        // Apply syntax highlighting to code blocks
+        // Apply syntax highlighting and enhance code blocks
         mdEl.querySelectorAll('pre code').forEach((block) => {
             hljs.highlightElement(block);
+            
+            // Get language from class
+            const languageClass = Array.from(block.classList).find(cls => cls.startsWith('language-'));
+            const language = languageClass ? languageClass.replace('language-', '') : 'text';
+            
+            // Wrap code block with header
+            const pre = block.parentElement;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'code-block-wrapper';
+            
+            // Create header with language and copy button
+            const header = document.createElement('div');
+            header.className = 'code-block-header';
+            
+            const langLabel = document.createElement('span');
+            langLabel.className = 'code-language';
+            langLabel.textContent = language.toUpperCase();
+            
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'code-copy-btn';
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+            copyBtn.title = 'Copy to clipboard';
+            
+            // Copy functionality
+            copyBtn.addEventListener('click', () => {
+                const code = block.textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                    copyBtn.classList.add('copied');
+                    setTimeout(() => {
+                        copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                        copyBtn.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                });
+            });
+            
+            header.appendChild(langLabel);
+            header.appendChild(copyBtn);
+            
+            // Insert wrapper before pre, then move pre into wrapper
+            pre.parentNode.insertBefore(wrapper, pre);
+            wrapper.appendChild(header);
+            wrapper.appendChild(pre);
         });
 
         if (tocEl) {
@@ -629,9 +674,54 @@ class FileManager {
             b.style.maxHeight = b.scrollHeight + 'px';
         });
 
-        // Apply syntax highlighting to code blocks
+        // Apply syntax highlighting and enhance code blocks
         mdEl.querySelectorAll('pre code').forEach((block) => {
             hljs.highlightElement(block);
+            
+            // Get language from class
+            const languageClass = Array.from(block.classList).find(cls => cls.startsWith('language-'));
+            const language = languageClass ? languageClass.replace('language-', '') : 'text';
+            
+            // Wrap code block with header
+            const pre = block.parentElement;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'code-block-wrapper';
+            
+            // Create header with language and copy button
+            const header = document.createElement('div');
+            header.className = 'code-block-header';
+            
+            const langLabel = document.createElement('span');
+            langLabel.className = 'code-language';
+            langLabel.textContent = language.toUpperCase();
+            
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'code-copy-btn';
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+            copyBtn.title = 'Copy to clipboard';
+            
+            // Copy functionality
+            copyBtn.addEventListener('click', () => {
+                const code = block.textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                    copyBtn.classList.add('copied');
+                    setTimeout(() => {
+                        copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                        copyBtn.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                });
+            });
+            
+            header.appendChild(langLabel);
+            header.appendChild(copyBtn);
+            
+            // Insert wrapper before pre, then move pre into wrapper
+            pre.parentNode.insertBefore(wrapper, pre);
+            wrapper.appendChild(header);
+            wrapper.appendChild(pre);
         });
 
         if (tocEl) {
