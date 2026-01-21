@@ -17,7 +17,7 @@
     
     /* Typography */
     --font-family: 'Inter', sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
+    --font-mono: 'Recursive', monospace;
     --font-size: 16px;
     --line-height: 1.6;
     --font-weight-normal: 400;
@@ -532,12 +532,12 @@ body {
 }
 
 .markdown-content code {
-    background-color: var(--surface-color);
+    background-color: rgba(99, 102, 241, 0.1);
     padding: 0.2rem 0.4rem;
     border-radius: 4px;
     font-family: var(--font-mono);
     font-size: 0.875rem;
-    color: var(--accent-color);
+    color: #e5c07b;
 }
 
 .markdown-content pre {
@@ -551,6 +551,99 @@ body {
 
 .markdown-content pre code {
     background: none;
+    padding: 0;
+    color: var(--text-color);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+/* Syntax Highlighting Enhancements */
+.markdown-content pre code.hljs {
+    display: block;
+    overflow-x: auto;
+    padding: 0;
+    background: transparent;
+}
+
+/* Enhance syntax highlighting colors */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-section,
+.hljs-link {
+    color: #c678dd;
+    font-weight: 500;
+}
+
+.hljs-function .hljs-keyword {
+    color: #61afef;
+}
+
+.hljs-string,
+.hljs-title,
+.hljs-name,
+.hljs-type,
+.hljs-attribute,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition,
+.hljs-variable,
+.hljs-template-tag,
+.hljs-template-variable {
+    color: #98c379;
+}
+
+.hljs-comment,
+.hljs-quote,
+.hljs-deletion,
+.hljs-meta {
+    color: #5c6370;
+    font-style: italic;
+}
+
+.hljs-number,
+.hljs-regexp,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-built_in,
+.hljs-builtin-name {
+    color: #e5c07b;
+}
+
+.hljs-function,
+.hljs-params {
+    color: #61afef;
+}
+
+.hljs-attr {
+    color: #d19a66;
+}
+
+.hljs-doctag,
+.hljs-title.class_,
+.hljs-title.function_ {
+    color: #e06c75;
+}
+
+/* Language label for code blocks */
+.markdown-content pre {
+    position: relative;
+}
+
+.markdown-content pre code.hljs::before {
+    content: attr(data-language);
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
     padding: 0;
     color: var(--text-color);
 }

@@ -558,6 +558,11 @@ class FileManager {
             b.style.maxHeight = b.scrollHeight + 'px';
         });
 
+        // Apply syntax highlighting to code blocks
+        mdEl.querySelectorAll('pre code').forEach((block) => {
+            hljs.highlightElement(block);
+        });
+
         if (tocEl) {
             const items = Array.from(mdEl.querySelectorAll('.md-heading')).map(h => {
                 const level = parseInt(h.tagName.substring(1), 10);
@@ -622,6 +627,11 @@ class FileManager {
         this.buildCollapsibleSections(mdEl);
         mdEl.querySelectorAll('.md-section-body').forEach(b => {
             b.style.maxHeight = b.scrollHeight + 'px';
+        });
+
+        // Apply syntax highlighting to code blocks
+        mdEl.querySelectorAll('pre code').forEach((block) => {
+            hljs.highlightElement(block);
         });
 
         if (tocEl) {
