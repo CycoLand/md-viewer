@@ -347,7 +347,7 @@ class FileManager {
 
         const children = Array.from(mdEl.children);
         const sections = [];
-        const stack = []; // {section, level}
+        const stack = []; // {section, level, body}
 
         children.forEach(node => {
             const isHeading = node.tagName && /^H[1-6]$/.test(node.tagName);
@@ -373,45 +373,88 @@ class FileManager {
                 mdEl.insertBefore(section, headingEl);
                 section.appendChild(headingEl);
 
+                // Create animated body wrapper
+                const body = document.createElement('div');
+                body.className = 'md-section-body';
+                section.appendChild(body);
+
                 // Manage hierarchy: nest within parent section if exists
                 while (stack.length && stack[stack.length - 1].level >= level) {
                     stack.pop();
                 }
-                const parent = stack.length ? stack[stack.length - 1].section : null;
-                if (parent) {
-                    parent.appendChild(section);
+                const parentEntry = stack.length ? stack[stack.length - 1] : null;
+                if (parentEntry) {
+                    parentEntry.body.appendChild(section);
                 }
 
-                sections.push({ section, headingId: headingEl.id, level });
-                stack.push({ section, level });
+                sections.push({ section, headingId: headingEl.id, level, body });
+                stack.push({ section, level, body });
             } else {
                 // Append non-heading content to the current top section
                 if (stack.length) {
-                    const top = stack[stack.length - 1].section;
-                    top.appendChild(node);
+                    const top = stack[stack.length - 1];
+                    top.body.appendChild(node);
                 }
             }
         });
 
-        // Apply collapsed state and attach listeners
-        sections.forEach(({ section, headingId }) => {
+        // Apply collapsed state, initial measurements, and attach listeners
+        // First, measure all bodies to capture natural heights
+        sections.forEach(({ body }) => {
+            body.style.maxHeight = body.scrollHeight + 'px';
+        });
+
+        sections.forEach(({ section, headingId, body }) => {
             const collapsed = !!state[headingId];
-            if (collapsed) section.classList.add('collapsed');
             const heading = section.querySelector('.md-heading');
+            const iconWrap = heading.querySelector('.md-toggle-icon');
+            const icon = heading.querySelector('.md-toggle-icon i');
+
+            // Initialize chevron visibility
+            if (collapsed) {
+                section.classList.add('collapsed');
+                if (iconWrap) iconWrap.classList.remove('hidden');
+                if (icon) {
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-right');
+                }
+            } else {
+                if (iconWrap) iconWrap.classList.add('hidden');
+                if (icon) {
+                    icon.classList.remove('fa-chevron-right');
+                    icon.classList.add('fa-chevron-down');
+                }
+            }
+
+            const remeasure = (rootSection) => {
+                // Re-measure this section body and all descendant bodies
+                const bodies = rootSection.querySelectorAll('.md-section-body');
+                bodies.forEach(b => {
+                    // Temporarily clear max-height to read natural height
+                    b.style.maxHeight = 'none';
+                    const h = b.scrollHeight;
+                    b.style.maxHeight = h + 'px';
+                });
+            };
+
             heading.addEventListener('click', () => {
                 const nowCollapsed = !section.classList.contains('collapsed');
-                section.classList.toggle('collapsed', nowCollapsed);
-                const iconWrap = heading.querySelector('.md-toggle-icon');
-                const icon = heading.querySelector('.md-toggle-icon i');
-                if (iconWrap && icon) {
-                    icon.classList.remove('fa-chevron-right','fa-chevron-down');
-                    if (nowCollapsed) {
-                        iconWrap.classList.remove('hidden');
+                if (nowCollapsed) {
+                    section.classList.add('collapsed');
+                    if (iconWrap) iconWrap.classList.remove('hidden');
+                    if (icon) {
+                        icon.classList.remove('fa-chevron-down');
                         icon.classList.add('fa-chevron-right');
-                    } else {
-                        iconWrap.classList.add('hidden');
+                    }
+                } else {
+                    section.classList.remove('collapsed');
+                    if (iconWrap) iconWrap.classList.add('hidden');
+                    if (icon) {
+                        icon.classList.remove('fa-chevron-right');
                         icon.classList.add('fa-chevron-down');
                     }
+                    // Re-measure after expanding to animate to natural height
+                    requestAnimationFrame(() => remeasure(section));
                 }
                 const curState = this.collapseState.get(currentFileId) || {};
                 curState[headingId] = nowCollapsed;

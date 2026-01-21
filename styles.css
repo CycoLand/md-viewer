@@ -422,13 +422,23 @@ body {
 .md-section .md-toggle-icon.hidden {
     display: none;
 }
-.md-section.collapsed > :not(.md-heading) {
+/* Collapse animation using content wrapper */
+.md-section-body {
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+/* Keep heading visible at all times */
+.md-section.collapsed > :not(.md-heading):not(.md-section-body) {
     display: none;
+}
+.md-section.collapsed .md-section-body {
+    max-height: 0 !important;
 }
 .md-section .md-heading {
     cursor: pointer;
     display: inline-flex;
-    align-items: baseline;
+    align-items: center;
     gap: 0.5rem;
 }
 .md-section.collapsed .md-heading {
