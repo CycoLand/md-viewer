@@ -359,7 +359,13 @@ class FileManager {
                 const headingEl = node; // original heading
                 const icon = document.createElement('span');
                 icon.className = 'md-toggle-icon';
-                icon.textContent = state[headingEl.id] ? '▶' : '▼';
+                const iconInner = document.createElement('i');
+                iconInner.className = 'fas fa-chevron-right';
+                if (!state[headingEl.id]) {
+                    // expanded -> hide chevron
+                    icon.classList.add('hidden');
+                }
+                icon.appendChild(iconInner);
                 headingEl.classList.add('md-heading');
                 headingEl.prepend(icon);
 
@@ -395,8 +401,18 @@ class FileManager {
             heading.addEventListener('click', () => {
                 const nowCollapsed = !section.classList.contains('collapsed');
                 section.classList.toggle('collapsed', nowCollapsed);
-                const icon = heading.querySelector('.md-toggle-icon');
-                if (icon) icon.textContent = nowCollapsed ? '▶' : '▼';
+                const iconWrap = heading.querySelector('.md-toggle-icon');
+                const icon = heading.querySelector('.md-toggle-icon i');
+                if (iconWrap && icon) {
+                    icon.classList.remove('fa-chevron-right','fa-chevron-down');
+                    if (nowCollapsed) {
+                        iconWrap.classList.remove('hidden');
+                        icon.classList.add('fa-chevron-right');
+                    } else {
+                        iconWrap.classList.add('hidden');
+                        icon.classList.add('fa-chevron-down');
+                    }
+                }
                 const curState = this.collapseState.get(currentFileId) || {};
                 curState[headingId] = nowCollapsed;
                 this.collapseState.set(currentFileId, curState);

@@ -412,6 +412,15 @@ body {
 .md-section .md-toggle-icon {
     margin-right: 0.5rem;
     color: var(--text-dim);
+    display: inline-flex;
+    align-items: center;
+}
+.md-section .md-toggle-icon i {
+    font-size: 0.9em;
+    line-height: 1;
+}
+.md-section .md-toggle-icon.hidden {
+    display: none;
 }
 .md-section.collapsed > :not(.md-heading) {
     display: none;
