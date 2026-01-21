@@ -405,6 +405,28 @@ body {
 .toc .indent-4 { padding-left: 2rem; }
 .toc .indent-5 { padding-left: 2.5rem; }
 
+/* Collapsible sections */
+.md-section {
+    position: relative;
+}
+.md-section .md-toggle-icon {
+    margin-right: 0.5rem;
+    color: var(--text-dim);
+}
+.md-section.collapsed > :not(.md-heading) {
+    display: none;
+}
+.md-section .md-heading {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+.md-section.collapsed .md-heading {
+    opacity: 0.95;
+}
+
+
 /* Markdown Styling */
 .markdown-content h1,
 .markdown-content h2,
@@ -577,6 +599,7 @@ body {
     transition: var(--transition);
     text-decoration: none;
     white-space: nowrap;
+    user-select: none; /* prevent selection on buttons */
 }
 
 .btn:disabled {
@@ -616,6 +639,7 @@ body {
 .btn-icon {
     padding: 0.5rem;
     min-width: auto;
+    user-select: none; /* prevent selection on icon buttons */
 }
 
 .btn-large {
@@ -666,6 +690,7 @@ body {
     padding: 0.5rem;
     border-radius: var(--border-radius);
     transition: var(--transition);
+    user-select: none; /* prevent selection on close buttons */
 }
 
 .close-btn:hover {

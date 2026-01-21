@@ -267,7 +267,6 @@ class FileManager {
             const fileArray = JSON.parse(saved);
             files = new Map();
             fileArray.forEach(f => {
-                // Ensure shape and types
                 const id = f.id || this.generateId();
                 files.set(id, {
                     id,
@@ -279,8 +278,6 @@ class FileManager {
             this.renderFileList();
         } catch (err) {
             console.error('Error loading files from localStorage:', err);
-            // If parsing fails, clear corrupted storage to avoid repeated errors
-            // but do not clear automatically; just render empty and let user re-add
             this.renderFileList();
         }
     }
@@ -313,7 +310,6 @@ class FileManager {
             </div>
         `).join('');
 
-        // Add click handlers
         fileList.querySelectorAll('.file-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 if (!e.target.closest('.file-actions')) {
@@ -345,6 +341,69 @@ class FileManager {
         }
     }
 
+    static buildCollapsibleSections(mdEl) {
+        if (!this.collapseState) this.collapseState = new Map();
+        const state = this.collapseState.get(currentFileId) || {};
+
+        const children = Array.from(mdEl.children);
+        const sections = [];
+        const stack = []; // {section, level}
+
+        children.forEach(node => {
+            const isHeading = node.tagName && /^H[1-6]$/.test(node.tagName);
+            if (isHeading) {
+                const level = parseInt(node.tagName.substring(1), 10);
+                const section = document.createElement('div');
+                section.className = 'md-section';
+
+                const headingEl = node; // original heading
+                const icon = document.createElement('span');
+                icon.className = 'md-toggle-icon';
+                icon.textContent = state[headingEl.id] ? '▶' : '▼';
+                headingEl.classList.add('md-heading');
+                headingEl.prepend(icon);
+
+                // Insert section before heading, then move heading into section
+                mdEl.insertBefore(section, headingEl);
+                section.appendChild(headingEl);
+
+                // Manage hierarchy: nest within parent section if exists
+                while (stack.length && stack[stack.length - 1].level >= level) {
+                    stack.pop();
+                }
+                const parent = stack.length ? stack[stack.length - 1].section : null;
+                if (parent) {
+                    parent.appendChild(section);
+                }
+
+                sections.push({ section, headingId: headingEl.id, level });
+                stack.push({ section, level });
+            } else {
+                // Append non-heading content to the current top section
+                if (stack.length) {
+                    const top = stack[stack.length - 1].section;
+                    top.appendChild(node);
+                }
+            }
+        });
+
+        // Apply collapsed state and attach listeners
+        sections.forEach(({ section, headingId }) => {
+            const collapsed = !!state[headingId];
+            if (collapsed) section.classList.add('collapsed');
+            const heading = section.querySelector('.md-heading');
+            heading.addEventListener('click', () => {
+                const nowCollapsed = !section.classList.contains('collapsed');
+                section.classList.toggle('collapsed', nowCollapsed);
+                const icon = heading.querySelector('.md-toggle-icon');
+                if (icon) icon.textContent = nowCollapsed ? '▶' : '▼';
+                const curState = this.collapseState.get(currentFileId) || {};
+                curState[headingId] = nowCollapsed;
+                this.collapseState.set(currentFileId, curState);
+            });
+        });
+    }
+
     static showRenderedContent(content) {
         const mdEl = document.getElementById('markdown-content');
         const rawEl = document.getElementById('raw-content');
@@ -353,7 +412,6 @@ class FileManager {
         rawEl.style.display = 'none';
         if (tocEl) tocEl.style.display = 'block';
         
-        // Configure marked options
         marked.setOptions({
             highlight: function(code, lang) {
                 if (lang && hljs.getLanguage(lang)) {
@@ -367,12 +425,10 @@ class FileManager {
             gfm: true
         });
 
-        // Parse to HTML and sanitize
         const html = marked.parse(content);
         const sanitizedHtml = DOMPurify.sanitize(html);
         mdEl.innerHTML = sanitizedHtml;
 
-        // Ensure headings have unique IDs
         const headings = mdEl.querySelectorAll('h1, h2, h3, h4, h5, h6');
         const usedIds = new Set();
         headings.forEach(h => {
@@ -389,11 +445,12 @@ class FileManager {
             usedIds.add(id);
         });
 
-        // Build TOC
+        this.buildCollapsibleSections(mdEl);
+
         if (tocEl) {
-            const items = Array.from(headings).map(h => {
+            const items = Array.from(mdEl.querySelectorAll('.md-heading')).map(h => {
                 const level = parseInt(h.tagName.substring(1), 10);
-                return { id: h.id, text: h.textContent, level };
+                return { id: h.id, text: h.textContent.replace(/^\s*▶\s*/,'').replace(/^\s*▼\s*/,''), level };
             });
             if (items.length === 0) {
                 tocEl.innerHTML = '';
@@ -410,7 +467,6 @@ class FileManager {
                 `;
                 tocEl.innerHTML = tocHtml;
 
-                // Click to scroll
                 tocEl.querySelectorAll('a').forEach(a => {
                     a.addEventListener('click', (e) => {
                         e.preventDefault();
@@ -422,7 +478,6 @@ class FileManager {
                     });
                 });
 
-                // Scroll spy
                 this.setupScrollSpy(headings, tocEl);
             }
         }
