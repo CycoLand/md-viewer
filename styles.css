@@ -646,11 +646,13 @@ body {
 
 /* Code Block Wrapper with Header */
 .code-block-wrapper {
+    display: table;
     margin: 1.5rem 0;
     border-radius: var(--border-radius);
     overflow: hidden;
     border: 1px solid var(--border-color);
     background-color: var(--surface-color);
+    max-width: 100%;
 }
 
 .code-block-header {
@@ -705,7 +707,8 @@ body {
 }
 
 .markdown-content table {
-    width: 100%;
+    width: auto;
+    max-width: 100%;
     border-collapse: collapse;
     margin: 1.5rem 0;
     background-color: var(--surface-color);
