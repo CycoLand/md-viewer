@@ -4,6 +4,7 @@ let currentFileId = null;
 let sidebarCollapsed = false;
 let rawMode = false;
 const STORAGE_KEY = 'markdownViewerDocs';
+const renderCache = new Map(); // fileId -> sanitized HTML string
 
 // Theme management
 class ThemeManager {
@@ -41,7 +42,7 @@ class ThemeManager {
             '--surface-color': computedStyle.getPropertyValue('--surface-color').trim(),
             '--text-color': computedStyle.getPropertyValue('--text-color').trim(),
             '--accent-color': computedStyle.getPropertyValue('--accent-color').trim(),
-            '--font-family': computedStyle.getPropertyValue('--font-family').trim(),
+            '--font-family': computedStyle.getPropertyValue('---font-family').trim(),
             '--font-size': computedStyle.getPropertyValue('--font-size').trim(),
             '--line-height': computedStyle.getPropertyValue('--line-height').trim(),
             '--sidebar-width': computedStyle.getPropertyValue('--sidebar-width').trim(),
@@ -398,12 +399,12 @@ class FileManager {
             }
         });
 
-        // Apply collapsed state, initial measurements, and attach listeners
-        // First, measure all bodies to capture natural heights
+        // Measure bodies initially to capture natural heights
         sections.forEach(({ body }) => {
             body.style.maxHeight = body.scrollHeight + 'px';
         });
 
+        // Apply collapsed state and attach listeners
         sections.forEach(({ section, headingId, body }) => {
             const collapsed = !!state[headingId];
             const heading = section.querySelector('.md-heading');
@@ -427,10 +428,8 @@ class FileManager {
             }
 
             const remeasure = (rootSection) => {
-                // Re-measure this section body and all descendant bodies
                 const bodies = rootSection.querySelectorAll('.md-section-body');
                 bodies.forEach(b => {
-                    // Temporarily clear max-height to read natural height
                     b.style.maxHeight = 'none';
                     const h = b.scrollHeight;
                     b.style.maxHeight = h + 'px';
@@ -453,8 +452,12 @@ class FileManager {
                         icon.classList.remove('fa-chevron-right');
                         icon.classList.add('fa-chevron-down');
                     }
-                    // Re-measure after expanding to animate to natural height
-                    requestAnimationFrame(() => remeasure(section));
+                    const level = parseInt(heading.tagName.substring(1), 10);
+                    if (currentFileId && renderCache.has(currentFileId) && level === 1) {
+                        FileManager.rebuildFromCache();
+                    } else {
+                        requestAnimationFrame(() => remeasure(section));
+                    }
                 }
                 const curState = this.collapseState.get(currentFileId) || {};
                 curState[headingId] = nowCollapsed;
@@ -487,6 +490,9 @@ class FileManager {
         const html = marked.parse(content);
         const sanitizedHtml = DOMPurify.sanitize(html);
         mdEl.innerHTML = sanitizedHtml;
+        if (currentFileId) {
+            renderCache.set(currentFileId, sanitizedHtml);
+        }
 
         const headings = mdEl.querySelectorAll('h1, h2, h3, h4, h5, h6');
         const usedIds = new Set();
@@ -505,6 +511,9 @@ class FileManager {
         });
 
         this.buildCollapsibleSections(mdEl);
+        mdEl.querySelectorAll('.md-section-body').forEach(b => {
+            b.style.maxHeight = b.scrollHeight + 'px';
+        });
 
         if (tocEl) {
             const items = Array.from(mdEl.querySelectorAll('.md-heading')).map(h => {
@@ -539,6 +548,65 @@ class FileManager {
 
                 this.setupScrollSpy(headings, tocEl);
             }
+        }
+    }
+
+    static rebuildFromCache() {
+        if (!currentFileId) return;
+        const mdEl = document.getElementById('markdown-content');
+        const tocEl = document.getElementById('toc');
+        const cached = renderCache.get(currentFileId);
+        if (!cached) return;
+
+        mdEl.innerHTML = cached;
+
+        const headings = mdEl.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        const usedIds = new Set();
+        headings.forEach(h => {
+            let base = (h.id || h.textContent || '').toLowerCase().trim()
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-');
+            if (!base) base = 'section';
+            let id = base;
+            let i = 1;
+            while (usedIds.has(id)) {
+                id = `${base}-${i++}`;
+            }
+            h.id = id;
+            usedIds.add(id);
+        });
+
+        this.buildCollapsibleSections(mdEl);
+        mdEl.querySelectorAll('.md-section-body').forEach(b => {
+            b.style.maxHeight = b.scrollHeight + 'px';
+        });
+
+        if (tocEl) {
+            const items = Array.from(mdEl.querySelectorAll('.md-heading')).map(h => {
+                const level = parseInt(h.tagName.substring(1), 10);
+                return { id: h.id, text: h.textContent, level };
+            });
+            const tocHtml = items.length ? `
+                <h4>Contents</h4>
+                <ul>
+                    ${items.map(it => `
+                        <li class="indent-${Math.min(5, Math.max(0, it.level - 1))}">
+                            <a href="#${it.id}" data-target="${it.id}">${it.text}</a>
+                        </li>
+                    `).join('')}
+                </ul>
+            ` : '';
+            tocEl.innerHTML = tocHtml;
+            tocEl.querySelectorAll('a').forEach(a => {
+                a.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = a.getAttribute('data-target');
+                    const el = document.getElementById(targetId);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
         }
     }
 
@@ -801,17 +869,14 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('export-html-btn').addEventListener('click', FileManager.exportCurrentFileAsHtml);
     document.getElementById('toggle-raw-btn').addEventListener('click', toggleRawMode);
 
-    // Overlay click handler
     document.getElementById('overlay').addEventListener('click', closeThemePanel);
 
-    // Modal click outside to close
     document.getElementById('paste-modal').addEventListener('click', function(e) {
         if (e.target === this) {
             closePasteModal();
         }
     });
 
-    // Keyboard shortcuts
     document.addEventListener('keydown', function(e) {
         if (e.ctrlKey || e.metaKey) {
             switch(e.key) {
@@ -858,13 +923,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Mobile responsive behavior
     if (window.innerWidth <= 768) {
         sidebarCollapsed = true;
         document.getElementById('sidebar').classList.add('collapsed');
     }
 
-    // Window resize handler
     window.addEventListener('resize', function() {
         if (window.innerWidth <= 768) {
             if (!sidebarCollapsed) {
