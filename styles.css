@@ -420,19 +420,70 @@ body {
 .md-section {
     position: relative;
 }
+
+.md-section .md-heading {
+    position: relative;
+    padding-right: 0; /* No space for chevron initially */
+    transition: padding-right 0.3s ease 0.3s; /* Default: delay (for expanding) */
+}
+
+/* When collapsing, extend line immediately with content collapse */
+.md-section.collapsed .md-heading {
+    padding-right: 2.5rem; /* Space for chevron */
+    transition: padding-right 0.3s ease; /* No delay - sync with content */
+}
+
 .md-section .md-toggle-icon {
-    margin-right: 0.5rem;
+    position: absolute;
+    right: 0.5rem; /* Move it even more to the right */
+    top: 50%;
     color: var(--text-dim);
     display: inline-flex;
     align-items: center;
+    width: 1em;
+    overflow: visible;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-50%);
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
+
 .md-section .md-toggle-icon i {
     font-size: 0.9em;
     line-height: 1;
 }
+
+/* Hidden state for expanded sections - completely invisible after transition */
 .md-section .md-toggle-icon.hidden {
-    display: none;
+    opacity: 0;
+    transform: translateY(calc(-50% + 10px));
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s 0.3s;
+    visibility: hidden;
 }
+
+/* Collapsed sections - chevron is visible and slides up AFTER line extends */
+.md-section.collapsed .md-toggle-icon:not(.hidden) {
+    opacity: 1;
+    transform: translateY(calc(-50% - 5px)); /* Slight upward position */
+    pointer-events: auto;
+    transition: opacity 0.3s ease 0.3s, transform 0.3s ease 0.3s; /* 0.3s delay for line extension */
+    visibility: visible;
+}
+
+/* Show on hover */
+.md-section.collapsed .md-heading:hover .md-toggle-icon:not(.hidden) {
+    opacity: 1;
+    transform: translateY(-50%);
+}
+
+/* When expanding: override to make chevron fade and slide immediately */
+.md-section:not(.collapsed) .md-toggle-icon {
+    opacity: 0;
+    transform: translateY(calc(-50% + 10px)); /* Slide down */
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s 0.3s; /* No delay, hide after fade */
+    visibility: hidden;
+}
+
 /* Collapse animation using content wrapper */
 .md-section-body {
     overflow: hidden;

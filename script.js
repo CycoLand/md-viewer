@@ -361,14 +361,17 @@ class FileManager {
                 const icon = document.createElement('span');
                 icon.className = 'md-toggle-icon';
                 const iconInner = document.createElement('i');
-                iconInner.className = 'fas fa-chevron-right';
+                iconInner.className = 'fas fa-chevron-down'; // Always use down-facing chevron
                 if (!state[headingEl.id]) {
-                    // expanded -> hide chevron
+                    // expanded -> hide chevron completely
                     icon.classList.add('hidden');
                 }
+                // For collapsed sections, don't add 'hidden' class
+                // CSS will handle showing the chevron on hover and rotating it
                 icon.appendChild(iconInner);
                 headingEl.classList.add('md-heading');
-                headingEl.prepend(icon);
+                headingEl.setAttribute('title', 'Collapse this section'); // Add tooltip
+                headingEl.appendChild(icon); // Append to the right instead of prepend
 
                 // Insert section before heading, then move heading into section
                 mdEl.insertBefore(section, headingEl);
@@ -414,17 +417,10 @@ class FileManager {
             // Initialize chevron visibility
             if (collapsed) {
                 section.classList.add('collapsed');
-                if (iconWrap) iconWrap.classList.remove('hidden');
-                if (icon) {
-                    icon.classList.remove('fa-chevron-down');
-                    icon.classList.add('fa-chevron-right');
-                }
+                // For collapsed sections, don't add 'hidden' - CSS handles showing on hover
             } else {
+                // For expanded sections, hide the chevron completely
                 if (iconWrap) iconWrap.classList.add('hidden');
-                if (icon) {
-                    icon.classList.remove('fa-chevron-right');
-                    icon.classList.add('fa-chevron-down');
-                }
             }
 
             const remeasure = (rootSection) => {
@@ -444,13 +440,9 @@ class FileManager {
                 this.collapseState.set(currentFileId, curState);
 
                 if (nowCollapsed) {
-                    // Collapse: set class and chevron, animate to 0
+                    // Collapse: set class, chevron will be hidden until hover via CSS
                     section.classList.add('collapsed');
                     if (iconWrap) iconWrap.classList.remove('hidden');
-                    if (icon) {
-                        icon.classList.remove('fa-chevron-down');
-                        icon.classList.add('fa-chevron-right');
-                    }
                     // Animate collapse
                     const bodyEl = section.querySelector('.md-section-body');
                     if (bodyEl) {
@@ -474,10 +466,6 @@ class FileManager {
                             newSection.classList.remove('collapsed');
                             const bodyEl = newSection.querySelector('.md-section-body');
                             if (newIconWrap) newIconWrap.classList.add('hidden');
-                            if (newIcon) {
-                                newIcon.classList.remove('fa-chevron-right');
-                                newIcon.classList.add('fa-chevron-down');
-                            }
                             if (bodyEl) {
                                 // start at 0 then animate to full height
                                 bodyEl.style.maxHeight = '0px';
@@ -490,10 +478,6 @@ class FileManager {
                         // Non-H1: animate existing section
                         section.classList.remove('collapsed');
                         if (iconWrap) iconWrap.classList.add('hidden');
-                        if (icon) {
-                            icon.classList.remove('fa-chevron-right');
-                            icon.classList.add('fa-chevron-down');
-                        }
                         const bodyEl = section.querySelector('.md-section-body');
                         if (bodyEl) {
                             bodyEl.style.maxHeight = '0px';
