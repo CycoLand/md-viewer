@@ -1169,3 +1169,333 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('   Ctrl+,: Theme settings');
     console.log('   Escape: Close panels');
 });
+
+// Pagination System
+class PaginationManager {
+    constructor() {
+        this.pages = [];
+        this.currentPageIndex = 0;
+        this.paginationActive = false;
+        this.pageHeight = 0;
+    }
+
+    toggle() {
+        this.paginationActive = !this.paginationActive;
+        const btn = document.getElementById('toggle-pagination-btn');
+        const contentBody = document.querySelector('.content-body');
+        const pageNav = document.getElementById('page-navigation');
+        const markdownContent = document.getElementById('markdown-content');
+        const toc = document.getElementById('toc');
+
+        if (this.paginationActive) {
+            // Reset to first page
+            this.currentPageIndex = 0;
+            
+            // First create pages while content is still visible
+            this.createPages();
+            
+            // Then update UI
+            btn.classList.add('active');
+            btn.innerHTML = '<i class="fas fa-scroll"></i> Scroll';
+            contentBody.classList.add('paginated');
+            pageNav.classList.add('active');
+            markdownContent.style.display = 'none';
+            if (toc) toc.style.display = 'none';
+            
+            this.renderPages();
+        } else {
+            btn.classList.remove('active');
+            btn.innerHTML = '<i class="fas fa-book-open"></i> Pages';
+            contentBody.classList.remove('paginated');
+            pageNav.classList.remove('active');
+            markdownContent.style.display = 'block';
+            if (toc) toc.style.display = 'block';
+        }
+    }
+
+    createPages() {
+        const markdownContent = document.getElementById('markdown-content');
+        if (!markdownContent) {
+            console.error('Markdown content not found');
+            return;
+        }
+
+        // Calculate available height from CSS
+        // The page container has: height: calc(100vh - 200px)
+        const viewportHeight = window.innerHeight;
+        const availableHeight = (viewportHeight - 200) * 1.0; // Use full height, let overflow handle it
+        
+        console.log(`Available page height: ${availableHeight}px`);
+
+        // Get all content - handle both regular and collapsible section structures
+        let children = [];
+        
+        // Check if we have collapsible sections
+        const sections = markdownContent.querySelectorAll('.md-section');
+        if (sections.length > 0) {
+            // We have collapsible sections - extract the actual content
+            console.log('Found collapsible sections, extracting content');
+            
+            // Get all headings and their bodies
+            sections.forEach(section => {
+                const heading = section.querySelector('.md-heading');
+                const body = section.querySelector('.md-section-body');
+                
+                if (heading) {
+                    // Clone heading without the toggle icon
+                    const headingClone = heading.cloneNode(true);
+                    const toggleIcon = headingClone.querySelector('.md-toggle-icon');
+                    if (toggleIcon) toggleIcon.remove();
+                    children.push(headingClone);
+                }
+                
+                if (body) {
+                    // Get all children from the body
+                    Array.from(body.children).forEach(child => {
+                        if (!child.classList.contains('md-section')) {
+                            children.push(child.cloneNode(true));
+                        }
+                    });
+                }
+            });
+        } else {
+            // No collapsible sections - use direct children
+            children = Array.from(markdownContent.children).map(child => child.cloneNode(true));
+        }
+        
+        if (children.length === 0) {
+            console.error('No content to paginate');
+            // Fallback: just clone the entire content
+            const pageDiv = document.createElement('div');
+            pageDiv.className = 'markdown-content';
+            pageDiv.innerHTML = markdownContent.innerHTML;
+            this.pages = [pageDiv];
+            console.log('Created 1 page with all content as fallback');
+            return;
+        }
+
+        console.log(`Creating pages from ${children.length} elements`);
+
+        // Create a temporary container for measuring heights
+        const tempContainer = document.createElement('div');
+        tempContainer.style.position = 'absolute';
+        tempContainer.style.visibility = 'hidden';
+        tempContainer.style.left = '-9999px';
+        tempContainer.style.width = '800px'; // Match the page width
+        tempContainer.style.padding = '3rem 2rem'; // Match page container padding
+        document.body.appendChild(tempContainer);
+
+        this.pages = [];
+        let currentPage = document.createElement('div');
+        currentPage.className = 'markdown-content';
+
+        children.forEach((child, index) => {
+            // Test adding this child to see if it fits
+            const testContent = currentPage.cloneNode(true);
+            testContent.appendChild(child.cloneNode(true));
+            
+            // Measure the content
+            tempContainer.innerHTML = '';
+            tempContainer.appendChild(testContent);
+            
+            const newHeight = tempContainer.scrollHeight;
+            
+            // Only create a new page if:
+            // 1. We already have content on the current page
+            // 2. Adding this would significantly exceed available height (by more than 10%)
+            // 3. The element itself isn't already too tall (if it is, we have to include it anyway)
+            
+            // Measure just this element alone
+            tempContainer.innerHTML = '';
+            const singleElementDiv = document.createElement('div');
+            singleElementDiv.className = 'markdown-content';
+            singleElementDiv.appendChild(child.cloneNode(true));
+            tempContainer.appendChild(singleElementDiv);
+            const elementHeight = tempContainer.scrollHeight;
+            
+            const wouldExceedSignificantly = newHeight > availableHeight * 1.1;
+            const elementFitsAlone = elementHeight <= availableHeight * 1.1;
+            
+            if (wouldExceedSignificantly && currentPage.children.length > 0 && elementFitsAlone) {
+                // Save current page and start a new one
+                this.pages.push(currentPage);
+                console.log(`Page ${this.pages.length} created with ${currentPage.children.length} elements (${newHeight}px would exceed ${availableHeight}px)`);
+                
+                currentPage = document.createElement('div');
+                currentPage.className = 'markdown-content';
+                currentPage.appendChild(child);
+            } else {
+                // Add to current page (even if it overflows a bit)
+                currentPage.appendChild(child);
+            }
+        });
+
+        // Add the last page if it has content
+        if (currentPage.children.length > 0) {
+            this.pages.push(currentPage);
+            console.log(`Final page ${this.pages.length} created with ${currentPage.children.length} elements`);
+        }
+
+        // Clean up temp container
+        document.body.removeChild(tempContainer);
+
+        console.log(`Created ${this.pages.length} pages with smart pagination`);
+    }
+
+    renderPages() {
+        const leftPage = document.getElementById('left-page');
+        const rightPage = document.getElementById('right-page');
+        const prevBtn = document.getElementById('prev-page-btn');
+        const nextBtn = document.getElementById('next-page-btn');
+
+        if (!leftPage || !rightPage) {
+            console.error('Page containers not found');
+            return;
+        }
+
+        // Clear existing content
+        leftPage.innerHTML = '';
+        rightPage.innerHTML = '';
+        leftPage.classList.remove('visible', 'single');
+        rightPage.classList.remove('visible', 'single');
+
+        const totalPages = this.pages.length;
+        console.log(`Rendering pages: current=${this.currentPageIndex}, total=${totalPages}`);
+        
+        if (totalPages === 0) {
+            console.error('No pages to render');
+            return;
+        }
+
+        // Determine which pages to show
+        if (totalPages === 1) {
+            // Single page - show centered
+            console.log('Showing single page');
+            const content = this.pages[0].cloneNode(true);
+            leftPage.appendChild(content);
+            leftPage.classList.add('visible', 'single');
+            console.log('Left page HTML length:', leftPage.innerHTML.length);
+            console.log('Left page classes:', leftPage.className);
+        } else if (this.currentPageIndex === 0) {
+            // First page only (show centered)
+            console.log('Showing first page centered');
+            const content = this.pages[0].cloneNode(true);
+            leftPage.appendChild(content);
+            leftPage.classList.add('visible', 'single');
+            console.log('Left page HTML length:', leftPage.innerHTML.length);
+            console.log('Left page classes:', leftPage.className);
+        } else {
+            // Show two pages
+            const leftPageIndex = this.currentPageIndex;
+            const rightPageIndex = this.currentPageIndex + 1;
+            console.log(`Showing pages ${leftPageIndex} and ${rightPageIndex}`);
+
+            if (leftPageIndex < totalPages) {
+                const leftContent = this.pages[leftPageIndex].cloneNode(true);
+                leftPage.appendChild(leftContent);
+                leftPage.classList.add('visible');
+                console.log('Left page added, HTML length:', leftPage.innerHTML.length);
+            }
+
+            if (rightPageIndex < totalPages) {
+                const rightContent = this.pages[rightPageIndex].cloneNode(true);
+                rightPage.appendChild(rightContent);
+                rightPage.classList.add('visible');
+                console.log('Right page added, HTML length:', rightPage.innerHTML.length);
+            }
+        }
+
+        // Update button states
+        prevBtn.disabled = this.currentPageIndex === 0;
+        nextBtn.disabled = this.currentPageIndex >= totalPages - 2 && totalPages > 1 || 
+                          (totalPages === 1 && this.currentPageIndex >= 0);
+
+        console.log(`Button states - prev: ${prevBtn.disabled}, next: ${nextBtn.disabled}`);
+
+        // Re-apply syntax highlighting to the pages
+        leftPage.querySelectorAll('pre code').forEach(block => {
+            if (window.hljs) hljs.highlightElement(block);
+        });
+        rightPage.querySelectorAll('pre code').forEach(block => {
+            if (window.hljs) hljs.highlightElement(block);
+        });
+        
+        console.log('Render complete');
+    }
+
+    nextPage() {
+        const totalPages = this.pages.length;
+        
+        if (totalPages === 1) {
+            return; // Can't go next if only one page
+        }
+        
+        if (this.currentPageIndex === 0) {
+            // From first page, go to pages 1-2 (indices 1 and 2)
+            this.currentPageIndex = 1;
+        } else {
+            // From any other position, advance by 2
+            this.currentPageIndex += 2;
+        }
+        
+        // Don't go beyond the last page
+        if (this.currentPageIndex >= totalPages) {
+            this.currentPageIndex = Math.max(1, totalPages - 2);
+        }
+        
+        this.renderPages();
+    }
+
+    prevPage() {
+        if (this.currentPageIndex === 1) {
+            // Go back to first page only
+            this.currentPageIndex = 0;
+        } else {
+            // Go back by 2 pages
+            this.currentPageIndex = Math.max(0, this.currentPageIndex - 2);
+        }
+        
+        this.renderPages();
+    }
+}
+
+// Initialize pagination manager
+const paginationManager = new PaginationManager();
+
+// Add event listeners for pagination
+document.addEventListener('DOMContentLoaded', function() {
+    const togglePaginationBtn = document.getElementById('toggle-pagination-btn');
+    const prevPageBtn = document.getElementById('prev-page-btn');
+    const nextPageBtn = document.getElementById('next-page-btn');
+
+    if (togglePaginationBtn) {
+        togglePaginationBtn.addEventListener('click', () => {
+            paginationManager.toggle();
+        });
+    }
+
+    if (prevPageBtn) {
+        prevPageBtn.addEventListener('click', () => {
+            paginationManager.prevPage();
+        });
+    }
+
+    if (nextPageBtn) {
+        nextPageBtn.addEventListener('click', () => {
+            paginationManager.nextPage();
+        });
+    }
+
+    // Keyboard navigation for pages
+    document.addEventListener('keydown', (e) => {
+        if (paginationManager.paginationActive) {
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                paginationManager.prevPage();
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                paginationManager.nextPage();
+            }
+        }
+    });
+});
