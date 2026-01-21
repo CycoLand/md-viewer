@@ -644,10 +644,6 @@ body {
     letter-spacing: 0.5px;
 }
 
-    padding: 0;
-    color: var(--text-color);
-}
-
 .markdown-content table {
     width: 100%;
     border-collapse: collapse;
