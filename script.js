@@ -3,6 +3,7 @@ let files = new Map();
 let currentFileId = null;
 let sidebarCollapsed = false;
 let rawMode = false;
+const STORAGE_KEY = 'markdownViewerDocs';
 
 // Theme management
 class ThemeManager {
@@ -226,8 +227,9 @@ class FileManager {
             id: fileId,
             name: name,
             content: content,
-            modified: new Date()
+            modified: new Date().toISOString()
         });
+        this.saveFiles();
         this.renderFileList();
         return fileId;
     }
@@ -238,11 +240,49 @@ class FileManager {
             currentFileId = null;
             this.showWelcomeScreen();
         }
+        this.saveFiles();
         this.renderFileList();
     }
 
     static getFile(fileId) {
         return files.get(fileId);
+    }
+
+    static saveFiles() {
+        try {
+            const fileArray = Array.from(files.values());
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(fileArray));
+        } catch (err) {
+            console.error('Error saving files to localStorage:', err);
+        }
+    }
+
+    static loadFiles() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) {
+            this.renderFileList();
+            return;
+        }
+        try {
+            const fileArray = JSON.parse(saved);
+            files = new Map();
+            fileArray.forEach(f => {
+                // Ensure shape and types
+                const id = f.id || this.generateId();
+                files.set(id, {
+                    id,
+                    name: f.name || 'Untitled.md',
+                    content: typeof f.content === 'string' ? f.content : '',
+                    modified: f.modified || new Date().toISOString()
+                });
+            });
+            this.renderFileList();
+        } catch (err) {
+            console.error('Error loading files from localStorage:', err);
+            // If parsing fails, clear corrupted storage to avoid repeated errors
+            // but do not clear automatically; just render empty and let user re-add
+            this.renderFileList();
+        }
     }
 
     static renderFileList() {
@@ -306,8 +346,12 @@ class FileManager {
     }
 
     static showRenderedContent(content) {
-        document.getElementById('markdown-content').style.display = 'block';
-        document.getElementById('raw-content').style.display = 'none';
+        const mdEl = document.getElementById('markdown-content');
+        const rawEl = document.getElementById('raw-content');
+        const tocEl = document.getElementById('toc');
+        mdEl.style.display = 'block';
+        rawEl.style.display = 'none';
+        if (tocEl) tocEl.style.display = 'block';
         
         // Configure marked options
         marked.setOptions({
@@ -323,9 +367,95 @@ class FileManager {
             gfm: true
         });
 
+        // Parse to HTML and sanitize
         const html = marked.parse(content);
         const sanitizedHtml = DOMPurify.sanitize(html);
-        document.getElementById('markdown-content').innerHTML = sanitizedHtml;
+        mdEl.innerHTML = sanitizedHtml;
+
+        // Ensure headings have unique IDs
+        const headings = mdEl.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        const usedIds = new Set();
+        headings.forEach(h => {
+            let base = (h.id || h.textContent || '').toLowerCase().trim()
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-');
+            if (!base) base = 'section';
+            let id = base;
+            let i = 1;
+            while (usedIds.has(id)) {
+                id = `${base}-${i++}`;
+            }
+            h.id = id;
+            usedIds.add(id);
+        });
+
+        // Build TOC
+        if (tocEl) {
+            const items = Array.from(headings).map(h => {
+                const level = parseInt(h.tagName.substring(1), 10);
+                return { id: h.id, text: h.textContent, level };
+            });
+            if (items.length === 0) {
+                tocEl.innerHTML = '';
+            } else {
+                const tocHtml = `
+                    <h4>Contents</h4>
+                    <ul>
+                        ${items.map(it => `
+                            <li class="indent-${Math.min(5, Math.max(0, it.level - 1))}">
+                                <a href="#${it.id}" data-target="${it.id}">${it.text}</a>
+                            </li>
+                        `).join('')}
+                    </ul>
+                `;
+                tocEl.innerHTML = tocHtml;
+
+                // Click to scroll
+                tocEl.querySelectorAll('a').forEach(a => {
+                    a.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const targetId = a.getAttribute('data-target');
+                        const el = document.getElementById(targetId);
+                        if (el) {
+                            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    });
+                });
+
+                // Scroll spy
+                this.setupScrollSpy(headings, tocEl);
+            }
+        }
+    }
+
+    static setupScrollSpy(headingsNodeList, tocEl) {
+        const links = Array.from(tocEl.querySelectorAll('a'));
+        const linkById = new Map(links.map(l => [l.dataset.target, l]));
+
+        function setActive(id) {
+            links.forEach(l => l.classList.toggle('active', l.dataset.target === id));
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            let currentId = null;
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    currentId = entry.target.id;
+                }
+            });
+            if (currentId && linkById.has(currentId)) {
+                setActive(currentId);
+            }
+        }, {
+            root: document.querySelector('.markdown-content'),
+            rootMargin: '0px 0px -70% 0px',
+            threshold: 0.01
+        });
+
+        Array.from(headingsNodeList).forEach(h => observer.observe(h));
+
+        const first = headingsNodeList[0];
+        if (first && linkById.has(first.id)) setActive(first.id);
     }
 
     static showRawContent(content) {
@@ -533,6 +663,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize drag and drop
     initializeDragAndDrop();
+
+    // Load files from localStorage
+    FileManager.loadFiles();
 
     // File input handler
     document.getElementById('file-input').addEventListener('change', function(e) {
