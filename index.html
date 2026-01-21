@@ -166,6 +166,9 @@
                         <span id="current-file-name">Untitled</span>
                     </div>
                     <div class="content-actions">
+                        <button id="toggle-pagination-btn" class="btn btn-outline" title="Toggle Pagination">
+                            <i class="fas fa-book-open"></i> Pages
+                        </button>
                         <button id="export-html-btn" class="btn btn-outline" title="Export as HTML">
                             <i class="fas fa-download"></i> Export
                         </button>
@@ -176,6 +179,21 @@
                 </div>
                 
                 <div class="content-body">
+                    <!-- Page Navigation -->
+                    <div id="page-navigation" class="page-navigation" style="display: none;">
+                        <button id="prev-page-btn" class="page-nav-btn page-nav-prev" title="Previous pages">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div id="page-viewer" class="page-viewer">
+                            <div id="left-page" class="page-container left-page"></div>
+                            <div id="right-page" class="page-container right-page"></div>
+                        </div>
+                        <button id="next-page-btn" class="page-nav-btn page-nav-next" title="Next pages">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Original content areas (hidden when pagination is active) -->
                     <div id="markdown-content" class="markdown-content"></div>
                     <aside id="toc" class="toc"></aside>
                     <div id="raw-content" class="raw-content" style="display: none;">
