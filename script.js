@@ -553,12 +553,7 @@ class FileManager {
             usedIds.add(id);
         });
 
-        this.buildCollapsibleSections(mdEl);
-        mdEl.querySelectorAll('.md-section-body').forEach(b => {
-            b.style.maxHeight = b.scrollHeight + 'px';
-        });
-
-        // Apply syntax highlighting and enhance code blocks
+        // Apply syntax highlighting and enhance code blocks FIRST (before measuring heights)
         mdEl.querySelectorAll('pre code').forEach((block) => {
             hljs.highlightElement(block);
             
@@ -606,6 +601,11 @@ class FileManager {
             pre.parentNode.insertBefore(wrapper, pre);
             wrapper.appendChild(header);
             wrapper.appendChild(pre);
+        });
+
+        this.buildCollapsibleSections(mdEl);
+        mdEl.querySelectorAll('.md-section-body').forEach(b => {
+            b.style.maxHeight = b.scrollHeight + 'px';
         });
 
         if (tocEl) {
@@ -669,12 +669,7 @@ class FileManager {
             usedIds.add(id);
         });
 
-        this.buildCollapsibleSections(mdEl);
-        mdEl.querySelectorAll('.md-section-body').forEach(b => {
-            b.style.maxHeight = b.scrollHeight + 'px';
-        });
-
-        // Apply syntax highlighting and enhance code blocks
+        // Apply syntax highlighting and enhance code blocks FIRST (before measuring heights)
         mdEl.querySelectorAll('pre code').forEach((block) => {
             hljs.highlightElement(block);
             
@@ -722,6 +717,11 @@ class FileManager {
             pre.parentNode.insertBefore(wrapper, pre);
             wrapper.appendChild(header);
             wrapper.appendChild(pre);
+        });
+
+        this.buildCollapsibleSections(mdEl);
+        mdEl.querySelectorAll('.md-section-body').forEach(b => {
+            b.style.maxHeight = b.scrollHeight + 'px';
         });
 
         if (tocEl) {
