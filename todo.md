@@ -1,6 +1,5 @@
 1. Make TOC collapsible/expandable with toggle button to save space when not needed
 2. Add search/filter input at top of file list for quick file finding
-3. Implement split view mode to show raw markdown and rendered content simultaneously
 4. Compact welcome screen and add recent files section for better context
 5. Create unified top toolbar with quick actions (file, paste, search, font, theme)
 6. Add file metadata to file list items (size, date, word count, context menu)

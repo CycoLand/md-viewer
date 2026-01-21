@@ -9,12 +9,53 @@ const renderCache = new Map(); // fileId -> sanitized HTML string
 // Theme management
 class ThemeManager {
     constructor() {
+        this.presets = {
+            default: {
+                '--primary-color': '#6366f1',
+                '--primary-hover': '#5b5ff1',
+                '--bg-color': '#0f172a',
+                '--surface-color': '#1e293b',
+                '--surface-hover': '#334155',
+                '--text-color': '#f8fafc',
+                '--text-muted': '#94a3b8',
+                '--text-dim': '#64748b',
+                '--accent-color': '#06b6d4',
+                '--border-color': '#334155'
+            },
+            dark: {
+                '--primary-color': '#9ca3af',
+                '--primary-hover': '#6b7280',
+                '--bg-color': '#111827',
+                '--surface-color': '#1f2937',
+                '--surface-hover': '#374151',
+                '--text-color': '#f9fafb',
+                '--text-muted': '#9ca3af',
+                '--text-dim': '#6b7280',
+                '--accent-color': '#6b7280',
+                '--border-color': '#374151'
+            },
+            light: {
+                '--primary-color': '#3b82f6',
+                '--primary-hover': '#2563eb',
+                '--bg-color': '#ffffff',
+                '--surface-color': '#f3f4f6',
+                '--surface-hover': '#e5e7eb',
+                '--text-color': '#1f2937',
+                '--text-muted': '#6b7280',
+                '--text-dim': '#9ca3af',
+                '--accent-color': '#2563eb',
+                '--border-color': '#d1d5db'
+            }
+        };
+        
         this.loadTheme();
         this.initializeThemePanel();
     }
 
     loadTheme() {
         const savedTheme = localStorage.getItem('markdownViewerTheme');
+        const savedPreset = localStorage.getItem('markdownViewerThemePreset');
+        
         if (savedTheme) {
             try {
                 const theme = JSON.parse(savedTheme);
@@ -22,6 +63,17 @@ class ThemeManager {
             } catch (error) {
                 console.error('Error loading saved theme:', error);
             }
+        }
+        
+        // Load the highlight.js theme based on saved preset
+        if (savedPreset) {
+            this.updateHighlightTheme(savedPreset);
+            // Update active state on preset buttons after DOM is ready
+            setTimeout(() => {
+                document.querySelectorAll('.theme-preset-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.theme === savedPreset);
+                });
+            }, 0);
         }
     }
 
@@ -59,6 +111,50 @@ class ThemeManager {
         localStorage.removeItem('markdownViewerTheme');
         location.reload();
     }
+    
+    applyPreset(presetName) {
+        const preset = this.presets[presetName];
+        if (!preset) return;
+        
+        this.applyTheme(preset);
+        this.saveTheme();
+        
+        // Save the preset name
+        localStorage.setItem('markdownViewerThemePreset', presetName);
+        
+        this.updateThemeInputs();
+        
+        // Update active state on preset buttons
+        document.querySelectorAll('.theme-preset-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.theme === presetName);
+        });
+        
+        // Switch highlight.js theme based on the preset
+        this.updateHighlightTheme(presetName);
+        
+        // Re-highlight all code blocks with the new theme
+        this.rehighlightCode();
+    }
+    
+    updateHighlightTheme(presetName) {
+        const highlightLink = document.getElementById('highlight-theme');
+        if (!highlightLink) return;
+        
+        // Use light theme for light preset, dark theme for others
+        const themeName = presetName === 'light' ? 'github' : 'github-dark';
+        highlightLink.href = `https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/${themeName}.min.css`;
+    }
+    
+    rehighlightCode() {
+        // Wait a bit for the CSS to load, then re-highlight
+        setTimeout(() => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                if (window.hljs) {
+                    hljs.highlightElement(block);
+                }
+            });
+        }, 100);
+    }
 
     exportTheme() {
         const theme = this.getCurrentTheme();
@@ -72,6 +168,14 @@ class ThemeManager {
     }
 
     initializeThemePanel() {
+        // Preset theme buttons
+        document.querySelectorAll('.theme-preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const themeName = btn.dataset.theme;
+                this.applyPreset(themeName);
+            });
+        });
+        
         // Color inputs
         document.getElementById('primary-color').addEventListener('input', (e) => {
             document.documentElement.style.setProperty('--primary-color', e.target.value);
@@ -578,8 +682,35 @@ class FileManager {
                 });
             });
             
+            // Copy as MD button
+            const copyMdBtn = document.createElement('button');
+            copyMdBtn.className = 'code-copy-btn';
+            copyMdBtn.innerHTML = '<i class="fas fa-file-code"></i> Copy MD';
+            copyMdBtn.title = 'Copy as markdown';
+            
+            copyMdBtn.addEventListener('click', () => {
+                const code = block.textContent;
+                const mdText = '```' + language + '\n' + code + '\n```';
+                navigator.clipboard.writeText(mdText).then(() => {
+                    copyMdBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                    copyMdBtn.classList.add('copied');
+                    setTimeout(() => {
+                        copyMdBtn.innerHTML = '<i class="fas fa-file-code"></i> Copy MD';
+                        copyMdBtn.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                });
+            });
+            
+            // Create button group container
+            const buttonGroup = document.createElement('div');
+            buttonGroup.className = 'code-button-group';
+            buttonGroup.appendChild(copyMdBtn);
+            buttonGroup.appendChild(copyBtn);
+            
             header.appendChild(langLabel);
-            header.appendChild(copyBtn);
+            header.appendChild(buttonGroup);
             
             // Insert wrapper before pre, then move pre into wrapper
             pre.parentNode.insertBefore(wrapper, pre);
@@ -694,8 +825,35 @@ class FileManager {
                 });
             });
             
+            // Copy as MD button
+            const copyMdBtn = document.createElement('button');
+            copyMdBtn.className = 'code-copy-btn';
+            copyMdBtn.innerHTML = '<i class="fas fa-file-code"></i> Copy MD';
+            copyMdBtn.title = 'Copy as markdown';
+            
+            copyMdBtn.addEventListener('click', () => {
+                const code = block.textContent;
+                const mdText = '```' + language + '\n' + code + '\n```';
+                navigator.clipboard.writeText(mdText).then(() => {
+                    copyMdBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                    copyMdBtn.classList.add('copied');
+                    setTimeout(() => {
+                        copyMdBtn.innerHTML = '<i class="fas fa-file-code"></i> Copy MD';
+                        copyMdBtn.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                });
+            });
+            
+            // Create button group container
+            const buttonGroup = document.createElement('div');
+            buttonGroup.className = 'code-button-group';
+            buttonGroup.appendChild(copyMdBtn);
+            buttonGroup.appendChild(copyBtn);
+            
             header.appendChild(langLabel);
-            header.appendChild(copyBtn);
+            header.appendChild(buttonGroup);
             
             // Insert wrapper before pre, then move pre into wrapper
             pre.parentNode.insertBefore(wrapper, pre);

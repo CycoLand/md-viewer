@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultimate Markdown Viewer</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <link id="highlight-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Recursive:wght,MONO@300..1000,1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -21,6 +21,36 @@
         </div>
         
         <div class="theme-panel-content">
+            <div class="theme-section">
+                <h4>Presets</h4>
+                <div class="theme-presets">
+                    <button class="theme-preset-btn active" data-theme="default">
+                        <div class="preset-colors">
+                            <span style="background: #6366f1"></span>
+                            <span style="background: #0f172a"></span>
+                            <span style="background: #1e293b"></span>
+                        </div>
+                        <span class="preset-name">Blue & Purple</span>
+                    </button>
+                    <button class="theme-preset-btn" data-theme="dark">
+                        <div class="preset-colors">
+                            <span style="background: #1f2937"></span>
+                            <span style="background: #111827"></span>
+                            <span style="background: #1f2937"></span>
+                        </div>
+                        <span class="preset-name">Dark</span>
+                    </button>
+                    <button class="theme-preset-btn" data-theme="light">
+                        <div class="preset-colors">
+                            <span style="background: #3b82f6"></span>
+                            <span style="background: #ffffff"></span>
+                            <span style="background: #f3f4f6"></span>
+                        </div>
+                        <span class="preset-name">Light</span>
+                    </button>
+                </div>
+            </div>
+            
             <div class="theme-section">
                 <h4>Colors</h4>
                 <div class="color-inputs">

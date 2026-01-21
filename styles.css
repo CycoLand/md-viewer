@@ -19,7 +19,7 @@
     --font-family: 'Inter', sans-serif;
     --font-mono: 'Recursive', monospace;
     --font-size: 16px;
-    --line-height: 1.6;
+    --line-height: 1.4;
     --font-weight-normal: 400;
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
@@ -736,6 +736,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
     padding: 0.5rem 1rem;
     background-color: rgba(0, 0, 0, 0.2);
     border-bottom: 1px solid var(--border-color);
@@ -750,6 +751,14 @@ body {
     font-family: var(--font-mono);
 }
 
+/* Button group container - pill shaped */
+.code-button-group {
+    display: inline-flex;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
 .code-copy-btn {
     display: inline-flex;
     align-items: center;
@@ -759,22 +768,27 @@ body {
     font-weight: 500;
     background-color: var(--surface-hover);
     color: var(--text-muted);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
+    border: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
     cursor: pointer;
     transition: var(--transition);
+}
+
+/* Last button in group shouldn't have right border */
+.code-copy-btn:last-child {
+    border-right: none;
 }
 
 .code-copy-btn:hover {
     background-color: var(--primary-color);
     color: white;
-    border-color: var(--primary-color);
+    z-index: 1;
 }
 
 .code-copy-btn.copied {
     background-color: var(--success-color);
     color: white;
-    border-color: var(--success-color);
+    z-index: 1;
 }
 
 .code-block-wrapper pre {
@@ -962,6 +976,55 @@ body {
     color: var(--text-color);
     font-weight: var(--font-weight-semibold);
 }
+
+.theme-presets {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+}
+
+.theme-preset-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background-color: var(--bg-color);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+    color: var(--text-color);
+    font-size: 0.95rem;
+    font-weight: var(--font-weight-medium);
+}
+
+.theme-preset-btn:hover {
+    border-color: var(--primary-color);
+    background-color: var(--surface-hover);
+}
+
+.theme-preset-btn.active {
+    border-color: var(--primary-color);
+    background-color: var(--surface-hover);
+}
+
+.preset-colors {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.preset-colors span {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.preset-name {
+    flex: 1;
+    text-align: left;
+}
+
 
 .input-group {
     margin-bottom: 1rem;
