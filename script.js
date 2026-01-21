@@ -818,11 +818,72 @@ function closePasteModal() {
     document.getElementById('markdown-input').value = '';
 }
 
+// Auto-detect title from markdown content
+function autoDetectTitle(content) {
+    if (!content || !content.trim()) {
+        return 'Untitled.md';
+    }
+    
+    const lines = content.trim().split('\n');
+    
+    // Strategy 1: Look for first H1 heading
+    const h1Match = content.match(/^#\s+(.+)$/m);
+    if (h1Match && h1Match[1]) {
+        return sanitizeFilename(h1Match[1].trim()) + '.md';
+    }
+    
+    // Strategy 2: Look for first H2 heading
+    const h2Match = content.match(/^##\s+(.+)$/m);
+    if (h2Match && h2Match[1]) {
+        return sanitizeFilename(h2Match[1].trim()) + '.md';
+    }
+    
+    // Strategy 3: Use first non-empty line if it's reasonably short
+    const firstLine = lines.find(line => line.trim().length > 0);
+    if (firstLine && firstLine.trim().length <= 60) {
+        // Remove markdown formatting from first line
+        const cleaned = firstLine.trim()
+            .replace(/^#+\s*/, '')  // Remove heading markers
+            .replace(/[*_~`]/g, '') // Remove emphasis markers
+            .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1'); // Remove links, keep text
+        
+        if (cleaned.length > 0 && cleaned.length <= 60) {
+            return sanitizeFilename(cleaned) + '.md';
+        }
+    }
+    
+    // Strategy 4: Take first few words
+    const words = content.trim()
+        .replace(/^#+\s*/, '')  // Remove heading markers
+        .replace(/[*_~`#]/g, '') // Remove markdown syntax
+        .split(/\s+/)
+        .filter(w => w.length > 0)
+        .slice(0, 5)
+        .join(' ');
+    
+    if (words) {
+        return sanitizeFilename(words) + '.md';
+    }
+    
+    return 'Untitled.md';
+}
+
+function sanitizeFilename(name) {
+    return name
+        .trim()
+        .replace(/[<>:"/\\|?*\x00-\x1F]/g, '') // Remove invalid filename chars
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/-+/g, '-') // Collapse multiple hyphens
+        .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
+        .substring(0, 100) // Limit length
+        || 'untitled';
+}
+
 function addPastedContent() {
     const nameInput = document.getElementById('file-name-input');
     const contentInput = document.getElementById('markdown-input');
     
-    const name = nameInput.value.trim() || 'Untitled.md';
+    const manualName = nameInput.value.trim();
     const content = contentInput.value.trim();
     
     if (!content) {
@@ -830,6 +891,9 @@ function addPastedContent() {
         return;
     }
 
+    // Auto-detect title if no manual name provided
+    const name = manualName || autoDetectTitle(content);
+    
     const fileId = FileManager.addFile(name, content);
     FileManager.selectFile(fileId);
     closePasteModal();
@@ -917,6 +981,18 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('paste-modal').addEventListener('click', function(e) {
         if (e.target === this) {
             closePasteModal();
+        }
+    });
+
+    // Auto-fill filename when markdown content is pasted/typed
+    document.getElementById('markdown-input').addEventListener('input', function(e) {
+        const nameInput = document.getElementById('file-name-input');
+        const content = e.target.value;
+        
+        // Only auto-fill if the name field is empty
+        if (!nameInput.value.trim() && content.trim()) {
+            const detectedTitle = autoDetectTitle(content);
+            nameInput.value = detectedTitle;
         }
     });
 
