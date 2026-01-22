@@ -239,7 +239,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3><i class="fas fa-paste"></i> Paste Markdown Content</h3>
-                <button class="close-modal" onclick="closePasteModal()">
+                <button class="close-modal" id="close-paste-modal">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -254,8 +254,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closePasteModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="addPastedContent()">Add Content</button>
+                <button class="btn btn-secondary" id="cancel-paste-btn">Cancel</button>
+                <button class="btn btn-primary" id="add-paste-btn">Add Content</button>
             </div>
         </div>
     </div>
@@ -267,6 +267,6 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js"></script>
-    <script src="script.js"></script>
+    <script type="module" src="scripts/main.js"></script>
 </body>
 </html>

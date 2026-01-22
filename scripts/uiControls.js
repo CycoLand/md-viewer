@@ -1,0 +1,187 @@
+// UI control functions
+import { state } from './state.js';
+
+export function toggleSidebar() {
+    state.sidebarCollapsed = !state.sidebarCollapsed;
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.querySelector('.main-content');
+    const headerToggleBtn = document.getElementById('sidebar-toggle-header');
+    
+    if (state.sidebarCollapsed) {
+        sidebar.classList.add('collapsed');
+        mainContent.classList.add('sidebar-collapsed');
+        if (headerToggleBtn) headerToggleBtn.classList.add('show');
+    } else {
+        sidebar.classList.remove('collapsed');
+        mainContent.classList.remove('sidebar-collapsed');
+        if (headerToggleBtn) headerToggleBtn.classList.remove('show');
+    }
+}
+
+export function toggleThemePanel() {
+    const panel = document.getElementById('theme-panel');
+    const overlay = document.getElementById('overlay');
+    
+    panel.classList.toggle('open');
+    overlay.classList.toggle('show');
+}
+
+export function closeThemePanel() {
+    document.getElementById('theme-panel').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+}
+
+export function toggleRawMode(FileManager) {
+    state.rawMode = !state.rawMode;
+    const btn = document.getElementById('toggle-raw-btn');
+    
+    if (state.rawMode) {
+        btn.innerHTML = '<i class="fas fa-eye"></i> Rendered';
+        btn.classList.add('active');
+    } else {
+        btn.innerHTML = '<i class="fas fa-code"></i> Raw';
+        btn.classList.remove('active');
+    }
+
+    if (state.currentFileId) {
+        const file = FileManager.getFile(state.currentFileId);
+        if (file) {
+            FileManager.showFile(file);
+        }
+    }
+}
+
+export function showPasteModal() {
+    const modal = document.getElementById('paste-modal');
+    modal.classList.add('show');
+}
+
+export function closePasteModal() {
+    const modal = document.getElementById('paste-modal');
+    modal.classList.remove('show');
+    document.getElementById('file-name-input').value = '';
+    document.getElementById('markdown-input').value = '';
+}
+
+export function autoDetectTitle(content) {
+    if (!content || !content.trim()) {
+        return 'Untitled.md';
+    }
+    
+    const lines = content.trim().split('\n');
+    
+    // Look for first H1 heading
+    const h1Match = content.match(/^#\s+(.+)$/m);
+    if (h1Match && h1Match[1]) {
+        return sanitizeFilename(h1Match[1].trim()) + '.md';
+    }
+    
+    // Look for first H2 heading
+    const h2Match = content.match(/^##\s+(.+)$/m);
+    if (h2Match && h2Match[1]) {
+        return sanitizeFilename(h2Match[1].trim()) + '.md';
+    }
+    
+    // Use first non-empty line if reasonably short
+    const firstLine = lines.find(line => line.trim().length > 0);
+    if (firstLine && firstLine.trim().length <= 60) {
+        const cleaned = firstLine.trim()
+            .replace(/^#+\s*/, '')
+            .replace(/[*_~`]/g, '')
+            .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1');
+        
+        if (cleaned.length > 0 && cleaned.length <= 60) {
+            return sanitizeFilename(cleaned) + '.md';
+        }
+    }
+    
+    // Take first few words
+    const words = content.trim()
+        .replace(/^#+\s*/, '')
+        .replace(/[*_~`#]/g, '')
+        .split(/\s+/)
+        .filter(w => w.length > 0)
+        .slice(0, 5)
+        .join(' ');
+    
+    if (words) {
+        return sanitizeFilename(words) + '.md';
+    }
+    
+    return 'Untitled.md';
+}
+
+export function sanitizeFilename(name) {
+    return name
+        .trim()
+        .replace(/[<>:"/\\|?*\x00-\x1F]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
+        .substring(0, 100)
+        || 'untitled';
+}
+
+export function addPastedContent(FileManager) {
+    const nameInput = document.getElementById('file-name-input');
+    const contentInput = document.getElementById('markdown-input');
+    
+    const manualName = nameInput.value.trim();
+    const content = contentInput.value.trim();
+    
+    if (!content) {
+        alert('Please enter some markdown content');
+        return;
+    }
+
+    const name = manualName || autoDetectTitle(content);
+    
+    const fileId = FileManager.addFile(name, content);
+    FileManager.selectFile(fileId);
+    closePasteModal();
+}
+
+export function initializeDragAndDrop(FileManager) {
+    const dragArea = document.getElementById('drag-drop-area');
+    const body = document.body;
+
+    const preventDefaults = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        body.addEventListener(eventName, preventDefaults, false);
+        dragArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        body.addEventListener(eventName, () => dragArea.classList.add('drag-over'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        body.addEventListener(eventName, () => dragArea.classList.remove('drag-over'), false);
+    });
+
+    const handleDrop = (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        handleFiles(files, FileManager);
+    };
+
+    body.addEventListener('drop', handleDrop, false);
+    dragArea.addEventListener('drop', handleDrop, false);
+}
+
+export function handleFiles(fileList, FileManager) {
+    Array.from(fileList).forEach(file => {
+        if (file.type === 'text/markdown' || file.name.endsWith('.md') || file.name.endsWith('.markdown') || file.type === 'text/plain') {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const fileId = FileManager.addFile(file.name, e.target.result);
+                FileManager.selectFile(fileId);
+            };
+            reader.readAsText(file);
+        }
+    });
+}

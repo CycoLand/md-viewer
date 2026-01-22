@@ -828,6 +828,15 @@ body {
     z-index: 1;
 }
 
+
+/* Fix width consistency for eye icons in comment toggle button */
+.code-copy-btn i.fa-eye,
+.code-copy-btn i.fa-eye-slash {
+    display: inline-block;
+    width: 1em;
+    text-align: center;
+}
+
 .code-block-wrapper pre {
     margin: 0;
     border: none;
