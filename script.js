@@ -854,6 +854,12 @@ class FileManager {
             toggleCommentsBtn.addEventListener('click', () => {
                 const isHidden = wrapper.classList.contains('hide-comments');
                 
+                // Lock the width on first toggle to prevent width changes
+                if (!wrapper.style.width) {
+                    const currentWidth = wrapper.offsetWidth;
+                    wrapper.style.width = currentWidth + 'px';
+                }
+                
                 if (!isHidden) {
                     // Hiding comments with CSS transition
                     wrapper.classList.add('hide-comments');
@@ -1022,6 +1028,12 @@ class FileManager {
             
             toggleCommentsBtn.addEventListener('click', () => {
                 const isHidden = wrapper.classList.contains('hide-comments');
+                
+                // Lock the width on first toggle to prevent width changes
+                if (!wrapper.style.width) {
+                    const currentWidth = wrapper.offsetWidth;
+                    wrapper.style.width = currentWidth + 'px';
+                }
                 
                 if (!isHidden) {
                     // Hiding comments with CSS transition

@@ -828,12 +828,6 @@ body {
     z-index: 1;
 }
 
-.code-copy-btn.active {
-    background-color: var(--primary-color);
-    color: white;
-    z-index: 1;
-}
-
 .code-block-wrapper pre {
     margin: 0;
     border: none;
