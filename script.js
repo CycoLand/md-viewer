@@ -6,6 +6,145 @@ let rawMode = false;
 const STORAGE_KEY = 'markdownViewerDocs';
 const renderCache = new Map(); // fileId -> sanitized HTML string
 
+// Helper functions for comment line collapsing
+function collapseCommentLines(codeElement) {
+    // Find all comment elements and check if they're on their own line
+    const commentNodes = codeElement.querySelectorAll('.hljs-comment');
+    
+    commentNodes.forEach(commentNode => {
+        // Skip if already wrapped
+        if (commentNode.closest('.comment-only-line')) {
+            return;
+        }
+        
+        // Get text before comment on same line
+        let textBefore = '';
+        let currentNode = commentNode.previousSibling;
+        
+        while (currentNode) {
+            if (currentNode.nodeType === Node.TEXT_NODE) {
+                const text = currentNode.textContent;
+                const lastNewlineIndex = text.lastIndexOf('\n');
+                if (lastNewlineIndex !== -1) {
+                    textBefore = text.substring(lastNewlineIndex + 1) + textBefore;
+                    break;
+                }
+                textBefore = text + textBefore;
+            } else if (currentNode.nodeType === Node.ELEMENT_NODE) {
+                // There's other code on this line (unless it's another wrapped comment)
+                if (!currentNode.classList || !currentNode.classList.contains('comment-only-line')) {
+                    return;
+                }
+            }
+            currentNode = currentNode.previousSibling;
+        }
+        
+        // Get text after comment on same line
+        let textAfter = '';
+        currentNode = commentNode.nextSibling;
+        
+        while (currentNode) {
+            if (currentNode.nodeType === Node.TEXT_NODE) {
+                const text = currentNode.textContent;
+                const firstNewlineIndex = text.indexOf('\n');
+                if (firstNewlineIndex !== -1) {
+                    textAfter = textAfter + text.substring(0, firstNewlineIndex);
+                    break;
+                }
+                textAfter = textAfter + text;
+            } else if (currentNode.nodeType === Node.ELEMENT_NODE) {
+                // There's other code on this line
+                if (!currentNode.classList || !currentNode.classList.contains('comment-only-line')) {
+                    return;
+                }
+            }
+            currentNode = currentNode.nextSibling;
+        }
+        
+        // If both before and after are just whitespace, this is a comment-only line
+        if (textBefore.trim() === '' && textAfter.trim() === '') {
+            // Wrap the comment and surrounding whitespace up to newlines
+            const wrapper = document.createElement('span');
+            wrapper.className = 'comment-only-line';
+            // Don't set display: none - let CSS handle it with transitions
+            
+            const parent = commentNode.parentNode;
+            parent.insertBefore(wrapper, commentNode);
+            
+            // Add preceding whitespace
+            currentNode = wrapper.previousSibling;
+            const nodesToMove = [];
+            while (currentNode) {
+                if (currentNode.nodeType === Node.TEXT_NODE) {
+                    const text = currentNode.textContent;
+                    const lastNewlineIndex = text.lastIndexOf('\n');
+                    if (lastNewlineIndex !== -1) {
+                        // Split this text node at the newline
+                        const afterNewline = text.substring(lastNewlineIndex + 1);
+                        const beforeNewline = text.substring(0, lastNewlineIndex + 1);
+                        if (afterNewline) {
+                            const afterNode = document.createTextNode(afterNewline);
+                            nodesToMove.push(afterNode);
+                        }
+                        currentNode.textContent = beforeNewline;
+                        break;
+                    }
+                    nodesToMove.push(currentNode);
+                    currentNode = currentNode.previousSibling;
+                } else {
+                    break;
+                }
+            }
+            
+            // Add nodes before comment
+            nodesToMove.reverse().forEach(n => wrapper.appendChild(n));
+            
+            // Add the comment itself
+            wrapper.appendChild(commentNode);
+            
+            // Add trailing content up to and including the newline
+            currentNode = wrapper.nextSibling;
+            while (currentNode) {
+                const next = currentNode.nextSibling;
+                if (currentNode.nodeType === Node.TEXT_NODE) {
+                    const text = currentNode.textContent;
+                    const firstNewlineIndex = text.indexOf('\n');
+                    if (firstNewlineIndex !== -1) {
+                        // Include the newline in the wrapper so the entire line disappears
+                        const beforeNewline = text.substring(0, firstNewlineIndex + 1);
+                        const afterNewline = text.substring(firstNewlineIndex + 1);
+                        wrapper.appendChild(document.createTextNode(beforeNewline));
+                        if (afterNewline) {
+                            currentNode.textContent = afterNewline;
+                        } else {
+                            parent.removeChild(currentNode);
+                        }
+                        break;
+                    }
+                    wrapper.appendChild(currentNode);
+                    currentNode = next;
+                } else {
+                    break;
+                }
+            }
+        }
+    });
+}
+
+function restoreCommentLines(codeElement) {
+    // Unwrap the hidden comment-only lines
+    const wrappedLines = codeElement.querySelectorAll('.comment-only-line');
+    wrappedLines.forEach(span => {
+        const parent = span.parentNode;
+        // Move all children out of the span
+        while (span.firstChild) {
+            parent.insertBefore(span.firstChild, span);
+        }
+        // Remove the empty span
+        parent.removeChild(span);
+    });
+}
+
 // Theme management
 class ThemeManager {
     constructor() {
@@ -645,6 +784,9 @@ class FileManager {
         mdEl.querySelectorAll('pre code').forEach((block) => {
             hljs.highlightElement(block);
             
+            // Wrap comment-only lines for proper collapsing
+            collapseCommentLines(block);
+            
             // Get language from class
             const languageClass = Array.from(block.classList).find(cls => cls.startsWith('language-'));
             const language = languageClass ? languageClass.replace('language-', '') : 'text';
@@ -703,9 +845,32 @@ class FileManager {
                 });
             });
             
+            // Toggle Comments button
+            const toggleCommentsBtn = document.createElement('button');
+            toggleCommentsBtn.className = 'code-copy-btn code-toggle-comments';
+            toggleCommentsBtn.innerHTML = '<i class="fas fa-eye"></i> Comments';
+            toggleCommentsBtn.title = 'Toggle comments visibility';
+            
+            toggleCommentsBtn.addEventListener('click', () => {
+                const isHidden = wrapper.classList.contains('hide-comments');
+                
+                if (!isHidden) {
+                    // Hiding comments with CSS transition
+                    wrapper.classList.add('hide-comments');
+                    toggleCommentsBtn.innerHTML = '<i class="fas fa-eye-slash"></i> Comments';
+                    toggleCommentsBtn.classList.add('active');
+                } else {
+                    // Showing comments with CSS transition
+                    wrapper.classList.remove('hide-comments');
+                    toggleCommentsBtn.innerHTML = '<i class="fas fa-eye"></i> Comments';
+                    toggleCommentsBtn.classList.remove('active');
+                }
+            });
+            
             // Create button group container
             const buttonGroup = document.createElement('div');
             buttonGroup.className = 'code-button-group';
+            buttonGroup.appendChild(toggleCommentsBtn);
             buttonGroup.appendChild(copyMdBtn);
             buttonGroup.appendChild(copyBtn);
             
@@ -788,6 +953,9 @@ class FileManager {
         mdEl.querySelectorAll('pre code').forEach((block) => {
             hljs.highlightElement(block);
             
+            // Wrap comment-only lines for proper collapsing
+            collapseCommentLines(block);
+            
             // Get language from class
             const languageClass = Array.from(block.classList).find(cls => cls.startsWith('language-'));
             const language = languageClass ? languageClass.replace('language-', '') : 'text';
@@ -846,9 +1014,32 @@ class FileManager {
                 });
             });
             
+            // Toggle Comments button
+            const toggleCommentsBtn = document.createElement('button');
+            toggleCommentsBtn.className = 'code-copy-btn code-toggle-comments';
+            toggleCommentsBtn.innerHTML = '<i class="fas fa-eye"></i> Comments';
+            toggleCommentsBtn.title = 'Toggle comments visibility';
+            
+            toggleCommentsBtn.addEventListener('click', () => {
+                const isHidden = wrapper.classList.contains('hide-comments');
+                
+                if (!isHidden) {
+                    // Hiding comments with CSS transition
+                    wrapper.classList.add('hide-comments');
+                    toggleCommentsBtn.innerHTML = '<i class="fas fa-eye-slash"></i> Comments';
+                    toggleCommentsBtn.classList.add('active');
+                } else {
+                    // Showing comments with CSS transition
+                    wrapper.classList.remove('hide-comments');
+                    toggleCommentsBtn.innerHTML = '<i class="fas fa-eye"></i> Comments';
+                    toggleCommentsBtn.classList.remove('active');
+                }
+            });
+            
             // Create button group container
             const buttonGroup = document.createElement('div');
             buttonGroup.className = 'code-button-group';
+            buttonGroup.appendChild(toggleCommentsBtn);
             buttonGroup.appendChild(copyMdBtn);
             buttonGroup.appendChild(copyBtn);
             

@@ -741,6 +741,34 @@ body {
     max-width: 100%;
 }
 
+/* Comment transitions */
+.hljs-comment {
+    transition: opacity 0.3s ease;
+}
+
+/* Hide inline comments when toggle is active (fade out but keep line) */
+.code-block-wrapper.hide-comments .hljs-comment {
+    opacity: 0;
+}
+
+/* Comment-only lines: hidden by default until CSS is applied */
+.comment-only-line {
+    display: block;
+    transition: opacity 0.3s ease, max-height 0.3s ease;
+    opacity: 1;
+    max-height: 1000px;
+    overflow: hidden;
+}
+
+/* Hide comment-only lines completely (remove from layout) */
+.code-block-wrapper.hide-comments .comment-only-line {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+
 .code-block-header {
     display: flex;
     justify-content: space-between;
@@ -796,6 +824,12 @@ body {
 
 .code-copy-btn.copied {
     background-color: var(--success-color);
+    color: white;
+    z-index: 1;
+}
+
+.code-copy-btn.active {
+    background-color: var(--primary-color);
     color: white;
     z-index: 1;
 }
