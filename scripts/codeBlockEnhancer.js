@@ -186,10 +186,8 @@ export function enhanceCodeBlocks(mdEl) {
             buttonGroup.appendChild(toggleCommentsBtn);
         }
         
-        // Always add copy markdown and copy buttons
-        const copyMdBtn = createCopyMdButton(block, language);
+        // Always add copy button
         const copyBtn = createCopyButton(block);
-        buttonGroup.appendChild(copyMdBtn);
         buttonGroup.appendChild(copyBtn);
         
         header.appendChild(langLabel);

@@ -51,16 +51,35 @@ export function generateTOC(mdEl, tocEl) {
  */
 function setupScrollSpy(headings, tocEl) {
     const links = Array.from(tocEl.querySelectorAll('a'));
+    const scrollContainer = document.querySelector('.content-area');
+    
+    if (!scrollContainer) return;
     
     function onScroll() {
         let currentId = null;
-        const scrollPos = window.scrollY + 100;
+        // Get 1/3 down from the top of the viewport
+        const viewportThird = window.innerHeight / 3;
+        let closestDistance = Infinity;
 
-        for (let i = headings.length - 1; i >= 0; i--) {
+        // Find which section's middle is closest to the viewport third point
+        for (let i = 0; i < headings.length; i++) {
             const h = headings[i];
-            if (h.offsetTop <= scrollPos) {
+            
+            // Get the next heading (or use a large value if this is the last one)
+            const nextHeading = headings[i + 1];
+            const currentTop = h.getBoundingClientRect().top;
+            const nextTop = nextHeading ? nextHeading.getBoundingClientRect().top : currentTop + 1000;
+            
+            // Calculate the middle of this section
+            const sectionMiddle = (currentTop + nextTop) / 2;
+            
+            // Calculate distance from section middle to viewport third point
+            const distance = Math.abs(sectionMiddle - viewportThird);
+            
+            // If this section is closest so far, make it current
+            if (distance < closestDistance) {
+                closestDistance = distance;
                 currentId = h.id;
-                break;
             }
         }
 
@@ -74,6 +93,7 @@ function setupScrollSpy(headings, tocEl) {
         });
     }
 
-    window.addEventListener('scroll', onScroll);
+    // Listen to scroll events on the content-area, not window
+    scrollContainer.addEventListener('scroll', onScroll);
     onScroll();
 }
