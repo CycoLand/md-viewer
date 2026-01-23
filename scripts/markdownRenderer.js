@@ -4,6 +4,46 @@ import { enhanceCodeBlocks } from './codeBlockEnhancer.js';
 import { buildCollapsibleSections, setupHashBasedCollapse, remeasureSection } from './collapsibleSections.js';
 import { generateTOC } from './tocManager.js';
 
+
+/**
+ * Creates a document header with metadata
+ * @param {Object} file - The file object with metadata
+ * @param {string} content - The markdown content for counting
+ * @returns {string} HTML string for the document header
+ */
+function createDocumentHeader(file, content) {
+    if (!file) return '';
+    
+    // Calculate word count (split by whitespace and filter non-empty)
+    const words = content.trim().split(/\s+/).filter(w => w.length > 0);
+    const wordCount = words.length;
+    
+    // Calculate line count
+    const lineCount = content.split('\n').length;
+    
+    // Format date
+    const date = new Date(file.modified);
+    const formattedDate = date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+    });
+    
+    return `
+        <div class="document-header">
+            <h1 class="document-title">${file.name}</h1>
+            <div class="document-meta">
+                <span class="meta-item"><i class="fas fa-font"></i> ${wordCount.toLocaleString()} words</span>
+                <span class="meta-separator">•</span>
+                <span class="meta-item"><i class="fas fa-list-ol"></i> ${lineCount.toLocaleString()} lines</span>
+                <span class="meta-separator">•</span>
+                <span class="meta-item"><i class="fas fa-calendar"></i> ${formattedDate}</span>
+            </div>
+        </div>
+        <hr class="document-separator">
+    `;
+}
+
 /**
  * Renders markdown content in the viewer
  * @param {string} content - The markdown content to render
@@ -35,7 +75,14 @@ export function showRenderedContent(content) {
     // Parse and sanitize markdown
     const html = marked.parse(content);
     const sanitizedHtml = DOMPurify.sanitize(html);
-    mdEl.innerHTML = sanitizedHtml;
+    
+    // Get current file info for metadata
+    const file = state.currentFileId ? state.files.get(state.currentFileId) : null;
+    
+    // Create document header with metadata
+    const headerHtml = createDocumentHeader(file, content);
+    
+    mdEl.innerHTML = headerHtml + sanitizedHtml;
     
     if (state.currentFileId) {
         state.renderCache.set(state.currentFileId, sanitizedHtml);

@@ -349,6 +349,9 @@ body {
     display: grid;
     grid-template-columns: 1fr 310px; /* main content + right toc */
     gap: 1rem;
+    max-width: calc(1100px + 1rem + 310px); /* content max-width + gap + toc width */
+    margin: 0 auto; /* Center the grid container */
+    padding: 0 2rem; /* Add padding on sides */
     /* Removed flex/min-height constraints to allow natural height */
     /* This allows sticky positioning to work properly */
 }
@@ -361,20 +364,76 @@ body {
     width: 100%;
 }
 
-/* Inner content - centered with max-width */
+/* Inner content - max-width without centering (grid is centered) */
 .markdown-content > * {
     max-width: var(--content-max-width);
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 2rem;
-    padding-right: 2rem;
+    padding-left: 0;
+    padding-right: 0;
 }
+
+
+/* Document Header Styles */
+.document-header {
+    background-color: rgba(99, 102, 241, 0.03); /* Very subtle primary color tint */
+    border-left: 3px solid var(--primary-color); /* Accent border */
+    border-radius: var(--border-radius);
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+    width: fit-content; /* Width based on content, not full width */
+    max-width: 100%; /* Don't overflow on small screens */
+}
+
+.document-title {
+    font-size: 1.75rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--primary-color); /* Use primary color for title */
+    margin: 0 0 0.75rem 0;
+    line-height: 1.2;
+    letter-spacing: -0.02em; /* Slightly tighter letter spacing */
+}
+
+.document-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: var(--font-weight-medium);
+}
+
+.meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.meta-item i {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    color: var(--accent-color);
+}
+
+.meta-separator {
+    color: var(--text-dim);
+    opacity: 0.4;
+}
+
+.document-separator {
+    border: none;
+    height: 1px;
+    background-color: rgba(148, 163, 184, 0.2);
+    margin: 2rem 0 2.5rem 0;
+}
+
 
 /* Raw content also lives in the main column */
 .raw-content {
     grid-column: 1 / 2;
     overflow-y: visible; /* No scrollbar here, parent handles scrolling */
-    padding: 2rem 2rem 4rem 2rem;
+    padding: 2rem 0 4rem 0;
 }
 
 /* TOC styles - right column */
@@ -386,7 +445,7 @@ body {
     overflow-y: auto;
     padding: 1.5rem 1rem 1rem 1.5rem;
     margin-right: 5px;
-    border-left: 1px solid transparent;
+    border-left: 1px solid rgba(148, 163, 184, 0.2); /* Subtle separation from content */
     background-color: transparent;
     font-size: 0.875rem;
 }
