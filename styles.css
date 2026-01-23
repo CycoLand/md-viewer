@@ -513,8 +513,40 @@ body {
     }
 }
 
-.toc h4 {
+
+.toc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 0.75rem;
+}
+
+.toc-depth-selector {
+    background-color: var(--surface-color);
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.toc-depth-selector:hover {
+    border-color: var(--primary-color);
+    color: var(--text-color);
+}
+
+.toc-depth-selector:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+
+.toc h4 {
+    margin: 0;
     color: var(--text-dim);
     font-weight: var(--font-weight-medium);
     font-size: 0.75rem;

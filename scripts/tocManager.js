@@ -8,7 +8,16 @@
 export function generateTOC(mdEl, tocEl) {
     if (!tocEl) return;
 
-    const headings = Array.from(mdEl.querySelectorAll('h1, h2, h3, h4, h5, h6'));
+    // Get current depth preference (default to 3)
+    const depth = parseInt(tocEl.dataset.tocDepth || '3');
+    
+    // Build selector based on depth
+    let selector = '';
+    for (let i = 1; i <= depth; i++) {
+        selector += (i > 1 ? ', ' : '') + `h${i}`;
+    }
+    
+    const headings = Array.from(mdEl.querySelectorAll(selector));
     const items = headings.map(h => {
         const level = parseInt(h.tagName.substring(1));
         return { id: h.id, text: h.textContent.replace(/^\s*▶\s*/, '').replace(/^\s*▼\s*/, ''), level };
@@ -18,7 +27,15 @@ export function generateTOC(mdEl, tocEl) {
         tocEl.innerHTML = '';
     } else {
         const tocHtml = `
-            <h4>Contents</h4>
+            <div class="toc-header">
+                <h4>Contents</h4>
+                <select class="toc-depth-selector" data-depth="${depth}">
+                    <option value="2" ${depth === 2 ? 'selected' : ''}>H1-H2</option>
+                    <option value="3" ${depth === 3 ? 'selected' : ''}>H1-H3</option>
+                    <option value="4" ${depth === 4 ? 'selected' : ''}>H1-H4</option>
+                    <option value="6" ${depth === 6 ? 'selected' : ''}>All</option>
+                </select>
+            </div>
             <ul>
                 ${items.map(it => `
                     <li class="indent-${Math.min(5, Math.max(0, it.level - 1))}">
@@ -28,6 +45,13 @@ export function generateTOC(mdEl, tocEl) {
             </ul>
         `;
         tocEl.innerHTML = tocHtml;
+
+        // Add event listener to depth selector
+        const depthSelector = tocEl.querySelector('.toc-depth-selector');
+        depthSelector.addEventListener('change', (e) => {
+            tocEl.dataset.tocDepth = e.target.value;
+            generateTOC(mdEl, tocEl);
+        });
 
         tocEl.querySelectorAll('a').forEach(a => {
             a.addEventListener('click', (e) => {
