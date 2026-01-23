@@ -155,13 +155,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Responsive sidebar
-    if (window.innerWidth <= 768) {
+    if (window.innerWidth <= 800) {
         state.sidebarCollapsed = true;
         document.getElementById('sidebar').classList.add('collapsed');
     }
 
     window.addEventListener('resize', function() {
-        if (window.innerWidth <= 768) {
+        if (window.innerWidth <= 800) {
             if (!state.sidebarCollapsed) {
                 toggleSidebar();
             }

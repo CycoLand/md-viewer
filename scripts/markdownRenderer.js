@@ -15,7 +15,8 @@ export function showRenderedContent(content) {
     
     mdEl.style.display = 'block';
     rawEl.style.display = 'none';
-    if (tocEl) tocEl.style.display = 'block';
+    // Remove inline style to let CSS media query handle TOC visibility
+    if (tocEl) tocEl.style.display = '';
     
     // Configure marked with syntax highlighting
     marked.setOptions({

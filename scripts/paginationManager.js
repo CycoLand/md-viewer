@@ -37,7 +37,8 @@ export class PaginationManager {
             contentBody.classList.remove('paginated');
             pageNav.classList.remove('active');
             markdownContent.style.display = 'block';
-            if (toc) toc.style.display = 'block';
+            // Remove inline style to let CSS media query handle TOC visibility
+            if (toc) toc.style.display = '';
         }
     }
 
