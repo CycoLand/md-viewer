@@ -11,10 +11,10 @@ export function generateTOC(mdEl, tocEl) {
     // Get current depth preference (default to 3)
     const depth = parseInt(tocEl.dataset.tocDepth || '3');
     
-    // Build selector based on depth
+    // Build selector based on depth, excluding the document title
     let selector = '';
     for (let i = 1; i <= depth; i++) {
-        selector += (i > 1 ? ', ' : '') + `h${i}`;
+        selector += (i > 1 ? ', ' : '') + `h${i}:not(.document-title)`;
     }
     
     const headings = Array.from(mdEl.querySelectorAll(selector));

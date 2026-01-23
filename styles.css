@@ -360,7 +360,7 @@ body {
 .markdown-content {
     grid-column: 1 / 2;
     overflow-y: visible; /* No scrollbar here, parent handles scrolling */
-    padding: 2rem 0 4rem 0; /* Remove horizontal padding */
+    padding: 2rem 1.0rem 4rem 1.0rem; /* Remove horizontal padding */
     width: 100%;
 }
 
