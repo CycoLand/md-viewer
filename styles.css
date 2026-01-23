@@ -860,13 +860,14 @@ body {
 
 /* Code Block Wrapper with Header */
 .code-block-wrapper {
-    display: table;
+    display: block;
     margin: 1.5rem 0;
     border-radius: var(--border-radius);
     overflow: hidden;
     border: 1px solid var(--border-color);
     background-color: var(--surface-color);
     max-width: 100%;
+    width: fit-content; /* Only as wide as needed */
 }
 
 /* Comment transitions */
@@ -969,6 +970,15 @@ body {
     margin: 0;
     border: none;
     border-radius: 0;
+    overflow-x: auto; /* Enable horizontal scrolling */
+    max-width: 100%; /* Never exceed container width */
+}
+
+.code-block-wrapper pre code {
+    display: block;
+    white-space: pre; /* Preserve whitespace and don't wrap */
+    width: max-content; /* Allow content to extend for scrolling */
+    min-width: 100%; /* But always fill the container */
 }
 
 .markdown-content table {
