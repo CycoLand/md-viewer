@@ -160,6 +160,9 @@ export function enhanceCodeBlocks(mdEl) {
         const languageClass = Array.from(block.classList).find(cls => cls.startsWith('language-'));
         const language = languageClass ? languageClass.replace('language-', '') : 'text';
         
+        // Check if code block has any comments
+        const hasComments = block.querySelectorAll('.hljs-comment').length > 0;
+        
         // Wrap code block with header
         const pre = block.parentElement;
         const wrapper = document.createElement('div');
@@ -173,15 +176,19 @@ export function enhanceCodeBlocks(mdEl) {
         langLabel.className = 'code-language';
         langLabel.textContent = language.toUpperCase();
         
-        // Create all buttons
-        const copyBtn = createCopyButton(block);
-        const copyMdBtn = createCopyMdButton(block, language);
-        const toggleCommentsBtn = createToggleCommentsButton(wrapper);
-        
         // Create button group container
         const buttonGroup = document.createElement('div');
         buttonGroup.className = 'code-button-group';
-        buttonGroup.appendChild(toggleCommentsBtn);
+        
+        // Only add toggle comments button if comments exist
+        if (hasComments) {
+            const toggleCommentsBtn = createToggleCommentsButton(wrapper);
+            buttonGroup.appendChild(toggleCommentsBtn);
+        }
+        
+        // Always add copy markdown and copy buttons
+        const copyMdBtn = createCopyMdButton(block, language);
+        const copyBtn = createCopyButton(block);
         buttonGroup.appendChild(copyMdBtn);
         buttonGroup.appendChild(copyBtn);
         
