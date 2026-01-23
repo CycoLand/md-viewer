@@ -317,9 +317,14 @@ body {
     height: 100%;
     display: flex;
     flex-direction: column;
+    overflow-y: auto; /* Scrollbar starts at top of viewport */
+    scroll-padding-top: calc(4rem + 13px); /* Account for sticky header when scrolling to anchors */
 }
 
 .content-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
     padding: 1rem 2rem;
     border-bottom: 1px solid var(--border-color);
     background-color: var(--surface-color);
@@ -344,14 +349,14 @@ body {
     display: grid;
     grid-template-columns: 1fr 310px; /* main content + right toc */
     gap: 1rem;
-    flex: 1;
-    min-height: 0;
+    /* Removed flex/min-height constraints to allow natural height */
+    /* This allows sticky positioning to work properly */
 }
 
 /* Wrapper for scrolling - takes full column width */
 .markdown-content {
     grid-column: 1 / 2;
-    overflow-y: auto;
+    overflow-y: visible; /* No scrollbar here, parent handles scrolling */
     padding: 2rem 0 4rem 0; /* Remove horizontal padding */
     width: 100%;
 }
@@ -368,7 +373,7 @@ body {
 /* Raw content also lives in the main column */
 .raw-content {
     grid-column: 1 / 2;
-    overflow-y: auto;
+    overflow-y: visible; /* No scrollbar here, parent handles scrolling */
     padding: 2rem 2rem 4rem 2rem;
 }
 
@@ -376,8 +381,8 @@ body {
 .toc {
     grid-column: 2 / 3;
     position: sticky;
-    top: 0;
-    height: 100%;
+    top: calc(4rem + 3px); /* Stick below header bar (including border + buffer) */
+    max-height: calc(100vh - 4rem - 3px); /* Limit to viewport height minus header */
     overflow-y: auto;
     padding: 1.5rem 1rem 1rem 1.5rem;
     margin-right: 5px;
