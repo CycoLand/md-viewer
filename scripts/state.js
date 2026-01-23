@@ -5,6 +5,10 @@ export const state = {
     sidebarCollapsed: false,
     rawMode: false,
     renderCache: new Map(), // fileId -> sanitized HTML string
+    contentFilters: {
+        emojis: false,
+        hr: false
+    }
 };
 
 export const STORAGE_KEY = 'markdownViewerDocs';

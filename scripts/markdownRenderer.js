@@ -38,6 +38,16 @@ function createDocumentHeader(file, content) {
                 <span class="meta-item"><i class="fas fa-list-ol"></i> ${lineCount.toLocaleString()} lines</span>
                 <span class="meta-separator">•</span>
                 <span class="meta-item"><i class="fas fa-calendar"></i> ${formattedDate}</span>
+                <span class="meta-separator">•</span>
+                <span class="filter-label">Filter</span>
+                <div class="filter-button-group">
+                    <button class="filter-toggle" data-filter="emojis" title="Toggle Emoji Filter">
+                        Emojis
+                    </button>
+                    <button class="filter-toggle" data-filter="hr" title="Toggle Horizontal Rule Filter">
+                        HRs
+                    </button>
+                </div>
             </div>
         </div>
         <hr class="document-separator">
@@ -110,6 +120,13 @@ export function showRenderedContent(content) {
         const headings = Array.from(mdEl.querySelectorAll('h1, h2, h3, h4, h5, h6'));
         generateTOC(mdEl, tocEl);
     }
+
+    // Setup filter toggle buttons
+    setupFilterToggles(mdEl);
+    
+    // Apply current filters
+    applyContentFilters(mdEl);
+
 }
 
 /**
@@ -185,4 +202,104 @@ export function showRawContent(content) {
     if (tocEl) tocEl.style.display = 'none';
     
     rawEl.textContent = content;
+}
+
+/**
+ * Sets up event handlers for filter toggle buttons
+ * @param {HTMLElement} mdEl - The markdown content element
+ */
+function setupFilterToggles(mdEl) {
+    const filterButtons = mdEl.querySelectorAll('.filter-toggle');
+    filterButtons.forEach(btn => {
+        const filterType = btn.getAttribute('data-filter');
+        
+        // Set initial state
+        if (state.contentFilters[filterType]) {
+            btn.classList.add('active');
+        }
+        
+        // Add click handler
+        btn.addEventListener('click', () => {
+            state.contentFilters[filterType] = !state.contentFilters[filterType];
+            btn.classList.toggle('active');
+            
+            // Re-render from cache to restore original content, then apply filters
+            reapplyFilters();
+        });
+    });
+}
+
+/**
+ * Re-renders content from cache and applies filters
+ */
+function reapplyFilters() {
+    if (!state.currentFileId) return;
+    
+    const file = state.files.get(state.currentFileId);
+    if (!file) return;
+    
+    // Re-render from original content
+    showRenderedContent(file.content);
+}
+
+/**
+ * Applies content filters based on current state
+ * @param {HTMLElement} mdEl - The markdown content element
+ */
+function applyContentFilters(mdEl) {
+    // Filter emojis
+    if (state.contentFilters.emojis) {
+        const textNodes = getTextNodes(mdEl);
+        textNodes.forEach(node => {
+            // Remove emojis using regex (matches most common emoji ranges)
+            node.textContent = node.textContent.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+        });
+    }
+    
+    // Filter horizontal rules
+    if (state.contentFilters.hr) {
+        mdEl.querySelectorAll('hr:not(.document-separator)').forEach(hr => {
+            hr.style.display = 'none';
+        });
+    } else {
+        mdEl.querySelectorAll('hr:not(.document-separator)').forEach(hr => {
+            hr.style.display = '';
+        });
+    }
+    
+    // Regenerate TOC after filters to reflect any changes
+    const tocEl = document.getElementById('toc');
+    if (tocEl) {
+        const headings = Array.from(mdEl.querySelectorAll('h1, h2, h3, h4, h5, h6'));
+        generateTOC(mdEl, tocEl);
+    }
+}
+
+/**
+ * Gets all text nodes within an element
+ * @param {HTMLElement} element - The element to search
+ * @returns {Array<Node>} Array of text nodes
+ */
+function getTextNodes(element) {
+    const textNodes = [];
+    const walker = document.createTreeWalker(
+        element,
+        NodeFilter.SHOW_TEXT,
+        {
+            acceptNode: (node) => {
+                // Skip text nodes in script, style, or the document header
+                if (node.parentElement.closest('script, style, .document-header')) {
+                    return NodeFilter.FILTER_REJECT;
+                }
+                return NodeFilter.FILTER_ACCEPT;
+            }
+        }
+    );
+    
+    let node;
+    while (node = walker.nextNode()) {
+        textNodes.push(node);
+    }
+    
+    return textNodes;
 }
