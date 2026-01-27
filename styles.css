@@ -253,8 +253,7 @@ body {
     cursor: pointer;
     display: none;
     align-items: center;
-    justify-content: flex-end;
-    padding-right: 8px;
+    justify-content: center;
     font-size: 1.1rem;
     box-shadow: var(--shadow-lg);
     transition: var(--transition);
@@ -276,7 +275,12 @@ body {
 
 .sidebar-expand-bookmark:hover {
     background-color: var(--primary-hover);
-    transform: translateX(5px);
+    width: 62px;
+}
+
+.sidebar-expand-bookmark:active {
+    width: 70px;
+    transition: width 0.1s ease;
 }
 
 .sidebar.collapsed ~ .sidebar-expand-bookmark {
