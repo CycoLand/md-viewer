@@ -210,7 +210,7 @@ body {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background-color: var(--primary-color);
+    background-color: transparent;
     color: white;
     border: none;
     cursor: pointer;
@@ -218,19 +218,52 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 1.1rem;
-    box-shadow: var(--shadow-lg);
     transition: var(--transition);
     z-index: 10;
+    overflow: visible;
+}
+
+.sidebar-collapse-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    box-shadow: var(--shadow-lg);
+    transition: transform 0.1s ease, background-color 0.2s;
+    z-index: -1;
+}
+
+.sidebar-collapse-btn i {
+    position: relative;
+    z-index: 1;
+    transition: transform 0.1s ease;
+}
+
+.sidebar-collapse-btn:hover::before {
+    background-color: var(--primary-hover);
 }
 
 .sidebar-collapse-btn:hover {
-    background-color: var(--primary-hover);
     transform: scale(1.1);
 }
+
+.sidebar-collapse-btn:active::before {
+    transform: translateX(8px);
+}
+
+.sidebar-collapse-btn:active i {
+    transform: translateX(8px);
+}
+
 
 .sidebar.collapsed .sidebar-collapse-btn {
     display: none;
 }
+
 
 /* Bookmark expand button (visible when sidebar collapsed) */
 .sidebar-expand-bookmark {
