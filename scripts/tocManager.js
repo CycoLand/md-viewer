@@ -18,9 +18,15 @@ export function generateTOC(mdEl, tocEl) {
     }
     
     const headings = Array.from(mdEl.querySelectorAll(selector));
+    
+    // Check if there are any H1s in the rendered content
+    const hasH1 = headings.some(h => h.tagName === 'H1');
+    
     const items = headings.map(h => {
         const level = parseInt(h.tagName.substring(1));
-        return { id: h.id, text: h.textContent.replace(/^\s*▶\s*/, '').replace(/^\s*▼\s*/, ''), level };
+        // If no H1s exist, shift all levels down by 1 for indentation
+        const displayLevel = hasH1 ? level : level - 1;
+        return { id: h.id, text: h.textContent.replace(/^\s*▶\s*/, '').replace(/^\s*▼\s*/, ''), level: displayLevel };
     });
 
     if (items.length === 0) {
