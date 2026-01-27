@@ -122,10 +122,17 @@ export function showRenderedContent(content) {
     // Build collapsible sections
     buildCollapsibleSections(mdEl);
     
-    // Set initial heights for section bodies
+    // Measure and set initial heights for section bodies based on actual content
     mdEl.querySelectorAll('.md-section-body').forEach(b => {
-        b.style.maxHeight = b.scrollHeight + 'px';
+        // Temporarily set to auto to measure true height
+        b.style.maxHeight = 'none';
+        const height = b.scrollHeight;
+        // Store the measured height as a data attribute
+        b.dataset.measuredHeight = height;
+        // Set to the measured height for smooth animations
+        b.style.maxHeight = height + 'px';
     });
+
 
     // Handle hash-based navigation
     setupHashBasedCollapse(mdEl);
@@ -167,10 +174,17 @@ export function rebuildFromCache() {
     // Build collapsible sections
     buildCollapsibleSections(mdEl);
     
-    // Set initial heights for section bodies
+    // Measure and set initial heights for section bodies based on actual content
     mdEl.querySelectorAll('.md-section-body').forEach(b => {
-        b.style.maxHeight = b.scrollHeight + 'px';
+        // Temporarily set to auto to measure true height
+        b.style.maxHeight = 'none';
+        const height = b.scrollHeight;
+        // Store the measured height as a data attribute
+        b.dataset.measuredHeight = height;
+        // Set to the measured height for smooth animations
+        b.style.maxHeight = height + 'px';
     });
+
 
     // Generate table of contents
     if (tocEl) {

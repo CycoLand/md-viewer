@@ -92,24 +92,19 @@ function toggleSection(section, bodyEl, iconWrap) {
     const isCollapsed = section.classList.contains('collapsed');
     
     if (isCollapsed) {
-        // Expanding
+        // Expanding - use the measured height stored on initial load
         section.classList.remove('collapsed');
         if (iconWrap) iconWrap.classList.add('hidden');
         if (bodyEl) {
-            bodyEl.style.maxHeight = '0px';
-            requestAnimationFrame(() => {
-                bodyEl.style.maxHeight = bodyEl.scrollHeight + 'px';
-            });
+            const measuredHeight = bodyEl.dataset.measuredHeight || '5000';
+            bodyEl.style.maxHeight = measuredHeight + 'px';
         }
     } else {
         // Collapsing
         section.classList.add('collapsed');
         if (iconWrap) iconWrap.classList.remove('hidden');
         if (bodyEl) {
-            bodyEl.style.maxHeight = bodyEl.scrollHeight + 'px';
-            requestAnimationFrame(() => {
-                bodyEl.style.maxHeight = '0px';
-            });
+            bodyEl.style.maxHeight = '0px';
         }
     }
 }
@@ -121,7 +116,8 @@ function toggleSection(section, bodyEl, iconWrap) {
 export function remeasureSection(section) {
     const bodyEl = section.querySelector('.md-section-body');
     if (bodyEl && !section.classList.contains('collapsed')) {
-        bodyEl.style.maxHeight = bodyEl.scrollHeight + 'px';
+        const measuredHeight = bodyEl.dataset.measuredHeight || '5000';
+        bodyEl.style.maxHeight = measuredHeight + 'px';
     }
 }
 
@@ -140,6 +136,9 @@ export function setupHashBasedCollapse(mdEl) {
     let current = targetEl;
     const ancestorSections = [];
     while (current && current !== mdEl) {
+
+
+
         if (current.classList && current.classList.contains('md-section')) {
             ancestorSections.push(current);
         }
@@ -166,12 +165,8 @@ export function setupHashBasedCollapse(mdEl) {
             if (iconWrap) iconWrap.classList.add('hidden');
             const bodyEl = section.querySelector('.md-section-body');
             if (bodyEl) {
-                bodyEl.style.maxHeight = '0px';
-                requestAnimationFrame(() => {
-                    bodyEl.style.maxHeight = bodyEl.scrollHeight + 'px';
-                });
-            } else {
-                requestAnimationFrame(() => remeasureSection(section));
+                const measuredHeight = bodyEl.dataset.measuredHeight || '5000';
+                bodyEl.style.maxHeight = measuredHeight + 'px';
             }
         }
     });
