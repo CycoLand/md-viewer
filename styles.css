@@ -210,6 +210,79 @@ body {
     gap: 0.5rem;
 }
 
+/* Circular collapse button at bottom-right of sidebar */
+.sidebar-collapse-btn {
+    position: absolute;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition);
+    z-index: 10;
+}
+
+.sidebar-collapse-btn:hover {
+    background-color: var(--primary-hover);
+    transform: scale(1.1);
+}
+
+.sidebar.collapsed .sidebar-collapse-btn {
+    display: none;
+}
+
+/* Bookmark expand button (visible when sidebar collapsed) */
+.sidebar-expand-bookmark {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 0;
+    width: 48px;
+    height: 64px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    font-size: 1.1rem;
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition);
+    z-index: 250;
+    /* Create the bookmark shape: square on left + half circle on right */
+    border-radius: 0 32px 32px 0;
+    clip-path: polygon(
+        0 0,           /* top-left of square */
+        50% 0,         /* middle-top where circle starts */
+        50% 0,         /* circle top */
+        100% 50%,      /* circle right (bulge) */
+        50% 100%,      /* circle bottom */
+        50% 100%,      /* middle-bottom where circle ends */
+        0 100%         /* bottom-left of square */
+    );
+    /* Better approach: just use border-radius for half-circle effect */
+    clip-path: none;
+}
+
+.sidebar-expand-bookmark:hover {
+    background-color: var(--primary-hover);
+    transform: translateX(5px);
+}
+
+.sidebar.collapsed ~ .sidebar-expand-bookmark {
+    display: flex;
+}
+
 .sidebar-actions {
     display: flex;
     gap: 0.5rem;
@@ -1678,6 +1751,11 @@ body {
     
     .global-top-bar .btn-sidebar-toggle {
         display: inline-flex !important;
+    }
+    
+    /* Hide bookmark button on mobile, use top bar toggle instead */
+    .sidebar-expand-bookmark {
+        display: none !important;
     }
     
     .search-container {

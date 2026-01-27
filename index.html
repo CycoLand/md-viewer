@@ -151,11 +151,6 @@
         <aside id="sidebar" class="sidebar">
             <div class="sidebar-header">
                 <h1><i class="fas fa-markdown"></i> MD Viewer</h1>
-                <div class="sidebar-actions">
-                    <button id="sidebar-toggle" class="btn btn-icon" title="Toggle Sidebar">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                </div>
             </div>
 
             <div class="file-actions">
@@ -177,7 +172,17 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Collapse button at bottom right of sidebar -->
+            <button id="sidebar-toggle" class="sidebar-collapse-btn" title="Collapse Sidebar">
+                <i class="fas fa-chevron-left"></i>
+            </button>
         </aside>
+        
+        <!-- Bookmark expand button (visible when sidebar is collapsed) -->
+        <button id="sidebar-expand-bookmark" class="sidebar-expand-bookmark" title="Expand Sidebar">
+            <i class="fas fa-chevron-right"></i>
+        </button>
 
         <!-- Main Content -->
         <main class="main-content">
