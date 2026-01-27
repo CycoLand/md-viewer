@@ -68,6 +68,21 @@ export function showRenderedContent(content) {
     // Remove inline style to let CSS media query handle TOC visibility
     if (tocEl) tocEl.style.display = '';
     
+    // Strip H1 if it's on the first or second line (to avoid repetition with document header)
+    const lines = content.split('\n');
+    let contentToRender = content;
+    
+    // Check first line
+    if (lines[0] && /^#\s+.+/.test(lines[0])) {
+        // Remove the H1 line
+        contentToRender = lines.slice(1).join('\n');
+    } 
+    // Check second line (in case first line is empty)
+    else if (lines[1] && /^#\s+.+/.test(lines[1])) {
+        // Remove the H1 line but keep the first line
+        contentToRender = lines[0] + '\n' + lines.slice(2).join('\n');
+    }
+    
     // Configure marked with syntax highlighting
     marked.setOptions({
         highlight: function(code, lang) {
@@ -83,7 +98,7 @@ export function showRenderedContent(content) {
     });
 
     // Parse and sanitize markdown
-    const html = marked.parse(content);
+    const html = marked.parse(contentToRender);
     const sanitizedHtml = DOMPurify.sanitize(html);
     
     // Get current file info for metadata
