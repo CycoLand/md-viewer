@@ -43,7 +43,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
     document.getElementById('sidebar-expand-bookmark').addEventListener('click', toggleSidebar);
-    document.getElementById('sidebar-toggle-global').addEventListener('click', toggleSidebar);
     document.getElementById('theme-toggle').addEventListener('click', toggleThemePanel);
     document.getElementById('close-theme-panel').addEventListener('click', closeThemePanel);
 

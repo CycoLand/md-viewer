@@ -5,18 +5,15 @@ export function toggleSidebar() {
     state.sidebarCollapsed = !state.sidebarCollapsed;
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.querySelector('.main-content');
-    const globalToggleBtn = document.getElementById('sidebar-toggle-global');
     const globalTopBar = document.querySelector('.global-top-bar');
     
     if (state.sidebarCollapsed) {
         sidebar.classList.add('collapsed');
         mainContent.classList.add('sidebar-collapsed');
-        if (globalToggleBtn) globalToggleBtn.classList.add('show');
         if (globalTopBar) globalTopBar.style.left = '0';
     } else {
         sidebar.classList.remove('collapsed');
         mainContent.classList.remove('sidebar-collapsed');
-        if (globalToggleBtn) globalToggleBtn.classList.remove('show');
         if (globalTopBar) globalTopBar.style.left = 'var(--sidebar-width)';
     }
 }

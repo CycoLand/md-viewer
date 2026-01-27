@@ -105,6 +105,7 @@ body {
 .top-bar-left {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 1rem;
     flex: 1;
 }
@@ -144,15 +145,6 @@ body {
 
 .search-input:focus {
     outline: none;
-
-.global-top-bar .btn-sidebar-toggle {
-    display: none;
-}
-
-.global-top-bar .btn-sidebar-toggle.show {
-    display: inline-flex;
-}
-
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
@@ -1751,10 +1743,6 @@ body {
     
     .main-content {
         margin-left: 0;
-    }
-    
-    .global-top-bar .btn-sidebar-toggle {
-        display: inline-flex !important;
     }
     
     /* Hide bookmark button on mobile, use top bar toggle instead */
