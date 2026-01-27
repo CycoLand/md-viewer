@@ -127,6 +127,11 @@ export function showRenderedContent(content) {
     // Create document header with metadata
     const headerHtml = createDocumentHeader(file, content);
     
+    // Setup scroll animation for document header
+    setTimeout(() => {
+        setupDocumentHeaderScroll();
+    }, 100);
+    
     mdEl.innerHTML = headerHtml + sanitizedHtml;
     
     if (state.currentFileId) {
@@ -440,5 +445,49 @@ function setupDocumentMenu(mdEl) {
             });
         });
     });
+}
+
+/**
+ * Setup scroll animation for document header
+ * Starts full-width, then shrinks to content area on scroll
+ */
+function setupDocumentHeaderScroll() {
+    const header = document.querySelector('.document-header');
+    const contentArea = document.getElementById('content-area');
+    const contentBody = document.querySelector('.content-body');
+    
+    if (!header || !contentArea || !contentBody) return;
+    
+    // Add full-width class initially
+    header.classList.add('full-width');
+    contentBody.classList.add('header-full-width');
+    
+    // Remove any existing scroll listener
+    const scrollHandler = () => {
+        const scrollTop = contentArea.scrollTop;
+        const scrollThreshold = 100; // Start animation after 100px scroll
+        
+        if (scrollTop > scrollThreshold) {
+            header.classList.remove('full-width');
+            header.classList.add('scrolled');
+            contentBody.classList.remove('header-full-width');
+        } else {
+            header.classList.remove('scrolled');
+            header.classList.add('full-width');
+            contentBody.classList.add('header-full-width');
+        }
+    };
+    
+    // Remove old listener if exists
+    if (contentArea._headerScrollHandler) {
+        contentArea.removeEventListener('scroll', contentArea._headerScrollHandler);
+    }
+    
+    // Store reference and add new listener
+    contentArea._headerScrollHandler = scrollHandler;
+    contentArea.addEventListener('scroll', scrollHandler, { passive: true });
+    
+    // Initial check
+    scrollHandler();
 }
 

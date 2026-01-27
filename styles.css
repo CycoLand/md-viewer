@@ -615,6 +615,12 @@ body {
     width: 100%;
 }
 
+/* Add top padding when header is full-width to prevent content overlap */
+.content-body.header-full-width {
+    padding-top: 180px; /* Approximate header height + margin */
+    transition: padding-top 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* Inner content - max-width without centering (grid is centered) */
 .markdown-content > * {
     max-width: var(--content-max-width);
@@ -634,6 +640,44 @@ body {
     max-width: none !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     backdrop-filter: blur(10px);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Full-width state (initial) - spans entire viewport including TOC */
+.document-header.full-width {
+    position: fixed;
+    top: 0;
+    left: var(--sidebar-width);
+    right: 0;
+    width: calc(100vw - var(--sidebar-width));
+    margin: 0;
+    border-radius: 0;
+    border-left: none;
+    border-top: 4px solid var(--primary-color);
+    z-index: 200;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    padding: 2.5rem 2rem;
+}
+
+/* Adjust for collapsed sidebar */
+.sidebar.collapsed ~ .main-content .document-header.full-width {
+    left: 0;
+    width: 100vw;
+}
+
+/* Scrolled state - animate to content area width */
+.document-header.scrolled {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    border-radius: var(--border-radius-lg);
+    border-left: 4px solid var(--primary-color);
+    border-top: none;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 2rem 2.5rem;
 }
 
 .document-header-top {
