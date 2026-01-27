@@ -65,7 +65,7 @@ export function closePasteModal() {
 
 export function autoDetectTitle(content) {
     if (!content || !content.trim()) {
-        return 'Untitled.md';
+        return 'Untitled';
     }
     
     const lines = content.trim().split('\n');
@@ -73,13 +73,13 @@ export function autoDetectTitle(content) {
     // Look for first H1 heading
     const h1Match = content.match(/^#\s+(.+)$/m);
     if (h1Match && h1Match[1]) {
-        return sanitizeFilename(h1Match[1].trim()) + '.md';
+        return sanitizeFilename(h1Match[1].trim());
     }
     
     // Look for first H2 heading
     const h2Match = content.match(/^##\s+(.+)$/m);
     if (h2Match && h2Match[1]) {
-        return sanitizeFilename(h2Match[1].trim()) + '.md';
+        return sanitizeFilename(h2Match[1].trim());
     }
     
     // Use first non-empty line if reasonably short
@@ -91,7 +91,7 @@ export function autoDetectTitle(content) {
             .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1');
         
         if (cleaned.length > 0 && cleaned.length <= 60) {
-            return sanitizeFilename(cleaned) + '.md';
+            return sanitizeFilename(cleaned);
         }
     }
     
@@ -105,19 +105,17 @@ export function autoDetectTitle(content) {
         .join(' ');
     
     if (words) {
-        return sanitizeFilename(words) + '.md';
+        return sanitizeFilename(words);
     }
     
-    return 'Untitled.md';
+    return 'Untitled';
 }
 
 export function sanitizeFilename(name) {
     return name
         .trim()
         .replace(/[<>:"/\\|?*\x00-\x1F]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-|-$/g, '')
+        .replace(/\s+/g, ' ')
         .substring(0, 100)
         || 'untitled';
 }
@@ -178,7 +176,11 @@ export function handleFiles(fileList, FileManager) {
         if (file.type === 'text/markdown' || file.name.endsWith('.md') || file.name.endsWith('.markdown') || file.type === 'text/plain') {
             const reader = new FileReader();
             reader.onload = function(e) {
-                const fileId = FileManager.addFile(file.name, e.target.result);
+                // Strip .md and .markdown extensions from filename
+                const fileName = file.name
+                    .replace(/\.md$/i, '')
+                    .replace(/\.markdown$/i, '');
+                const fileId = FileManager.addFile(fileName, e.target.result);
                 FileManager.selectFile(fileId);
             };
             reader.readAsText(file);

@@ -84,17 +84,41 @@ export class FileManager {
 
         const fileArray = Array.from(state.files.values()).sort((a, b) => a.name.localeCompare(b.name));
         
-        fileList.innerHTML = fileArray.map(file => `
-            <div class="file-item ${state.currentFileId === file.id ? 'active' : ''}" data-file-id="${file.id}">
-                <i class="fas fa-file-markdown file-icon"></i>
-                <span class="file-name" title="${file.name}">${file.name}</span>
-                <div class="file-actions">
-                    <button class="btn btn-icon" onclick="window.fileManagerRemove('${file.id}')" title="Remove">
-                        <i class="fas fa-trash"></i>
-                    </button>
+        fileList.innerHTML = fileArray.map(file => {
+            // Calculate metadata
+            const content = file.content || '';
+            const words = content.trim().split(/\s+/).filter(w => w.length > 0);
+            const wordCount = words.length;
+            const lineCount = content.split('\n').length;
+            
+            // Format date
+            const date = new Date(file.modified);
+            const formattedDate = date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            
+            return `
+                <div class="file-item ${state.currentFileId === file.id ? 'active' : ''}" data-file-id="${file.id}">
+                    <div class="file-item-header">
+                        <span class="file-name" title="${file.name}">${file.name}</span>
+                        <div class="file-actions">
+                            <button class="btn btn-icon" onclick="window.fileManagerRemove('${file.id}')" title="Remove">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="file-meta">
+                        <span class="meta-item"><i class="fas fa-font"></i> ${wordCount.toLocaleString()}</span>
+                        <span class="meta-separator">•</span>
+                        <span class="meta-item"><i class="fas fa-list-ol"></i> ${lineCount.toLocaleString()}</span>
+                        <span class="meta-separator">•</span>
+                        <span class="meta-item"><i class="fas fa-calendar"></i> ${formattedDate}</span>
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
 
         fileList.querySelectorAll('.file-item').forEach(item => {
             item.addEventListener('click', (e) => {

@@ -544,7 +544,6 @@ class FileManager {
         
         fileList.innerHTML = fileArray.map(file => `
             <div class="file-item ${currentFileId === file.id ? 'active' : ''}" data-file-id="${file.id}">
-                <i class="fas fa-file-markdown file-icon"></i>
                 <span class="file-name" title="${file.name}">${file.name}</span>
                 <div class="file-actions">
                     <button class="btn btn-icon" onclick="FileManager.removeFile('${file.id}')" title="Remove">
