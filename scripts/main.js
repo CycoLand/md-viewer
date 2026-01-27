@@ -33,6 +33,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load files from localStorage
     FileManager.loadFiles();
 
+    // Search functionality
+    const globalSearchInput = document.getElementById('global-search');
+    if (globalSearchInput) {
+        globalSearchInput.addEventListener('input', function(e) {
+            const query = e.target.value;
+            FileManager.renderFileList(query);
+        });
+    }
+
     // File input handler
     document.getElementById('file-input').addEventListener('change', function(e) {
         handleFiles(e.target.files, FileManager);

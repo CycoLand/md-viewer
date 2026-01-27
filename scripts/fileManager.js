@@ -68,7 +68,7 @@ export class FileManager {
         }
     }
 
-    static renderFileList() {
+    static renderFileList(searchQuery = '') {
         const fileList = document.getElementById('file-list');
         
         if (state.files.size === 0) {
@@ -82,7 +82,31 @@ export class FileManager {
             return;
         }
 
-        const fileArray = Array.from(state.files.values()).sort((a, b) => a.name.localeCompare(b.name));
+        let fileArray = Array.from(state.files.values());
+        
+        // Filter by search query if provided
+        if (searchQuery && searchQuery.trim()) {
+            const query = searchQuery.trim().toLowerCase();
+            fileArray = fileArray.filter(file => {
+                const nameMatch = file.name.toLowerCase().includes(query);
+                const contentMatch = (file.content || '').toLowerCase().includes(query);
+                return nameMatch || contentMatch;
+            });
+            
+            // Show empty state if no matches
+            if (fileArray.length === 0) {
+                fileList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <p>No files found</p>
+                        <p class="subtitle">Try a different search term</p>
+                    </div>
+                `;
+                return;
+            }
+        }
+        
+        fileArray = fileArray.sort((a, b) => a.name.localeCompare(b.name));
         
         fileList.innerHTML = fileArray.map(file => {
             // Calculate metadata
