@@ -12,7 +12,11 @@ export class ThemeManager {
                 '--text-muted': '#94a3b8',
                 '--text-dim': '#64748b',
                 '--accent-color': '#06b6d4',
-                '--border-color': '#334155'
+                '--border-color': '#334155',
+                '--code-color': '#e5c07b',
+                '--success-color': '#10b981',
+                '--warning-color': '#f59e0b',
+                '--error-color': '#ef4444'
             },
             dark: {
                 '--primary-color': '#9ca3af',
@@ -24,7 +28,11 @@ export class ThemeManager {
                 '--text-muted': '#9ca3af',
                 '--text-dim': '#6b7280',
                 '--accent-color': '#6b7280',
-                '--border-color': '#374151'
+                '--border-color': '#374151',
+                '--code-color': '#e5c07b',
+                '--success-color': '#10b981',
+                '--warning-color': '#f59e0b',
+                '--error-color': '#ef4444'
             },
             light: {
                 '--primary-color': '#3b82f6',
@@ -36,7 +44,11 @@ export class ThemeManager {
                 '--text-muted': '#6b7280',
                 '--text-dim': '#9ca3af',
                 '--accent-color': '#2563eb',
-                '--border-color': '#d1d5db'
+                '--border-color': '#d1d5db',
+                '--code-color': '#c7254e',
+                '--success-color': '#10b981',
+                '--warning-color': '#f59e0b',
+                '--error-color': '#ef4444'
             }
         };
         
