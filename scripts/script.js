@@ -192,7 +192,7 @@ class ThemeManager {
                 '--text-dim': '#9ca3af',
                 '--accent-color': '#2563eb',
                 '--border-color': '#d1d5db',
-                '--code-color': '#c7254e',
+                '--code-color': '#415bac',
                 '--success-color': '#10b981',
                 '--warning-color': '#f59e0b',
                 '--error-color': '#ef4444'
@@ -268,9 +268,10 @@ class ThemeManager {
         if (!preset) return;
         
         this.applyTheme(preset);
-        this.saveTheme();
         
-        // Save the preset name
+        // Clear custom theme and only save preset name
+        // This ensures we use the full preset definition, not partial customizations
+        localStorage.removeItem('markdownViewerTheme');
         localStorage.setItem('markdownViewerThemePreset', presetName);
         
         this.updateThemeInputs();
@@ -279,7 +280,7 @@ class ThemeManager {
         document.querySelectorAll('.theme-preset-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.theme === presetName);
         });
-        
+                
         // Switch highlight.js theme based on the preset
         this.updateHighlightTheme(presetName);
         
