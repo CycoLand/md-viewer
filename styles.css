@@ -143,7 +143,9 @@ body {
 .sidebar .search-container {
     position: relative;
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
 }
 
 .sidebar .search-icon {
@@ -156,7 +158,8 @@ body {
 }
 
 .sidebar .search-input {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     padding: 0.5rem 1rem 0.5rem 2.5rem;
     background-color: var(--bg-color);
     border: 1px solid var(--border-color);
@@ -177,37 +180,10 @@ body {
     color: var(--text-dim);
 }
 
-/* Documents header with + button */
-.documents-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 1.5rem 0.75rem 1.5rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.documents-header h2 {
-    font-size: 0.75rem;
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin: 0;
-}
-
-.add-document-btn {
-    padding: 0.35rem;
-    font-size: 0.9rem;
-    color: var(--primary-color);
-    background-color: transparent;
-    border: 1px solid var(--border-color);
-    transition: var(--transition);
-}
-
-.add-document-btn:hover {
-    background-color: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
+.add-document-inline-btn {
+    flex-shrink: 0;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
 }
 
 /* Circular collapse button at bottom-right of sidebar */
@@ -323,7 +299,7 @@ body {
 .file-list-container {
     flex: 1;
     overflow-y: auto;
-    padding: 1rem 0;
+    padding-bottom: 1rem;
 }
 
 .file-list {
