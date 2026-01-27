@@ -1208,15 +1208,18 @@ function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.querySelector('.main-content');
     const headerToggleBtn = document.getElementById('sidebar-toggle-header');
+    const globalTopBar = document.querySelector('.global-top-bar');
     
     if (sidebarCollapsed) {
         sidebar.classList.add('collapsed');
         mainContent.classList.add('sidebar-collapsed');
         if (headerToggleBtn) headerToggleBtn.classList.add('show');
+        if (globalTopBar) globalTopBar.style.left = '0';
     } else {
         sidebar.classList.remove('collapsed');
         mainContent.classList.remove('sidebar-collapsed');
         if (headerToggleBtn) headerToggleBtn.classList.remove('show');
+        if (globalTopBar) globalTopBar.style.left = 'var(--sidebar-width)';
     }
 }
 

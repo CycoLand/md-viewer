@@ -89,7 +89,7 @@ body {
 .global-top-bar {
     position: fixed;
     top: 0;
-    left: 0;
+    left: var(--sidebar-width);
     right: 0;
     height: 50px;
     background-color: var(--surface-color);
@@ -99,6 +99,7 @@ body {
     align-items: center;
     padding: 0 1.5rem;
     z-index: 200;
+    transition: var(--transition-slow);
 }
 
 .top-bar-left {
@@ -172,19 +173,24 @@ body {
 .sidebar {
     position: fixed;
     left: 0;
-    top: 50px;
-    height: calc(100vh - 50px);
+    top: 0;
+    height: 100vh;
     width: var(--sidebar-width);
     background-color: var(--surface-color);
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     transition: var(--transition-slow);
-    z-index: 100;
+    z-index: 300;
 }
 
 .sidebar.collapsed {
     transform: translateX(-100%);
+}
+
+/* Adjust main content when sidebar is collapsed */
+.main-content.sidebar-collapsed {
+    margin-left: 0;
 }
 
 .sidebar-header {
@@ -1662,6 +1668,10 @@ body {
 
 /* Responsive Design */
 @media (max-width: 800px) {
+    .global-top-bar {
+        left: 0;
+    }
+    
     .main-content {
         margin-left: 0;
     }
