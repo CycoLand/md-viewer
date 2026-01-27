@@ -31,7 +31,27 @@ function createDocumentHeader(file, content) {
     
     return `
         <div class="document-header">
-            <h1 class="document-title">${file.name}</h1>
+            <div class="document-header-top">
+                <div class="document-title">${file.name}</div>
+                <button class="btn btn-icon document-menu-btn" id="document-menu-btn" title="Document Options">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <div class="document-menu-dropdown" id="document-menu-dropdown">
+                    <button class="menu-item" data-action="view-rendered">
+                        <i class="fas fa-eye"></i> View Rendered
+                    </button>
+                    <button class="menu-item" data-action="view-raw">
+                        <i class="fas fa-code"></i> View Raw
+                    </button>
+                    <button class="menu-item" data-action="view-pages">
+                        <i class="fas fa-book-open"></i> View Pages
+                    </button>
+                    <div class="menu-separator"></div>
+                    <button class="menu-item" data-action="export-html">
+                        <i class="fas fa-download"></i> Export HTML
+                    </button>
+                </div>
+            </div>
             <div class="document-meta">
                 <span class="meta-item"><i class="fas fa-font"></i> ${wordCount.toLocaleString()} words</span>
                 <span class="meta-separator">•</span>
@@ -148,6 +168,10 @@ export function showRenderedContent(content) {
     
     // Apply current filters
     applyContentFilters(mdEl);
+
+    // Setup document menu
+    setupDocumentMenu(mdEl);
+
 
 }
 
@@ -332,3 +356,89 @@ function getTextNodes(element) {
     
     return textNodes;
 }
+
+
+/**
+ * Sets up the document menu for view mode switching and actions
+ * @param {HTMLElement} mdEl - The markdown content element
+ */
+function setupDocumentMenu(mdEl) {
+    const menuBtn = mdEl.querySelector('#document-menu-btn');
+    const menuDropdown = mdEl.querySelector('#document-menu-dropdown');
+    const menuItems = mdEl.querySelectorAll('.menu-item');
+    
+    if (!menuBtn || !menuDropdown) return;
+    
+    // Toggle menu on button click
+    menuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menuDropdown.classList.toggle('show');
+    });
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+            menuDropdown.classList.remove('show');
+        }
+    });
+    
+    // Handle menu item clicks
+    menuItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const action = item.getAttribute('data-action');
+            menuDropdown.classList.remove('show');
+            
+            // Import necessary modules
+            import('./fileManager.js').then(({ FileManager }) => {
+                import('./paginationManager.js').then((paginationModule) => {
+                    // Get pagination manager instance from main.js scope
+                    const paginationActive = document.querySelector('.page-navigation')?.classList.contains('active') || false;
+                    
+                    switch (action) {
+                        case 'view-rendered':
+                            // Turn off raw mode and pagination
+                            if (state.rawMode) {
+                                state.rawMode = false;
+                                const file = FileManager.getFile(state.currentFileId);
+                                if (file) FileManager.showFile(file);
+                            }
+                            if (paginationActive) {
+                                // Trigger pagination toggle
+                                document.dispatchEvent(new CustomEvent('togglePagination'));
+                            }
+                            break;
+                            
+                        case 'view-raw':
+                            // Turn on raw mode, turn off pagination
+                            if (paginationActive) {
+                                document.dispatchEvent(new CustomEvent('togglePagination'));
+                            }
+                            if (!state.rawMode) {
+                                state.rawMode = true;
+                                const file = FileManager.getFile(state.currentFileId);
+                                if (file) FileManager.showFile(file);
+                            }
+                            break;
+                            
+                        case 'view-pages':
+                            // Turn off raw mode, turn on pagination
+                            if (state.rawMode) {
+                                state.rawMode = false;
+                                const file = FileManager.getFile(state.currentFileId);
+                                if (file) FileManager.showFile(file);
+                            }
+                            if (!paginationActive) {
+                                document.dispatchEvent(new CustomEvent('togglePagination'));
+                            }
+                            break;
+                            
+                        case 'export-html':
+                            FileManager.exportCurrentFileAsHtml();
+                            break;
+                    }
+                });
+            });
+        });
+    });
+}
+

@@ -42,12 +42,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('welcome-paste-btn').addEventListener('click', showPasteModal);
 
     document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
-    document.getElementById('sidebar-toggle-header').addEventListener('click', toggleSidebar);
+    document.getElementById('sidebar-toggle-global').addEventListener('click', toggleSidebar);
     document.getElementById('theme-toggle').addEventListener('click', toggleThemePanel);
     document.getElementById('close-theme-panel').addEventListener('click', closeThemePanel);
-
-    document.getElementById('export-html-btn').addEventListener('click', () => FileManager.exportCurrentFileAsHtml());
-    document.getElementById('toggle-raw-btn').addEventListener('click', () => toggleRawMode(FileManager));
 
     document.getElementById('overlay').addEventListener('click', closeThemePanel);
 
@@ -73,16 +70,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Pagination controls
-    const togglePaginationBtn = document.getElementById('toggle-pagination-btn');
+    // Pagination keyboard and page navigation controls
     const prevPageBtn = document.getElementById('prev-page-btn');
     const nextPageBtn = document.getElementById('next-page-btn');
 
-    if (togglePaginationBtn) {
-        togglePaginationBtn.addEventListener('click', () => {
-            paginationManager.toggle();
-        });
-    }
+
+    // Listen for custom pagination toggle event from document menu
+    document.addEventListener('togglePagination', () => {
+        paginationManager.toggle();
+    });
 
     if (prevPageBtn) {
         prevPageBtn.addEventListener('click', () => {

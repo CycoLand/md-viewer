@@ -1,4 +1,71 @@
 // Table of Contents management
+// Table of Contents management
+
+// Store reference to handlers so they can be attached after TOC regeneration
+let documentControlHandlers = null;
+
+/**
+ * Set the document control button handlers
+ * @param {Object} handlers - Object with handler functions
+ */
+export function setDocumentControlHandlers(handlers) {
+    documentControlHandlers = handlers;
+}
+
+/**
+ * Attach document control button handlers
+ */
+function attachDocumentControlHandlers() {
+    if (!documentControlHandlers) return;
+    
+    const viewRenderedBtn = document.getElementById('view-rendered-btn');
+    const viewRawBtn = document.getElementById('view-raw-btn');
+    const viewPagesBtn = document.getElementById('view-pages-btn');
+    const exportHtmlBtn = document.getElementById('export-html-btn');
+    
+    // View mode buttons
+    if (viewRenderedBtn && documentControlHandlers.onViewModeChange) {
+        viewRenderedBtn.addEventListener('click', () => {
+            setActiveViewButton('rendered');
+            documentControlHandlers.onViewModeChange('rendered');
+        });
+    }
+    
+    if (viewRawBtn && documentControlHandlers.onViewModeChange) {
+        viewRawBtn.addEventListener('click', () => {
+            setActiveViewButton('raw');
+            documentControlHandlers.onViewModeChange('raw');
+        });
+    }
+    
+    if (viewPagesBtn && documentControlHandlers.onViewModeChange) {
+        viewPagesBtn.addEventListener('click', () => {
+            setActiveViewButton('pages');
+            documentControlHandlers.onViewModeChange('pages');
+        });
+    }
+    
+    if (exportHtmlBtn && documentControlHandlers.onExportHtml) {
+        exportHtmlBtn.addEventListener('click', documentControlHandlers.onExportHtml);
+    }
+}
+
+/**
+ * Set the active view button
+ * @param {string} view - The view mode: 'rendered', 'raw', or 'pages'
+ */
+function setActiveViewButton(view) {
+    document.querySelectorAll('.view-mode-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    const activeBtn = document.getElementById(`view-${view}-btn`);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+    }
+}
+
+
 
 /**
  * Generates and displays the table of contents

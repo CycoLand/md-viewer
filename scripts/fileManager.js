@@ -142,7 +142,6 @@ export class FileManager {
     static showFile(file) {
         document.getElementById('welcome-screen').style.display = 'none';
         document.getElementById('content-area').style.display = 'flex';
-        document.getElementById('current-file-name').textContent = file.name;
 
         if (state.rawMode) {
             showRawContent(file.content);
