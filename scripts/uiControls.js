@@ -5,16 +5,13 @@ export function toggleSidebar() {
     state.sidebarCollapsed = !state.sidebarCollapsed;
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.querySelector('.main-content');
-    const globalTopBar = document.querySelector('.global-top-bar');
     
     if (state.sidebarCollapsed) {
         sidebar.classList.add('collapsed');
         mainContent.classList.add('sidebar-collapsed');
-        if (globalTopBar) globalTopBar.style.left = '0';
     } else {
         sidebar.classList.remove('collapsed');
         mainContent.classList.remove('sidebar-collapsed');
-        if (globalTopBar) globalTopBar.style.left = 'var(--sidebar-width)';
     }
 }
 
@@ -186,4 +183,106 @@ export function handleFiles(fileList, FileManager) {
             reader.readAsText(file);
         }
     });
+}
+
+
+
+// Add Document Modal functions
+let selectedFile = null;
+
+export function showAddDocumentModal() {
+    const modal = document.getElementById('add-document-modal');
+    modal.classList.add('show');
+    
+    // Reset form
+    const pasteInput = document.getElementById('paste-markdown-input');
+    const titleInput = document.getElementById('document-title-input');
+    pasteInput.value = '';
+    titleInput.value = '';
+    titleInput.dataset.userEdited = '';
+    clearSelectedFile();
+    
+    // Focus the paste textarea
+    setTimeout(() => {
+        pasteInput.focus();
+    }, 100);
+}
+
+export function closeAddDocumentModal() {
+    const modal = document.getElementById('add-document-modal');
+    modal.classList.remove('show');
+    selectedFile = null;
+}
+
+export function handleModalFileSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    selectedFile = file;
+    
+    // Show file info
+    document.getElementById('file-drop-zone').style.display = 'none';
+    document.getElementById('selected-file-info').style.display = 'flex';
+    document.getElementById('selected-file-name').textContent = file.name;
+    
+    // Read file and auto-generate title
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const content = event.target.result;
+        const titleInput = document.getElementById('document-title-input');
+        
+        if (!titleInput.dataset.userEdited) {
+            // Strip .md and .markdown extensions from filename
+            const fileName = file.name
+                .replace(/\.md$/i, '')
+                .replace(/\.markdown$/i, '');
+            titleInput.value = fileName;
+        }
+        
+        // Store content for later use
+        selectedFile.content = content;
+    };
+    reader.readAsText(file);
+}
+
+export function clearSelectedFile() {
+    selectedFile = null;
+    document.getElementById('file-drop-zone').style.display = 'flex';
+    document.getElementById('selected-file-info').style.display = 'none';
+    document.getElementById('file-input').value = '';
+}
+
+export function createDocumentFromModal(FileManager) {
+    const pastedContent = document.getElementById('paste-markdown-input').value.trim();
+    const titleInput = document.getElementById('document-title-input');
+    let title = titleInput.value.trim();
+    let content = '';
+    
+    // Determine content source
+    if (pastedContent) {
+        content = pastedContent;
+        if (!title) {
+            title = autoDetectTitle(content);
+        }
+    } else if (selectedFile && selectedFile.content) {
+        content = selectedFile.content;
+        if (!title) {
+            title = selectedFile.name
+                .replace(/\.md$/i, '')
+                .replace(/\.markdown$/i, '');
+        }
+    } else {
+        alert('Please paste markdown content or select a file');
+        return;
+    }
+    
+    if (!content) {
+        alert('No content provided');
+        return;
+    }
+    
+    // Create the document
+    const fileId = FileManager.addFile(title, content);
+    FileManager.selectFile(fileId);
+    closeAddDocumentModal();
 }

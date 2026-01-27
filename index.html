@@ -103,23 +103,7 @@
     </script>
 </head>
 <body>
-    <!-- Global Top Bar -->
-    <div class="global-top-bar">
-        <div class="top-bar-left">
-            <div class="search-container">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" id="global-search" class="search-input" placeholder="Search">
-            </div>
-        </div>
-        <div class="top-bar-right">
-            <button id="theme-toggle" class="btn btn-icon" title="Customize Theme">
-                <i class="fas fa-palette"></i>
-            </button>
-            <button id="settings-toggle" class="btn btn-icon" title="Settings">
-                <i class="fas fa-cog"></i>
-            </button>
-        </div>
-    </div>
+
 
     <!-- Theme Customizer Panel -->
     <div id="theme-panel" class="theme-panel">
@@ -240,16 +224,21 @@
         <aside id="sidebar" class="sidebar">
             <div class="sidebar-header">
                 <h1><i class="fas fa-markdown"></i> MD Viewer</h1>
+                <button id="theme-toggle" class="btn btn-icon" title="Customize Theme">
+                    <i class="fas fa-palette"></i>
+                </button>
             </div>
 
-            <div class="file-actions">
-                <button id="add-files-btn" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Add Files
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="global-search" class="search-input" placeholder="Search documents...">
+            </div>
+
+            <div class="documents-header">
+                <h2>Documents</h2>
+                <button id="add-document-btn" class="btn btn-icon add-document-btn" title="Add Document">
+                    <i class="fas fa-plus"></i>
                 </button>
-                <button id="paste-content-btn" class="btn btn-secondary">
-                    <i class="fas fa-paste"></i> Paste MD
-                </button>
-                <input type="file" id="file-input" multiple accept=".md,.markdown,.txt" style="display: none;">
             </div>
 
             <div class="file-list-container">
@@ -326,6 +315,53 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Add Document Modal -->
+    <div id="add-document-modal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3><i class="fas fa-plus-circle"></i> Add Document</h3>
+                <button class="close-modal" id="close-add-document-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="add-document-options">
+                    <div class="add-option paste-option">
+                        <h4><i class="fas fa-paste"></i> Paste Markdown</h4>
+                        <textarea id="paste-markdown-input" placeholder="Paste your markdown content here..." rows="12"></textarea>
+                    </div>
+                    <div class="add-option-divider">
+                        <span>OR</span>
+                    </div>
+                    <div class="add-option file-option">
+                        <h4><i class="fas fa-folder-open"></i> Select File</h4>
+                        <div class="file-drop-zone" id="file-drop-zone">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Drop file here or</p>
+                            <button class="btn btn-secondary" id="browse-file-btn">Browse Files</button>
+                            <input type="file" id="file-input" accept=".md,.markdown,.txt" style="display: none;">
+                        </div>
+                        <div id="selected-file-info" class="selected-file-info" style="display: none;">
+                            <i class="fas fa-file-alt"></i>
+                            <span id="selected-file-name"></span>
+                            <button class="btn btn-icon" id="clear-file-btn" title="Clear">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="document-title-input">Document Title</label>
+                    <input type="text" id="document-title-input" placeholder="Auto-generated from content">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-add-document-btn">Cancel</button>
+                <button class="btn btn-primary" id="create-document-btn">Create</button>
+            </div>
+        </div>
     </div>
 
     <!-- Paste Modal -->

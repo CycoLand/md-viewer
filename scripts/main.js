@@ -13,7 +13,12 @@ import {
     autoDetectTitle,
     addPastedContent,
     initializeDragAndDrop,
-    handleFiles
+    handleFiles,
+    showAddDocumentModal,
+    closeAddDocumentModal,
+    handleModalFileSelect,
+    clearSelectedFile,
+    createDocumentFromModal
 } from './uiControls.js';
 
 // Initialize when DOM is ready
@@ -34,11 +39,65 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Button handlers
-    document.getElementById('add-files-btn').addEventListener('click', () => {
+    const addDocBtn = document.getElementById('add-document-btn');
+    
+    if (addDocBtn) {
+        addDocBtn.addEventListener('click', () => {
+            showAddDocumentModal();
+        });
+    }
+
+    // Add Document Modal handlers
+    document.getElementById('close-add-document-modal')?.addEventListener('click', closeAddDocumentModal);
+    document.getElementById('cancel-add-document-btn')?.addEventListener('click', closeAddDocumentModal);
+    document.getElementById('create-document-btn')?.addEventListener('click', () => createDocumentFromModal(FileManager));
+    
+    document.getElementById('browse-file-btn')?.addEventListener('click', () => {
         document.getElementById('file-input').click();
     });
+    
+    document.getElementById('clear-file-btn')?.addEventListener('click', clearSelectedFile);
+    
+    // File input change
+    document.getElementById('file-input')?.addEventListener('change', handleModalFileSelect);
+    
+    // Auto-generate title from pasted content
+    document.getElementById('paste-markdown-input')?.addEventListener('input', function(e) {
+        const titleInput = document.getElementById('document-title-input');
+        const createBtn = document.getElementById('create-document-btn');
+        const content = e.target.value;
+        
+        if (content.trim() && !titleInput.dataset.userEdited) {
+            const detectedTitle = autoDetectTitle(content);
+            titleInput.value = detectedTitle;
+            
+            // Focus the create button after title is generated
+            setTimeout(() => {
+                createBtn.focus();
+            }, 50);
+        }
+    });
+    
+    // Track if user manually edited the title
+    document.getElementById('document-title-input')?.addEventListener('input', function() {
+        this.dataset.userEdited = 'true';
+    });
+    
 
-    document.getElementById('paste-content-btn').addEventListener('click', showPasteModal);
+    // Handle Enter key on create button
+    document.getElementById('create-document-btn')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            createDocumentFromModal(FileManager);
+        }
+    });
+
+    // Close modal on clicking backdrop
+    document.getElementById('add-document-modal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeAddDocumentModal();
+        }
+    });
     document.getElementById('welcome-paste-btn').addEventListener('click', showPasteModal);
 
     document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
@@ -135,6 +194,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             if (document.getElementById('paste-modal').classList.contains('show')) {
                 closePasteModal();
+            }
+            if (document.getElementById('add-document-modal').classList.contains('show')) {
+                closeAddDocumentModal();
             }
         }
 
