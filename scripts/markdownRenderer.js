@@ -16,7 +16,7 @@ function createDocumentHeader(file, content) {
     
     // Calculate word count (split by whitespace and filter non-empty)
     const words = content.trim().split(/\s+/).filter(w => w.length > 0);
-    const wordCount = words.length;
+    const readTime = Math.ceil(words.length / 238);
     
     // Calculate line count
     const lineCount = content.split('\n').length;
@@ -53,7 +53,7 @@ function createDocumentHeader(file, content) {
                 </div>
             </div>
             <div class="document-meta">
-                <span class="meta-item"><i class="fas fa-font"></i> ${wordCount.toLocaleString()} words</span>
+                <span class="meta-item"><i class="fas fa-clock"></i> ${readTime} min read</span>
                 <span class="meta-separator">•</span>
                 <span class="meta-item"><i class="fas fa-list-ol"></i> ${lineCount.toLocaleString()} lines</span>
                 <span class="meta-separator">•</span>
@@ -178,6 +178,9 @@ export function showRenderedContent(content) {
     // Setup task list checkboxes (for interactive checking)
     setupTaskListCheckboxes(mdEl);
 
+    // Mark external links with an indicator
+    markExternalLinks(mdEl);
+
 }
 
 /**
@@ -223,6 +226,9 @@ export function rebuildFromCache() {
 
     // Setup task list checkboxes
     setupTaskListCheckboxes(mdEl);
+    
+    // Mark external links with an indicator
+    markExternalLinks(mdEl);
 }
 
 /**
@@ -533,4 +539,43 @@ function setupTaskListCheckboxes(mdEl) {
     
     console.log(`Setup ${checkboxCount} interactive checkboxes with clickable labels`);
 }
+
+/**
+ * Marks external links with a visual indicator
+ * @param {HTMLElement} mdEl - The markdown content element
+ */
+function markExternalLinks(mdEl) {
+    // Find all links in the markdown content
+    const links = mdEl.querySelectorAll('a[href]');
+    
+    let externalLinkCount = 0;
+    
+    links.forEach(link => {
+        const href = link.getAttribute('href');
+        
+        // Skip if no href
+        if (!href) return;
+        
+        // Determine if link is external
+        // External links are:
+        // - Links starting with http:// or https://
+        // - Not anchor links (starting with #)
+        // - Not relative links (starting with ./ or ../)
+        const isExternal = /^https?:\/\//i.test(href);
+        
+        // Skip anchor links and relative links
+        const isAnchor = href.startsWith('#');
+        const isRelative = href.startsWith('./') || href.startsWith('../') || href.startsWith('/');
+        
+        if (isExternal && !isAnchor && !isRelative) {
+            link.classList.add('external-link');
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noopener noreferrer');
+            externalLinkCount++;
+        }
+    });
+    
+    console.log(`Marked ${externalLinkCount} external links`);
+}
+
 

@@ -112,7 +112,7 @@ export class FileManager {
             // Calculate metadata
             const content = file.content || '';
             const words = content.trim().split(/\s+/).filter(w => w.length > 0);
-            const wordCount = words.length;
+            const readTime = Math.ceil(words.length / 238);
             const lineCount = content.split('\n').length;
             
             // Format date
@@ -134,7 +134,7 @@ export class FileManager {
                         </div>
                     </div>
                     <div class="file-meta">
-                        <span class="meta-item"><i class="fas fa-font"></i> ${wordCount.toLocaleString()}</span>
+                        <span class="meta-item"><i class="fas fa-clock"></i> ${readTime} min</span>
                         <span class="meta-separator">•</span>
                         <span class="meta-item"><i class="fas fa-list-ol"></i> ${lineCount.toLocaleString()}</span>
                         <span class="meta-separator">•</span>
