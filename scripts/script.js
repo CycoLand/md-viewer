@@ -193,6 +193,9 @@ class ThemeManager {
                 '--accent-color': '#2563eb',
                 '--border-color': '#d1d5db',
                 '--code-color': '#415bac',
+                '--inline-code-color': '#dc2626',
+                '--inline-code-bg': '#f3f4f6',
+                '--box-border': '#d1d5db',
                 '--success-color': '#10b981',
                 '--warning-color': '#f59e0b',
                 '--error-color': '#ef4444'
@@ -207,17 +210,9 @@ class ThemeManager {
         const savedTheme = localStorage.getItem('markdownViewerTheme');
         const savedPreset = localStorage.getItem('markdownViewerThemePreset');
         
-        if (savedTheme) {
-            try {
-                const theme = JSON.parse(savedTheme);
-                this.applyTheme(theme);
-            } catch (error) {
-                console.error('Error loading saved theme:', error);
-            }
-        }
-        
-        // Load the highlight.js theme based on saved preset
-        if (savedPreset) {
+        // If there's a saved preset, apply it first (provides base theme)
+        if (savedPreset && this.presets[savedPreset]) {
+            this.applyTheme(this.presets[savedPreset]);
             this.updateHighlightTheme(savedPreset);
             // Update active state on preset buttons after DOM is ready
             setTimeout(() => {
@@ -225,6 +220,16 @@ class ThemeManager {
                     btn.classList.toggle('active', btn.dataset.theme === savedPreset);
                 });
             }, 0);
+        }
+        
+        // If there's a custom theme, apply it on top (overrides preset)
+        if (savedTheme) {
+            try {
+                const theme = JSON.parse(savedTheme);
+                this.applyTheme(theme);
+            } catch (error) {
+                console.error('Error loading saved theme:', error);
+            }
         }
     }
 

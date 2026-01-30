@@ -52,7 +52,7 @@
     
     /* Page Transition Animation */
     /* Adjust these to fine-tune the page transition animation */
-    --page-transition-duration: 0.1s;                    /* How long the fade takes */
+    --page-transition-duration: 0s;                    /* How long the fade takes */
     --page-transition-easing: ease-in-out;               /* Animation curve (try: ease, ease-in, ease-out, linear) */
     
     /* Collapsible Section Timings */
