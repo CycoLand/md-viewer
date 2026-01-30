@@ -3,6 +3,7 @@ import { state } from './state.js';
 import { ThemeManager } from './themeManager.js';
 import { FileManager } from './fileManager.js';
 import { PaginationManager } from './paginationManager.js';
+import './loadingAnimations.js'; // Initialize loading animations
 import {
     toggleSidebar,
     toggleThemePanel,

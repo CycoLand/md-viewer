@@ -1,6 +1,7 @@
 // File management
 import { state, STORAGE_KEY } from './state.js';
 import { showRenderedContent, showRawContent } from './markdownRenderer.js';
+import { showLoading, hideLoading } from './loadingAnimations.js';
 
 export class FileManager {
     static generateId() {
@@ -167,11 +168,28 @@ export class FileManager {
         document.getElementById('welcome-screen').style.display = 'none';
         document.getElementById('content-area').style.display = 'flex';
 
-        if (state.rawMode) {
-            showRawContent(file.content);
-        } else {
-            showRenderedContent(file.content);
-        }
+        const contentArea = document.getElementById('content-area');
+        
+        // Show wipe loading animation with current content area (includes layout, TOC, etc.)
+        showLoading(contentArea);
+
+        // Load new content immediately (it will be behind the old content layer)
+        setTimeout(() => {
+            try {
+                if (state.rawMode) {
+                    showRawContent(file.content);
+                } else {
+                    showRenderedContent(file.content);
+                }
+            } catch (error) {
+                console.error('Error rendering content:', error);
+            }
+            
+            // Hide loading animation after wipe completes
+            setTimeout(() => {
+                hideLoading();
+            }, 650); // Just after wipe animation completes
+        }, 50); // Small delay to ensure old content is cloned first
     }
 
     static showWelcomeScreen() {
