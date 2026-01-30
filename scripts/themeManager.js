@@ -15,6 +15,8 @@ export class ThemeManager {
                 '--border-color': '#334155',
                 '--code-color': '#e5c07b',
                 '--inline-code-color': '#e5c07b',
+                '--inline-code-bg': 'rgba(99, 102, 241, 0.15)',
+                '--box-border': 'rgba(99, 102, 241, 0.3)',
                 '--success-color': '#10b981',
                 '--warning-color': '#f59e0b',
                 '--error-color': '#ef4444'
@@ -32,6 +34,8 @@ export class ThemeManager {
                 '--border-color': '#374151',
                 '--code-color': '#e5c07b',
                 '--inline-code-color': '#e5c07b',
+                '--inline-code-bg': 'rgba(156, 163, 175, 0.15)',
+                '--box-border': 'rgba(156, 163, 175, 0.3)',
                 '--success-color': '#10b981',
                 '--warning-color': '#f59e0b',
                 '--error-color': '#ef4444'
