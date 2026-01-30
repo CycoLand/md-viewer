@@ -1,0 +1,13 @@
+/* ========================================
+   ULTIMATE MARKDOWN VIEWER - MAIN STYLESHEET
+   Organized modular CSS architecture
+   ======================================== */
+
+/* Base: Variables, reset, scrollbar, selection */
+@import url('styles/base.css');
+
+/* Layout: App container, sidebar, main content */
+@import url('styles/layout.css');
+
+/* All other styles (to be further modularized) */
+@import url('styles-legacy.css');
