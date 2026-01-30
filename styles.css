@@ -50,6 +50,11 @@
     --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     
+    /* Page Transition Animation */
+    /* Adjust these to fine-tune the page transition animation */
+    --page-transition-duration: 0.1s;                    /* How long the fade takes */
+    --page-transition-easing: ease-in-out;               /* Animation curve (try: ease, ease-in, ease-out, linear) */
+    
     /* Collapsible Section Timings */
     --collapse-duration: 0.3s;
     --collapse-delay: 0.2s;
@@ -615,6 +620,11 @@ body {
     flex-direction: column;
     overflow-y: auto; /* Scrollbar starts at top of viewport */
     scroll-padding-top: 1rem; /* Small padding when scrolling to anchors */
+    transition: opacity var(--page-transition-duration) var(--page-transition-easing);
+}
+
+.content-area.fading {
+    opacity: 0;
 }
 
 .content-body {
@@ -2756,72 +2766,3 @@ body {
         padding: 0 !important;
     }
 }
-
-/* ==================== Loading Animation - Wipe Effect ==================== */
-
-/* Loading overlay - only covers main content area */
-.loading-overlay {
-    position: fixed;
-    top: 0;
-    left: var(--sidebar-width); /* Start at right edge of sidebar */
-    right: 0;
-    bottom: 0;
-    pointer-events: none;
-    z-index: 9999;
-    overflow: hidden;
-}
-
-.loading-overlay.active {
-    pointer-events: all;
-}
-
-/* Old content layer that gets clipped away */
-.old-content-layer {
-    /* Styles are set via JavaScript for proper cloning */
-}
-
-/* Clip animation - progressively hides content from left to right */
-@keyframes clip-wipe {
-    0% {
-        clip-path: inset(0 0 0 0);
-    }
-    100% {
-        clip-path: inset(0 0 0 100%);
-    }
-}
-
-/* Wipe bar that sweeps from left to right */
-.wipe-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 4px; /* Thin bar */
-    background: var(--primary-color);
-    box-shadow: 0 0 20px 2px var(--primary-color);
-    transform: translateX(-4px);
-    animation: wipe 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    z-index: 3; /* On top of old content */
-}
-
-@keyframes wipe {
-    0% {
-        transform: translateX(-4px);
-    }
-    100% {
-        transform: translateX(100vw);
-    }
-}
-
-/* Responsive - adjust for collapsed sidebar */
-.main-content.sidebar-collapsed ~ .loading-overlay,
-.sidebar.collapsed ~ .loading-overlay {
-    left: 0; /* Full width when sidebar collapsed */
-}
-
-@media (max-width: 768px) {
-    .loading-overlay {
-        left: 0; /* Sidebar is hidden on mobile */
-    }
-}
-
