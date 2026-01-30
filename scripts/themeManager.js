@@ -14,6 +14,7 @@ export class ThemeManager {
                 '--accent-color': '#06b6d4',
                 '--border-color': '#334155',
                 '--code-color': '#e5c07b',
+                '--inline-code-color': '#e5c07b',
                 '--success-color': '#10b981',
                 '--warning-color': '#f59e0b',
                 '--error-color': '#ef4444'
@@ -30,6 +31,7 @@ export class ThemeManager {
                 '--accent-color': '#6b7280',
                 '--border-color': '#374151',
                 '--code-color': '#e5c07b',
+                '--inline-code-color': '#e5c07b',
                 '--success-color': '#10b981',
                 '--warning-color': '#f59e0b',
                 '--error-color': '#ef4444'
@@ -46,6 +48,7 @@ export class ThemeManager {
                 '--accent-color': '#2563eb',
                 '--border-color': '#d1d5db',
                 '--code-color': '#415bac',
+                '--inline-code-color': '#415bac',
                 '--success-color': '#10b981',
                 '--warning-color': '#f59e0b',
                 '--error-color': '#ef4444'

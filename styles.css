@@ -1338,6 +1338,7 @@ body {
     font-weight: 500;
     border: 1px solid var(--box-border);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    white-space: nowrap;
 }
 
 .markdown-content pre {
