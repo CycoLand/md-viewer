@@ -2,6 +2,7 @@
 import { state, STORAGE_KEY } from './state.js';
 import { showRenderedContent, showRawContent } from './markdownRenderer.js';
 import { showLoading, hideLoading, getTransitionDuration } from './loadingAnimations.js';
+import { launchRocket } from './laserAnimation.js';
 
 export class FileManager {
     static generateId() {
@@ -149,19 +150,28 @@ export class FileManager {
             item.addEventListener('click', (e) => {
                 if (!e.target.closest('.file-actions')) {
                     const fileId = item.dataset.fileId;
-                    this.selectFile(fileId);
+                    this.selectFile(fileId, item); // Pass the clicked element
                 }
             });
         });
     }
 
-    static selectFile(fileId) {
+    static selectFile(fileId, clickedElement = null) {
         const file = this.getFile(fileId);
         if (!file) return;
 
         state.currentFileId = fileId;
         this.renderFileList();
-        this.showFile(file);
+        
+        // If we have the clicked element (file-item), launch the rocket
+        if (clickedElement && clickedElement.classList.contains('file-item')) {
+            launchRocket(clickedElement, () => {
+                this.showFile(file);
+            });
+        } else {
+            // No animation, just show the file
+            this.showFile(file);
+        }
     }
 
     static showFile(file) {

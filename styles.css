@@ -55,6 +55,13 @@
     --page-transition-duration: 0.1s;                    /* How long the fade takes */
     --page-transition-easing: ease-in-out;               /* Animation curve (try: ease, ease-in, ease-out, linear) */
     
+    /* Laser Pointer Border Animation */
+    --laser-dot-size: 8px;                               /* Size of the bright dot */
+    --laser-tail-length: 60px;                           /* Length of the trailing glow */
+    --laser-color: var(--primary-color);                 /* Color of the laser */
+    --laser-rotation-speed: 1.5s;                        /* Speed of rotation around border */
+    --laser-rocket-duration: 0.6s;                       /* Duration of rocket flight */
+    
     /* Collapsible Section Timings */
     --collapse-duration: 0.3s;
     --collapse-delay: 0.2s;
@@ -390,12 +397,31 @@ body {
     color: var(--text-muted);
 }
 
+/* Laser Pointer Border Animation */
+.file-item {
+    position: relative;
+    overflow: visible;
+}
+
+/* The laser dot that traces the border */
+.file-item::after {
+    /* Hidden - we use real DOM elements now for Web Animations API */
+    display: none;
+}
+
+/* The laser trail/tail that follows behind */
+.file-item::before {
+    /* Hidden - we use real DOM elements now for Web Animations API */
+    display: none;
+}
+
 .file-item-header {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     position: relative;
     padding-right: 0; /* No padding when actions hidden */
+    z-index: 2; /* Above the laser border */
 }
 
 .file-item:hover .file-item-header {
@@ -440,6 +466,8 @@ body {
     font-size: 0.7rem;
     color: var(--text-muted);
     flex-wrap: wrap;
+    position: relative;
+    z-index: 2; /* Above the laser border */
 }
 
 
@@ -2766,3 +2794,48 @@ body {
         padding: 0 !important;
     }
 }
+
+/* ==================== Laser Rocket Animation ==================== */
+
+/* The rocket dot that flies from sidebar to content */
+.laser-rocket {
+    position: fixed;
+    width: var(--laser-dot-size);
+    height: var(--laser-dot-size);
+    background: var(--laser-color);
+    border-radius: 50%;
+    box-shadow: 
+        0 0 10px var(--laser-color),
+        0 0 20px var(--laser-color),
+        0 0 30px var(--laser-color);
+    z-index: 10000;
+    pointer-events: none;
+}
+
+/* Rocket trail effect */
+.laser-rocket::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--laser-tail-length);
+    height: 3px;
+    background: linear-gradient(
+        to left,
+        var(--laser-color),
+        transparent
+    );
+    opacity: 0.8;
+    transform-origin: right center;
+    transform: translate(-100%, -50%) rotate(var(--trail-rotation, 0deg));
+}
+
+@keyframes rocket-flight {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+

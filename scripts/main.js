@@ -4,6 +4,7 @@ import { ThemeManager } from './themeManager.js';
 import { FileManager } from './fileManager.js';
 import { PaginationManager } from './paginationManager.js';
 import './loadingAnimations.js'; // Initialize loading animations
+import { initLaserAnimation } from './laserAnimation.js'; // Initialize laser animations
 import {
     toggleSidebar,
     toggleThemePanel,
@@ -30,6 +31,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize drag and drop
     initializeDragAndDrop(FileManager);
+    
+    // Initialize laser pointer animation
+    initLaserAnimation();
 
     // Load files from localStorage
     FileManager.loadFiles();
