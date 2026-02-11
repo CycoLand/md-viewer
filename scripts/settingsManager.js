@@ -9,11 +9,16 @@ export class SettingsManager {
         this.settingsPanel = document.getElementById('settings-panel');
         this.settingsToggle = document.getElementById('settings-toggle');
         this.closeSettingsBtn = document.getElementById('close-settings-panel');
-        this.overlay = document.getElementById('overlay');
+        this.quickMenu = document.getElementById('settings-quick-menu');
+        this.openFullPanelBtn = document.getElementById('open-full-settings-panel');
         
-        // Setting toggles
+        // Setting toggles (full panel)
         this.progressBarToggle = document.getElementById('toggle-progress-bar');
         this.tocToggle = document.getElementById('toggle-toc');
+        
+        // Quick toggles
+        this.quickProgressBarToggle = document.getElementById('quick-toggle-progress-bar');
+        this.quickTocToggle = document.getElementById('quick-toggle-toc');
         
         this.init();
     }
@@ -30,32 +35,85 @@ export class SettingsManager {
         
         // Set up event listeners
         this.setupEventListeners();
+        
+        // Initialize quick menu
+        this.initializeQuickMenu();
+    }
+    
+    /**
+     * Initialize quick menu
+     */
+    initializeQuickMenu() {
+        // Toggle quick menu on settings button click
+        this.settingsToggle?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.quickMenu?.classList.toggle('show');
+            
+            // Close theme quick menu if open
+            const themeQuickMenu = document.getElementById('theme-quick-menu');
+            themeQuickMenu?.classList.remove('show');
+        });
+        
+        // Quick toggle handlers
+        this.quickProgressBarToggle?.addEventListener('change', (e) => {
+            state.settings.showProgressBar = e.target.checked;
+            // Sync with full panel toggle
+            if (this.progressBarToggle) {
+                this.progressBarToggle.checked = e.target.checked;
+            }
+            this.saveSettings();
+            this.applyProgressBarSetting();
+        });
+        
+        this.quickTocToggle?.addEventListener('change', (e) => {
+            state.settings.showTOC = e.target.checked;
+            // Sync with full panel toggle
+            if (this.tocToggle) {
+                this.tocToggle.checked = e.target.checked;
+            }
+            this.saveSettings();
+            this.applyTOCSetting();
+        });
+        
+        // Open full settings panel
+        this.openFullPanelBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.quickMenu?.classList.remove('show');
+            this.openPanel();
+        });
+        
+        // Close quick menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!this.settingsToggle?.contains(e.target) && !this.quickMenu?.contains(e.target)) {
+                this.quickMenu?.classList.remove('show');
+            }
+        });
     }
     
     /**
      * Set up event listeners
      */
     setupEventListeners() {
-        // Panel toggle
-        this.settingsToggle?.addEventListener('click', () => this.openPanel());
+        // Panel close button
         this.closeSettingsBtn?.addEventListener('click', () => this.closePanel());
         
-        // Close on overlay click
-        this.overlay?.addEventListener('click', () => {
-            if (this.settingsPanel?.classList.contains('open')) {
-                this.closePanel();
-            }
-        });
-        
-        // Setting toggles
+        // Full panel setting toggles
         this.progressBarToggle?.addEventListener('change', (e) => {
             state.settings.showProgressBar = e.target.checked;
+            // Sync with quick toggle
+            if (this.quickProgressBarToggle) {
+                this.quickProgressBarToggle.checked = e.target.checked;
+            }
             this.saveSettings();
             this.applyProgressBarSetting();
         });
         
         this.tocToggle?.addEventListener('change', (e) => {
             state.settings.showTOC = e.target.checked;
+            // Sync with quick toggle
+            if (this.quickTocToggle) {
+                this.quickTocToggle.checked = e.target.checked;
+            }
             this.saveSettings();
             this.applyTOCSetting();
         });
@@ -66,7 +124,6 @@ export class SettingsManager {
      */
     openPanel() {
         this.settingsPanel?.classList.add('open');
-        this.overlay?.classList.add('show');
         
         // Close theme panel if open
         const themePanel = document.getElementById('theme-panel');
@@ -80,7 +137,6 @@ export class SettingsManager {
      */
     closePanel() {
         this.settingsPanel?.classList.remove('open');
-        this.overlay?.classList.remove('show');
     }
     
     /**
@@ -101,12 +157,18 @@ export class SettingsManager {
             console.error('Error loading settings:', error);
         }
         
-        // Update toggle states
+        // Update all toggle states
         if (this.progressBarToggle) {
             this.progressBarToggle.checked = state.settings.showProgressBar;
         }
         if (this.tocToggle) {
             this.tocToggle.checked = state.settings.showTOC;
+        }
+        if (this.quickProgressBarToggle) {
+            this.quickProgressBarToggle.checked = state.settings.showProgressBar;
+        }
+        if (this.quickTocToggle) {
+            this.quickTocToggle.checked = state.settings.showTOC;
         }
     }
     

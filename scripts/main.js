@@ -125,10 +125,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
     document.getElementById('sidebar-expand-bookmark').addEventListener('click', toggleSidebar);
-    document.getElementById('theme-toggle').addEventListener('click', toggleThemePanel);
     document.getElementById('close-theme-panel').addEventListener('click', closeThemePanel);
 
-    document.getElementById('overlay').addEventListener('click', closeThemePanel);
+    // Overlay is no longer used for theme/settings panels
 
     document.getElementById('paste-modal').addEventListener('click', function(e) {
         if (e.target === this) {
@@ -212,11 +211,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         if (e.key === 'Escape') {
-            if (document.getElementById('theme-panel').classList.contains('open')) {
-                closeThemePanel();
-            }
             if (document.getElementById('settings-panel').classList.contains('open')) {
                 settingsManager.closePanel();
+            }
+            if (document.getElementById('theme-panel').classList.contains('open')) {
+                closeThemePanel();
             }
             if (document.getElementById('paste-modal').classList.contains('show')) {
                 closePasteModal();

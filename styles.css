@@ -893,6 +893,12 @@ body {
     display: none !important;
 }
 
+/* Center content when TOC is hidden */
+.content-body:has(.toc.force-hidden) {
+    grid-template-columns: 1fr;
+    max-width: var(--content-max-width);
+}
+
 @media (max-width: 1599px) {
     .content-body {
         grid-template-columns: 1fr;
@@ -1940,19 +1946,24 @@ body {
 .theme-panel {
     position: fixed;
     top: 0;
-    right: -400px;
+    left: var(--sidebar-width);
     width: 400px;
     height: 100vh;
     background-color: var(--surface-color);
-    border-left: 1px solid var(--border-color);
-    z-index: 1000;
+    border-right: 1px solid var(--border-color);
+    z-index: 999;
     transition: var(--transition-slow);
     overflow-y: auto;
-    box-shadow: -4px 0 16px rgba(0, 0, 0, 0.2);
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.2);
+    transform: translateX(-100%);
+    opacity: 0;
+    pointer-events: none;
 }
 
 .theme-panel.open {
-    right: 0;
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .theme-panel-header {
@@ -2135,18 +2146,24 @@ body {
 .settings-panel {
     position: fixed;
     top: 0;
-    right: -400px;
+    left: var(--sidebar-width);
     width: 400px;
     height: 100vh;
     background: var(--surface-color);
-    z-index: 1000;
+    border-right: 1px solid var(--border-color);
+    z-index: 999;
     transition: var(--transition-slow);
     overflow-y: auto;
-    box-shadow: -4px 0 16px rgba(0, 0, 0, 0.2);
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.2);
+    transform: translateX(-100%);
+    opacity: 0;
+    pointer-events: none;
 }
 
 .settings-panel.open {
-    right: 0;
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .settings-panel-header {
@@ -2276,8 +2293,123 @@ body {
     background-color: var(--primary-hover);
 }
 
-/* Sidebar header buttons container */
+
+/* ==================== Quick Menu (Theme & Settings) ==================== */
+.quick-menu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-xl);
+    padding: 0.5rem;
+    min-width: 220px;
+    z-index: 1001;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-10px);
+    transition: var(--transition);
+}
+
+.quick-menu.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.quick-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: none;
+    border-radius: var(--border-radius);
+    color: var(--text-color);
+    font-family: var(--font-family);
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: left;
+}
+
+.quick-menu-item:hover {
+    background: var(--surface-hover);
+}
+
+.quick-menu-item.active {
+    background: rgba(99, 102, 241, 0.15);
+    color: var(--primary-color);
+}
+
+.quick-menu-separator {
+    height: 1px;
+    background: var(--border-color);
+    margin: 0.5rem 0;
+}
+
+.quick-menu-more {
+    color: var(--primary-color);
+}
+
+.quick-menu-more i {
+    font-size: 0.875rem;
+}
+
+/* Theme Preview Colors */
+.theme-preview {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+}
+
+.theme-preview span {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+
+/* Quick menu setting items */
+.quick-menu-setting {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: var(--bg-color);
+    border-radius: var(--border-radius);
+}
+
+.quick-menu-setting:hover {
+    background: var(--surface-hover);
+}
+
+.quick-menu-setting .setting-label {
+    font-size: 0.875rem;
+}
+
+/* Smaller toggle switch for quick menu */
+.toggle-switch-small {
+    width: 40px;
+    height: 22px;
+}
+
+.toggle-switch-small .toggle-slider:before {
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+}
+
+.toggle-switch-small input:checked + .toggle-slider:before {
+    transform: translateX(18px);
+}
+
+/* Position quick menu relative to button */
 .sidebar-header-buttons {
+    position: relative;
     display: flex;
     gap: 0.5rem;
     align-items: center;
@@ -2636,13 +2768,13 @@ body:hover .reading-progress-bar:not(.hidden) {
     }
     
     .theme-panel {
+        left: 0;
         width: 100%;
-        right: -100%;
     }
     
     .settings-panel {
+        left: 0;
         width: 100%;
-        right: -100%;
     }
     
     

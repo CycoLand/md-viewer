@@ -63,6 +63,8 @@ export class ThemeManager {
         
         this.loadTheme();
         this.initializeThemePanel();
+        this.initializeQuickMenu();
+
     }
 
     loadTheme() {
@@ -334,4 +336,59 @@ export class ThemeManager {
             (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
             (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
     }
+
+    
+    initializeQuickMenu() {
+        const themeToggle = document.getElementById('theme-toggle');
+        const quickMenu = document.getElementById('theme-quick-menu');
+        const openFullPanelBtn = document.getElementById('open-full-theme-panel');
+        const quickMenuItems = quickMenu?.querySelectorAll('.quick-menu-item[data-theme]');
+        
+        // Toggle quick menu on theme button click
+        themeToggle?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            quickMenu?.classList.toggle('show');
+            
+            // Close settings quick menu if open
+            const settingsQuickMenu = document.getElementById('settings-quick-menu');
+            settingsQuickMenu?.classList.remove('show');
+            
+            // Update active state
+            this.updateQuickMenuActiveState();
+        });
+        
+        // Quick theme preset buttons
+        quickMenuItems?.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const themeName = item.dataset.theme;
+                this.applyPreset(themeName);
+                quickMenu?.classList.remove('show');
+            });
+        });
+        
+        // Open full theme panel
+        openFullPanelBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            quickMenu?.classList.remove('show');
+            document.getElementById('theme-panel')?.classList.add('open');
+        });
+        
+        // Close quick menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!themeToggle?.contains(e.target) && !quickMenu?.contains(e.target)) {
+                quickMenu?.classList.remove('show');
+            }
+        });
+    }
+    
+    updateQuickMenuActiveState() {
+        const savedPreset = localStorage.getItem('markdownViewerThemePreset');
+        const quickMenuItems = document.querySelectorAll('#theme-quick-menu .quick-menu-item[data-theme]');
+        
+        quickMenuItems.forEach(item => {
+            item.classList.toggle('active', item.dataset.theme === savedPreset);
+        });
+    }
+
 }
