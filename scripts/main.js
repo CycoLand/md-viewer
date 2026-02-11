@@ -4,6 +4,7 @@ import { ThemeManager } from './themeManager.js';
 import { FileManager } from './fileManager.js';
 import { PaginationManager } from './paginationManager.js';
 import { ClipboardAutoLoader } from './clipboardAutoLoader.js';
+import { initProgressBar, getProgressBar } from './progressBar.js';
 import './loadingAnimations.js'; // Initialize loading animations
 import {
     toggleSidebar,
@@ -28,10 +29,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize managers
     const themeManager = new ThemeManager();
     const paginationManager = new PaginationManager();
-    const clipboardAutoLoader = new ClipboardAutoLoader();
+    
+    // Initialize progress bar
+    const progressBar = initProgressBar();
 
     // Initialize drag and drop
     initializeDragAndDrop(FileManager);
+
+    // Load files from localStorage BEFORE clipboard loader
+    FileManager.loadFiles();
+    
+    // NOW initialize clipboard auto-loader (after FileManager is ready)
+    const clipboardAutoLoader = new ClipboardAutoLoader();
 
     // Load files from localStorage
     FileManager.loadFiles();

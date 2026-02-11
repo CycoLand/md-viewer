@@ -2,6 +2,7 @@
 import { state, STORAGE_KEY } from './state.js';
 import { showRenderedContent, showRawContent } from './markdownRenderer.js';
 import { showLoading, hideLoading, getTransitionDuration } from './loadingAnimations.js';
+import { getProgressBar } from './progressBar.js';
 
 export class FileManager {
     static generateId() {
@@ -189,6 +190,12 @@ export class FileManager {
             // Fade in new content
             setTimeout(() => {
                 hideLoading(contentArea);
+                
+                // Notify progress bar that content has changed
+                const progressBar = getProgressBar();
+                if (progressBar) {
+                    progressBar.onFileChange();
+                }
             }, 50); // Small delay to ensure content is rendered
         }, transitionDuration); // Wait for fade out to complete
     }

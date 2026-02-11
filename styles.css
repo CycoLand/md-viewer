@@ -2417,6 +2417,38 @@ body {
     }
 }
 
+
+/* ==================== Reading Progress Bar ==================== */
+.reading-progress-bar {
+    position: fixed;
+    top: 0;
+    left: var(--sidebar-width); /* Start at the right edge of sidebar */
+    height: 3px;
+    width: 0%;
+    background: var(--primary-color);
+    z-index: 9999;
+    transition: width 0.2s ease-out, opacity 0.3s ease, left 0.3s ease;
+    opacity: 1;
+    pointer-events: none; /* Don't interfere with clicks */
+    box-shadow: none;
+}
+
+/* Adjust when sidebar is collapsed */
+.sidebar.collapsed ~ .reading-progress-bar,
+body:has(.sidebar.collapsed) .reading-progress-bar {
+    left: 0; /* Full width when sidebar is collapsed */
+}
+
+/* Hide progress bar when not needed */
+.reading-progress-bar.hidden {
+    opacity: 0;
+}
+
+/* Optional: Slightly increase opacity on hover */
+body:hover .reading-progress-bar {
+    opacity: 0.8;
+}
+
 /* Responsive Design */
 @media (max-width: 800px) {
     .main-content {
