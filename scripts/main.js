@@ -1,8 +1,12 @@
 // Main entry point - brings all modules together
 import { state } from './state.js';
 import { ThemeManager } from './themeManager.js';
+import { SettingsManager } from './settingsManager.js';
 import { FileManager } from './fileManager.js';
 import { PaginationManager } from './paginationManager.js';
+import { ClipboardAutoLoader } from './clipboardAutoLoader.js';
+import { initProgressBar, getProgressBar } from './progressBar.js';
+import './loadingAnimations.js'; // Initialize loading animations
 import {
     toggleSidebar,
     toggleThemePanel,
@@ -25,13 +29,32 @@ import {
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize managers
     const themeManager = new ThemeManager();
+    const settingsManager = new SettingsManager();
     const paginationManager = new PaginationManager();
+    
+    // Initialize progress bar
+    const progressBar = initProgressBar();
 
     // Initialize drag and drop
     initializeDragAndDrop(FileManager);
 
+    // Load files from localStorage BEFORE clipboard loader
+    FileManager.loadFiles();
+    
+    // NOW initialize clipboard auto-loader (after FileManager is ready)
+    const clipboardAutoLoader = new ClipboardAutoLoader();
+
     // Load files from localStorage
     FileManager.loadFiles();
+
+    // Search functionality
+    const globalSearchInput = document.getElementById('global-search');
+    if (globalSearchInput) {
+        globalSearchInput.addEventListener('input', function(e) {
+            const query = e.target.value;
+            FileManager.renderFileList(query);
+        });
+    }
 
     // File input handler
     document.getElementById('file-input').addEventListener('change', function(e) {
@@ -102,10 +125,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
     document.getElementById('sidebar-expand-bookmark').addEventListener('click', toggleSidebar);
-    document.getElementById('theme-toggle').addEventListener('click', toggleThemePanel);
     document.getElementById('close-theme-panel').addEventListener('click', closeThemePanel);
 
-    document.getElementById('overlay').addEventListener('click', closeThemePanel);
+    // Overlay is no longer used for theme/settings panels
 
     document.getElementById('paste-modal').addEventListener('click', function(e) {
         if (e.target === this) {
@@ -189,6 +211,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         if (e.key === 'Escape') {
+            if (document.getElementById('settings-panel').classList.contains('open')) {
+                settingsManager.closePanel();
+            }
             if (document.getElementById('theme-panel').classList.contains('open')) {
                 closeThemePanel();
             }

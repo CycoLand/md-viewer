@@ -1,6 +1,8 @@
 // File management
 import { state, STORAGE_KEY } from './state.js';
 import { showRenderedContent, showRawContent } from './markdownRenderer.js';
+import { showLoading, hideLoading, getTransitionDuration } from './loadingAnimations.js';
+import { getProgressBar } from './progressBar.js';
 
 export class FileManager {
     static generateId() {
@@ -68,7 +70,7 @@ export class FileManager {
         }
     }
 
-    static renderFileList() {
+    static renderFileList(searchQuery = '') {
         const fileList = document.getElementById('file-list');
         
         if (state.files.size === 0) {
@@ -82,13 +84,37 @@ export class FileManager {
             return;
         }
 
-        const fileArray = Array.from(state.files.values()).sort((a, b) => a.name.localeCompare(b.name));
+        let fileArray = Array.from(state.files.values());
+        
+        // Filter by search query if provided
+        if (searchQuery && searchQuery.trim()) {
+            const query = searchQuery.trim().toLowerCase();
+            fileArray = fileArray.filter(file => {
+                const nameMatch = file.name.toLowerCase().includes(query);
+                const contentMatch = (file.content || '').toLowerCase().includes(query);
+                return nameMatch || contentMatch;
+            });
+            
+            // Show empty state if no matches
+            if (fileArray.length === 0) {
+                fileList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <p>No files found</p>
+                        <p class="subtitle">Try a different search term</p>
+                    </div>
+                `;
+                return;
+            }
+        }
+        
+        fileArray = fileArray.sort((a, b) => a.name.localeCompare(b.name));
         
         fileList.innerHTML = fileArray.map(file => {
             // Calculate metadata
             const content = file.content || '';
             const words = content.trim().split(/\s+/).filter(w => w.length > 0);
-            const wordCount = words.length;
+            const readTime = Math.ceil(words.length / 238);
             const lineCount = content.split('\n').length;
             
             // Format date
@@ -110,7 +136,7 @@ export class FileManager {
                         </div>
                     </div>
                     <div class="file-meta">
-                        <span class="meta-item"><i class="fas fa-font"></i> ${wordCount.toLocaleString()}</span>
+                        <span class="meta-item"><i class="fas fa-clock"></i> ${readTime} min</span>
                         <span class="meta-separator">•</span>
                         <span class="meta-item"><i class="fas fa-list-ol"></i> ${lineCount.toLocaleString()}</span>
                         <span class="meta-separator">•</span>
@@ -143,11 +169,35 @@ export class FileManager {
         document.getElementById('welcome-screen').style.display = 'none';
         document.getElementById('content-area').style.display = 'flex';
 
-        if (state.rawMode) {
-            showRawContent(file.content);
-        } else {
-            showRenderedContent(file.content);
-        }
+        const contentArea = document.getElementById('content-area');
+        const transitionDuration = getTransitionDuration();
+        
+        // Fade out current content
+        showLoading(contentArea);
+
+        // Wait for fade out, then load new content
+        setTimeout(() => {
+            try {
+                if (state.rawMode) {
+                    showRawContent(file.content);
+                } else {
+                    showRenderedContent(file.content);
+                }
+            } catch (error) {
+                console.error('Error rendering content:', error);
+            }
+            
+            // Fade in new content
+            setTimeout(() => {
+                hideLoading(contentArea);
+                
+                // Notify progress bar that content has changed
+                const progressBar = getProgressBar();
+                if (progressBar) {
+                    progressBar.onFileChange();
+                }
+            }, 50); // Small delay to ensure content is rendered
+        }, transitionDuration); // Wait for fade out to complete
     }
 
     static showWelcomeScreen() {

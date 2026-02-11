@@ -10,100 +10,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Recursive:wght,MONO@300..1000,1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Inline theme loader - runs after CSS loads to override defaults -->
-    <script>
-        (function() {
-            const savedPreset = localStorage.getItem('markdownViewerThemePreset');
-            const savedTheme = localStorage.getItem('markdownViewerTheme');
-            
-            console.log('Inline script running - savedPreset:', savedPreset, 'savedTheme:', savedTheme);
-            
-            if (savedTheme) {
-                try {
-                    const theme = JSON.parse(savedTheme);
-                    const root = document.documentElement;
-                    Object.keys(theme).forEach(key => {
-                        root.style.setProperty(key, theme[key]);
-                    });
-                    console.log('Applied custom theme from localStorage');
-                } catch (e) {
-                    console.error('Error applying custom theme:', e);
-                }
-            } else if (savedPreset) {
-                const presets = {
-                    default: {
-                        '--primary-color': '#6366f1',
-                        '--primary-hover': '#5b5ff1',
-                        '--bg-color': '#0f172a',
-                        '--surface-color': '#1e293b',
-                        '--surface-hover': '#334155',
-                        '--text-color': '#f8fafc',
-                        '--text-muted': '#94a3b8',
-                        '--text-dim': '#64748b',
-                        '--accent-color': '#06b6d4',
-                        '--border-color': '#334155',
-                        '--code-color': '#e5c07b',
-                        '--success-color': '#10b981',
-                        '--warning-color': '#f59e0b',
-                        '--error-color': '#ef4444'
-                    },
-                    dark: {
-                        '--primary-color': '#9ca3af',
-                        '--primary-hover': '#6b7280',
-                        '--bg-color': '#111827',
-                        '--surface-color': '#1f2937',
-                        '--surface-hover': '#374151',
-                        '--text-color': '#f9fafb',
-                        '--text-muted': '#9ca3af',
-                        '--text-dim': '#6b7280',
-                        '--accent-color': '#6b7280',
-                        '--border-color': '#374151',
-                        '--code-color': '#e5c07b',
-                        '--success-color': '#10b981',
-                        '--warning-color': '#f59e0b',
-                        '--error-color': '#ef4444'
-                    },
-                    light: {
-                        '--primary-color': '#3b82f6',
-                        '--primary-hover': '#2563eb',
-                        '--bg-color': '#ffffff',
-                        '--surface-color': '#f3f4f6',
-                        '--surface-hover': '#e5e7eb',
-                        '--text-color': '#1f2937',
-                        '--text-muted': '#6b7280',
-                        '--text-dim': '#9ca3af',
-                        '--accent-color': '#2563eb',
-                        '--border-color': '#d1d5db',
-                        '--code-color': '#c7254e',
-                        '--success-color': '#10b981',
-                        '--warning-color': '#f59e0b',
-                        '--error-color': '#ef4444'
-                    }
-                };
-                
-                const preset = presets[savedPreset];
-                if (preset) {
-                    const root = document.documentElement;
-                    Object.keys(preset).forEach(key => {
-                        root.style.setProperty(key, preset[key]);
-                    });
-                    console.log('Applied preset theme:', savedPreset);
-                }
-            }
-            
-            // Also update highlight.js theme
-            if (savedPreset === 'light') {
-                const highlightLink = document.getElementById('highlight-theme');
-                console.log('Attempting to update highlight theme, element found:', !!highlightLink);
-                if (highlightLink) {
-                    highlightLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
-                }
-            }
-        })();
-    </script>
+    <!-- Theme loader - prevents flash of unstyled content -->
+    <script src="scripts/themeLoader.js"></script>
+
 </head>
 <body>
 
+    <!-- Reading Progress Bar -->
+    <div id="reading-progress-bar" class="reading-progress-bar"></div>
 
     <!-- Theme Customizer Panel -->
     <div id="theme-panel" class="theme-panel">
@@ -220,13 +134,122 @@
 
     <!-- Main Application -->
     <div class="app-container">
+
+    <!-- Settings Panel -->
+    <div id="settings-panel" class="settings-panel">
+        <div class="settings-panel-header">
+            <h3><i class="fas fa-cog"></i> Settings</h3>
+            <button id="close-settings-panel" class="close-btn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="settings-panel-content">
+            <div class="settings-section">
+                <h4>Display Options</h4>
+                
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Reading Progress Bar</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-progress-bar" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <i class="fas fa-list"></i>
+                        <span>Table of Contents</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-toc" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
         <!-- Sidebar -->
         <aside id="sidebar" class="sidebar">
             <div class="sidebar-header">
                 <h1><i class="fas fa-book"></i> MD Viewer</h1>
-                <button id="theme-toggle" class="btn btn-icon" title="Customize Theme">
-                    <i class="fas fa-palette"></i>
-                </button>
+                <div class="sidebar-header-buttons">
+                    <button id="settings-toggle" class="btn btn-icon" title="Settings">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    
+                    <!-- Settings Quick Menu -->
+                    <div id="settings-quick-menu" class="quick-menu">
+                        <div class="setting-item quick-menu-setting">
+                            <div class="setting-label">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Progress Bar</span>
+                            </div>
+                            <label class="toggle-switch toggle-switch-small">
+                                <input type="checkbox" id="quick-toggle-progress-bar" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="setting-item quick-menu-setting">
+                            <div class="setting-label">
+                                <i class="fas fa-list"></i>
+                                <span>Table of Contents</span>
+                            </div>
+                            <label class="toggle-switch toggle-switch-small">
+                                <input type="checkbox" id="quick-toggle-toc" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="quick-menu-separator"></div>
+                        <button id="open-full-settings-panel" class="quick-menu-item quick-menu-more">
+                            <i class="fas fa-sliders-h"></i>
+                            <span>Advanced...</span>
+                        </button>
+                    </div>
+
+                    <button id="theme-toggle" class="btn btn-icon" title="Theme">
+                        <i class="fas fa-palette"></i>
+                    </button>
+                    
+                    <!-- Theme Quick Menu -->
+                    <div id="theme-quick-menu" class="quick-menu">
+                        <button class="quick-menu-item" data-theme="default">
+                            <div class="theme-preview">
+                                <span style="background: #6366f1"></span>
+                                <span style="background: #0f172a"></span>
+                                <span style="background: #1e293b"></span>
+                            </div>
+                            <span>Default</span>
+                        </button>
+                        <button class="quick-menu-item" data-theme="dark">
+                            <div class="theme-preview">
+                                <span style="background: #1f2937"></span>
+                                <span style="background: #111827"></span>
+                                <span style="background: #1f2937"></span>
+                            </div>
+                            <span>Dark</span>
+                        </button>
+                        <button class="quick-menu-item" data-theme="light">
+                            <div class="theme-preview">
+                                <span style="background: #3b82f6"></span>
+                                <span style="background: #ffffff"></span>
+                                <span style="background: #f3f4f6"></span>
+                            </div>
+                            <span>Light</span>
+                        </button>
+                        <div class="quick-menu-separator"></div>
+                        <button id="open-full-theme-panel" class="quick-menu-item quick-menu-more">
+                            <i class="fas fa-sliders-h"></i>
+                            <span>Custom...</span>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div class="search-container">
@@ -394,6 +417,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <script type="module" src="scripts/main.js"></script>
 </body>
 </html>

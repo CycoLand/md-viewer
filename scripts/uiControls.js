@@ -17,15 +17,11 @@ export function toggleSidebar() {
 
 export function toggleThemePanel() {
     const panel = document.getElementById('theme-panel');
-    const overlay = document.getElementById('overlay');
-    
     panel.classList.toggle('open');
-    overlay.classList.toggle('show');
 }
 
 export function closeThemePanel() {
     document.getElementById('theme-panel').classList.remove('open');
-    document.getElementById('overlay').classList.remove('show');
 }
 
 export function toggleRawMode(FileManager) {

@@ -16,7 +16,7 @@ function createDocumentHeader(file, content) {
     
     // Calculate word count (split by whitespace and filter non-empty)
     const words = content.trim().split(/\s+/).filter(w => w.length > 0);
-    const wordCount = words.length;
+    const readTime = Math.ceil(words.length / 238);
     
     // Calculate line count
     const lineCount = content.split('\n').length;
@@ -53,7 +53,7 @@ function createDocumentHeader(file, content) {
                 </div>
             </div>
             <div class="document-meta">
-                <span class="meta-item"><i class="fas fa-font"></i> ${wordCount.toLocaleString()} words</span>
+                <span class="meta-item"><i class="fas fa-clock"></i> ${readTime} min read</span>
                 <span class="meta-separator">•</span>
                 <span class="meta-item"><i class="fas fa-list-ol"></i> ${lineCount.toLocaleString()} lines</span>
                 <span class="meta-separator">•</span>
@@ -119,7 +119,10 @@ export function showRenderedContent(content) {
 
     // Parse and sanitize markdown
     const html = marked.parse(contentToRender);
-    const sanitizedHtml = DOMPurify.sanitize(html);
+    const sanitizedHtml = DOMPurify.sanitize(html, {
+        ADD_ATTR: ['disabled'], // Allow disabled attribute so we can control it
+        ADD_TAGS: ['input'] // Ensure input tags are allowed
+    });
     
     // Get current file info for metadata
     const file = state.currentFileId ? state.files.get(state.currentFileId) : null;
@@ -172,6 +175,11 @@ export function showRenderedContent(content) {
     // Setup document menu
     setupDocumentMenu(mdEl);
 
+    // Setup task list checkboxes (for interactive checking)
+    setupTaskListCheckboxes(mdEl);
+
+    // Mark external links with an indicator
+    markExternalLinks(mdEl);
 
 }
 
@@ -215,6 +223,12 @@ export function rebuildFromCache() {
         const headings = Array.from(mdEl.querySelectorAll('h1, h2, h3, h4, h5, h6'));
         generateTOC(mdEl, tocEl);
     }
+
+    // Setup task list checkboxes
+    setupTaskListCheckboxes(mdEl);
+    
+    // Mark external links with an indicator
+    markExternalLinks(mdEl);
 }
 
 /**
@@ -441,4 +455,127 @@ function setupDocumentMenu(mdEl) {
         });
     });
 }
+
+/**
+ * Sets up interactive task list checkboxes
+ * @param {HTMLElement} mdEl - The markdown content element
+ */
+function setupTaskListCheckboxes(mdEl) {
+    // Find all list items that contain checkboxes
+    const allListItems = mdEl.querySelectorAll('li');
+    
+    let checkboxCount = 0;
+    
+    allListItems.forEach(item => {
+        const checkbox = item.querySelector('input[type="checkbox"]');
+        if (!checkbox) return;
+        
+        checkboxCount++;
+        
+        // Add task-list-item class for styling
+        item.classList.add('task-list-item');
+        
+        // Make the checkbox not disabled (marked.js might disable them)
+        checkbox.disabled = false;
+        
+        // Wrap the text content (everything after the checkbox) in a label
+        // This makes the entire text area clickable
+        const textContent = [];
+        let node = checkbox.nextSibling;
+        
+        while (node) {
+            const nextNode = node.nextSibling;
+            if (node.nodeType === Node.TEXT_NODE || node.nodeType === Node.ELEMENT_NODE) {
+                textContent.push(node);
+            }
+            node = nextNode;
+        }
+        
+        // Create a label wrapper for the text content
+        const label = document.createElement('label');
+        label.className = 'task-label';
+        label.style.cursor = 'pointer';
+        label.style.flex = '1';
+        
+        // Move text nodes into the label
+        textContent.forEach(node => {
+            label.appendChild(node);
+        });
+        
+        // Insert label after checkbox
+        item.appendChild(label);
+        
+        // Apply initial checked state styling
+        if (checkbox.checked) {
+            item.classList.add('checked');
+        }
+        
+        // Add change event listener to checkbox
+        checkbox.addEventListener('change', (e) => {
+            console.log('Checkbox changed:', e.target.checked);
+            if (e.target.checked) {
+                item.classList.add('checked');
+            } else {
+                item.classList.remove('checked');
+            }
+        });
+        
+        // Make label clickable to toggle checkbox, but only if no text is selected
+        label.addEventListener('click', (e) => {
+            // Check if user is selecting text (has a selection range)
+            const selection = window.getSelection();
+            const hasSelection = selection && selection.toString().length > 0;
+            
+            // Don't toggle if user is selecting text or clicking on a link/code element
+            if (hasSelection || e.target.tagName === 'A' || e.target.tagName === 'CODE') {
+                return;
+            }
+            
+            e.preventDefault();
+            checkbox.checked = !checkbox.checked;
+            checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+    });
+    
+    console.log(`Setup ${checkboxCount} interactive checkboxes with clickable labels`);
+}
+
+/**
+ * Marks external links with a visual indicator
+ * @param {HTMLElement} mdEl - The markdown content element
+ */
+function markExternalLinks(mdEl) {
+    // Find all links in the markdown content
+    const links = mdEl.querySelectorAll('a[href]');
+    
+    let externalLinkCount = 0;
+    
+    links.forEach(link => {
+        const href = link.getAttribute('href');
+        
+        // Skip if no href
+        if (!href) return;
+        
+        // Determine if link is external
+        // External links are:
+        // - Links starting with http:// or https://
+        // - Not anchor links (starting with #)
+        // - Not relative links (starting with ./ or ../)
+        const isExternal = /^https?:\/\//i.test(href);
+        
+        // Skip anchor links and relative links
+        const isAnchor = href.startsWith('#');
+        const isRelative = href.startsWith('./') || href.startsWith('../') || href.startsWith('/');
+        
+        if (isExternal && !isAnchor && !isRelative) {
+            link.classList.add('external-link');
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noopener noreferrer');
+            externalLinkCount++;
+        }
+    });
+    
+    console.log(`Marked ${externalLinkCount} external links`);
+}
+
 

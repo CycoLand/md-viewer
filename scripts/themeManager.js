@@ -14,6 +14,9 @@ export class ThemeManager {
                 '--accent-color': '#06b6d4',
                 '--border-color': '#334155',
                 '--code-color': '#e5c07b',
+                '--inline-code-color': '#e5c07b',
+                '--inline-code-bg': 'rgba(99, 102, 241, 0.15)',
+                '--box-border': 'rgba(99, 102, 241, 0.3)',
                 '--success-color': '#10b981',
                 '--warning-color': '#f59e0b',
                 '--error-color': '#ef4444'
@@ -30,6 +33,9 @@ export class ThemeManager {
                 '--accent-color': '#6b7280',
                 '--border-color': '#374151',
                 '--code-color': '#e5c07b',
+                '--inline-code-color': '#e5c07b',
+                '--inline-code-bg': 'rgba(156, 163, 175, 0.15)',
+                '--box-border': 'rgba(156, 163, 175, 0.3)',
                 '--success-color': '#10b981',
                 '--warning-color': '#f59e0b',
                 '--error-color': '#ef4444'
@@ -46,6 +52,9 @@ export class ThemeManager {
                 '--accent-color': '#2563eb',
                 '--border-color': '#d1d5db',
                 '--code-color': '#415bac',
+                '--inline-code-color': '#dc2626',
+                '--inline-code-bg': '#f3f4f6',
+                '--box-border': '#d1d5db',
                 '--success-color': '#10b981',
                 '--warning-color': '#f59e0b',
                 '--error-color': '#ef4444'
@@ -54,23 +63,17 @@ export class ThemeManager {
         
         this.loadTheme();
         this.initializeThemePanel();
+        this.initializeQuickMenu();
+
     }
 
     loadTheme() {
         const savedTheme = localStorage.getItem('markdownViewerTheme');
         const savedPreset = localStorage.getItem('markdownViewerThemePreset');
         
-        if (savedTheme) {
-            try {
-                const theme = JSON.parse(savedTheme);
-                this.applyTheme(theme);
-            } catch (error) {
-                console.error('Error loading saved theme:', error);
-            }
-        }
-        
-        // Load the highlight.js theme based on saved preset
-        if (savedPreset) {
+        // If there's a saved preset, apply it first (provides base theme)
+        if (savedPreset && this.presets[savedPreset]) {
+            this.applyTheme(this.presets[savedPreset]);
             this.updateHighlightTheme(savedPreset);
             // Update active state on preset buttons after DOM is ready
             setTimeout(() => {
@@ -78,6 +81,16 @@ export class ThemeManager {
                     btn.classList.toggle('active', btn.dataset.theme === savedPreset);
                 });
             }, 0);
+        }
+        
+        // If there's a custom theme, apply it on top (overrides preset)
+        if (savedTheme) {
+            try {
+                const theme = JSON.parse(savedTheme);
+                this.applyTheme(theme);
+            } catch (error) {
+                console.error('Error loading saved theme:', error);
+            }
         }
     }
 
@@ -323,4 +336,59 @@ export class ThemeManager {
             (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
             (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
     }
+
+    
+    initializeQuickMenu() {
+        const themeToggle = document.getElementById('theme-toggle');
+        const quickMenu = document.getElementById('theme-quick-menu');
+        const openFullPanelBtn = document.getElementById('open-full-theme-panel');
+        const quickMenuItems = quickMenu?.querySelectorAll('.quick-menu-item[data-theme]');
+        
+        // Toggle quick menu on theme button click
+        themeToggle?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            quickMenu?.classList.toggle('show');
+            
+            // Close settings quick menu if open
+            const settingsQuickMenu = document.getElementById('settings-quick-menu');
+            settingsQuickMenu?.classList.remove('show');
+            
+            // Update active state
+            this.updateQuickMenuActiveState();
+        });
+        
+        // Quick theme preset buttons
+        quickMenuItems?.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const themeName = item.dataset.theme;
+                this.applyPreset(themeName);
+                quickMenu?.classList.remove('show');
+            });
+        });
+        
+        // Open full theme panel
+        openFullPanelBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            quickMenu?.classList.remove('show');
+            document.getElementById('theme-panel')?.classList.add('open');
+        });
+        
+        // Close quick menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!themeToggle?.contains(e.target) && !quickMenu?.contains(e.target)) {
+                quickMenu?.classList.remove('show');
+            }
+        });
+    }
+    
+    updateQuickMenuActiveState() {
+        const savedPreset = localStorage.getItem('markdownViewerThemePreset');
+        const quickMenuItems = document.querySelectorAll('#theme-quick-menu .quick-menu-item[data-theme]');
+        
+        quickMenuItems.forEach(item => {
+            item.classList.toggle('active', item.dataset.theme === savedPreset);
+        });
+    }
+
 }

@@ -1,0 +1,120 @@
+/* ========================================
+   BASE STYLES
+   CSS variables, resets, and base elements
+   ======================================== */
+
+/* CSS Custom Properties for Theme Customization */
+:root {
+    /* Colors */
+    --primary-color: #6366f1;
+    --primary-hover: #5b5ff1;
+    --bg-color: #0f172a;
+    --surface-color: #1e293b;
+    --surface-hover: #334155;
+    --text-color: #f8fafc;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
+    --accent-color: #06b6d4;
+    --border-color: #334155;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --error-color: #ef4444;
+    --code-color: #e5c07b;
+    --selection-bg: rgba(99, 102, 241, 0.3);
+    --selection-color: var(--text-color);
+    
+    /* Box styling colors - mode-aware */
+    --box-bg: rgba(99, 102, 241, 0.08);
+    --box-bg-alt: rgba(99, 102, 241, 0.12);
+    --box-border: rgba(99, 102, 241, 0.3);
+    --inline-code-bg: rgba(99, 102, 241, 0.15);
+    --inline-code-color: #e5c07b;
+    --blockquote-bg: rgba(99, 102, 241, 0.08);
+    --blockquote-accent: #6366f1;
+    
+    /* Typography */
+    --font-family: 'Inter', sans-serif;
+    --font-mono: 'Recursive', monospace;
+    --font-size: 16px;
+    --line-height: 1.4;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    
+    /* Layout */
+    --sidebar-width: 310px;
+    --content-max-width: 1100px;
+    --border-radius: 8px;
+    --border-radius-lg: 12px;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    
+    /* Animation Timings */
+    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Page Transition Animation */
+    --page-transition-duration: 0s;
+    --page-transition-easing: ease-in-out;
+    
+    /* Collapsible Section Timings */
+    --collapse-duration: 0.3s;
+    --collapse-delay: 0.2s;
+    --chevron-slide-distance: 5px;
+    --chevron-fade-duration: 0.3s;
+    --chevron-color-transition: 0.2s;
+}
+
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: var(--font-size);
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-family);
+    line-height: var(--line-height);
+    color: var(--text-color);
+    background-color: var(--bg-color);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-dim);
+}
+
+/* Text Selection Styling */
+::selection {
+    background-color: var(--selection-bg);
+    color: var(--selection-color);
+}
+
+::-moz-selection {
+    background-color: var(--selection-bg);
+    color: var(--selection-color);
+}
