@@ -8,7 +8,12 @@ export const state = {
     contentFilters: {
         emojis: false,
         hr: false
+    },
+    settings: {
+        showProgressBar: true,
+        showTOC: true
     }
 };
 
 export const STORAGE_KEY = 'markdownViewerDocs';
+export const SETTINGS_KEY = 'markdownViewerSettings';

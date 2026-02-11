@@ -1,6 +1,7 @@
 // Main entry point - brings all modules together
 import { state } from './state.js';
 import { ThemeManager } from './themeManager.js';
+import { SettingsManager } from './settingsManager.js';
 import { FileManager } from './fileManager.js';
 import { PaginationManager } from './paginationManager.js';
 import { ClipboardAutoLoader } from './clipboardAutoLoader.js';
@@ -28,6 +29,7 @@ import {
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize managers
     const themeManager = new ThemeManager();
+    const settingsManager = new SettingsManager();
     const paginationManager = new PaginationManager();
     
     // Initialize progress bar
@@ -212,6 +214,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.key === 'Escape') {
             if (document.getElementById('theme-panel').classList.contains('open')) {
                 closeThemePanel();
+            }
+            if (document.getElementById('settings-panel').classList.contains('open')) {
+                settingsManager.closePanel();
             }
             if (document.getElementById('paste-modal').classList.contains('show')) {
                 closePasteModal();

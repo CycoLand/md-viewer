@@ -886,6 +886,13 @@ body {
 }
 
 /* Hide TOC when screen is less than 1600px */
+
+
+/* Force hide TOC when disabled in settings */
+.toc.force-hidden {
+    display: none !important;
+}
+
 @media (max-width: 1599px) {
     .content-body {
         grid-template-columns: 1fr;
@@ -2123,6 +2130,160 @@ body {
     border-top: 1px solid var(--border-color);
 }
 
+
+/* ==================== Settings Panel ==================== */
+.settings-panel {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 400px;
+    height: 100vh;
+    background: var(--surface-color);
+    z-index: 1000;
+    transition: var(--transition-slow);
+    overflow-y: auto;
+    box-shadow: -4px 0 16px rgba(0, 0, 0, 0.2);
+}
+
+.settings-panel.open {
+    right: 0;
+}
+
+.settings-panel-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: var(--surface-color);
+    z-index: 10;
+    backdrop-filter: blur(10px);
+}
+
+.settings-panel-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-color);
+    margin: 0;
+}
+
+.settings-panel-header i {
+    color: var(--primary-color);
+}
+
+.settings-panel-content {
+    padding: 1.5rem;
+}
+
+.settings-section {
+    margin-bottom: 2rem;
+}
+
+.settings-section h4 {
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+}
+
+.setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: var(--bg-color);
+    border-radius: var(--border-radius);
+    margin-bottom: 0.75rem;
+    transition: var(--transition);
+}
+
+.setting-item:hover {
+    background: var(--surface-hover);
+}
+
+.setting-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-color);
+    font-weight: var(--font-weight-medium);
+}
+
+.setting-label i {
+    color: var(--primary-color);
+    width: 20px;
+    text-align: center;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
+    cursor: pointer;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--border-color);
+    transition: var(--transition);
+    border-radius: 26px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--text-color);
+    transition: var(--transition);
+    border-radius: 50%;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background-color: var(--primary-color);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(22px);
+}
+
+.toggle-switch:hover .toggle-slider {
+    background-color: var(--surface-hover);
+}
+
+.toggle-switch input:checked:hover + .toggle-slider {
+    background-color: var(--primary-hover);
+}
+
+/* Sidebar header buttons container */
+.sidebar-header-buttons {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+
 /* Modal - removed duplicate, see improved version below */
 
 /* Add Document Modal Styles */
@@ -2442,10 +2603,11 @@ body:has(.sidebar.collapsed) .reading-progress-bar {
 /* Hide progress bar when not needed */
 .reading-progress-bar.hidden {
     opacity: 0;
+    width: 0px !important; /* Force width to 0 when hidden */
 }
 
 /* Optional: Slightly increase opacity on hover */
-body:hover .reading-progress-bar {
+body:hover .reading-progress-bar:not(.hidden) {
     opacity: 0.8;
 }
 
@@ -2474,6 +2636,11 @@ body:hover .reading-progress-bar {
     }
     
     .theme-panel {
+        width: 100%;
+        right: -100%;
+    }
+    
+    .settings-panel {
         width: 100%;
         right: -100%;
     }
@@ -2785,7 +2952,8 @@ body:hover .reading-progress-bar {
 /* Print Styles */
 @media print {
     .sidebar,
-    .theme-panel {
+    .theme-panel,
+    .settings-panel {
         display: none !important;
     }
     

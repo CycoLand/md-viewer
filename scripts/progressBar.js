@@ -80,9 +80,10 @@ export class ProgressBar {
         const paginationActive = document.querySelector('.page-navigation')?.classList.contains('active') || false;
         const isRawMode = state.rawMode;
         const hasContent = state.currentFileId !== null;
+        const settingEnabled = state.settings.showProgressBar;
         
-        // Show progress bar only in rendered view mode with content
-        const shouldShow = hasContent && !isRawMode && !paginationActive;
+        // Show progress bar only in rendered view mode with content AND if setting is enabled
+        const shouldShow = hasContent && !isRawMode && !paginationActive && settingEnabled;
         
         if (shouldShow) {
             this.show();
