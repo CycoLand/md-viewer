@@ -5,6 +5,7 @@ import { buildCollapsibleSections, setupHashBasedCollapse, remeasureSection } fr
 import { generateTOC } from './tocManager.js';
 import { setupSortableTables } from './sortableTables.js';
 import { enhanceListCards } from './listCardEnhancer.js';
+import { enhanceCheckmarkLists } from './checkmarkLists.js';
 
 
 /**
@@ -186,6 +187,9 @@ export function showRenderedContent(content) {
     // Setup task list checkboxes (for interactive checking)
     setupTaskListCheckboxes(mdEl);
 
+    // Replace native checkbox / ✅ with theme-styled custom check symbol
+    enhanceCheckmarkLists(mdEl);
+
     // Mark external links with an indicator
     markExternalLinks(mdEl);
 
@@ -237,6 +241,9 @@ export function rebuildFromCache() {
 
     // Setup task list checkboxes
     setupTaskListCheckboxes(mdEl);
+
+    // Replace native checkbox / ✅ with theme-styled custom check symbol
+    enhanceCheckmarkLists(mdEl);
     
     // Mark external links with an indicator
     markExternalLinks(mdEl);
