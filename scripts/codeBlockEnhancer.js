@@ -525,13 +525,28 @@ async function renderMermaidDiagram(codeBlock, pre) {
         mermaidCode = mermaidCode.replace(/^\s*(graph|flowchart)\s*/i, '$1 LR\n');
     }
     
-    // Create header
+    // Create header (collapsible like regular code blocks)
     const header = document.createElement('div');
     header.className = 'code-block-header';
+    header.style.cursor = 'pointer';
+    
+    const headerLeft = document.createElement('div');
+    headerLeft.className = 'code-block-header-left';
+    headerLeft.style.display = 'flex';
+    headerLeft.style.alignItems = 'center';
+    headerLeft.style.gap = '0.5rem';
     
     const langLabel = document.createElement('span');
     langLabel.className = 'code-language';
     langLabel.textContent = 'MERMAID';
+    
+    const toggleIcon = document.createElement('span');
+    toggleIcon.className = 'code-block-toggle-icon';
+    toggleIcon.innerHTML = '<i class="fas fa-chevron-down"></i>';
+    toggleIcon.title = 'Collapse/expand';
+    
+    headerLeft.appendChild(langLabel);
+    headerLeft.appendChild(toggleIcon);
     
     // Create button group
     const buttonGroup = document.createElement('div');
@@ -559,8 +574,12 @@ async function renderMermaidDiagram(codeBlock, pre) {
     buttonGroup.appendChild(copyBtn);
     buttonGroup.appendChild(downloadBtn);
     
-    header.appendChild(langLabel);
+    header.appendChild(headerLeft);
     header.appendChild(buttonGroup);
+    
+    // Body wrapper for collapse
+    const bodyWrap = document.createElement('div');
+    bodyWrap.className = 'code-block-body';
     
     // Create diagram container
     const diagramContainer = document.createElement('div');
@@ -582,9 +601,16 @@ async function renderMermaidDiagram(codeBlock, pre) {
         hljs.highlightElement(sourceCodeBlock);
     }
     
+    bodyWrap.appendChild(diagramContainer);
+    bodyWrap.appendChild(sourceContainer);
+    
     wrapper.appendChild(header);
-    wrapper.appendChild(diagramContainer);
-    wrapper.appendChild(sourceContainer);
+    wrapper.appendChild(bodyWrap);
+    
+    header.addEventListener('click', (e) => {
+        if (e.target.closest('.code-button-group')) return;
+        toggleCodeBlock(wrapper, bodyWrap, toggleIcon);
+    });
     
     // Generate unique ID for mermaid
     const id = 'mermaid-' + Math.random().toString(36).substr(2, 9);
@@ -810,6 +836,10 @@ async function renderMermaidDiagram(codeBlock, pre) {
             URL.revokeObjectURL(url);
         });
         
+        // Set measured height for collapse animation (after diagram is rendered)
+        bodyWrap.dataset.measuredHeight = String(bodyWrap.scrollHeight);
+        bodyWrap.style.maxHeight = bodyWrap.scrollHeight + 'px';
+        
     } catch (error) {
         console.error('Mermaid rendering error:', error);
         
@@ -879,6 +909,8 @@ async function renderMermaidDiagram(codeBlock, pre) {
             </div>
         `;
         diagramContainer.classList.add('error');
+        bodyWrap.dataset.measuredHeight = String(bodyWrap.scrollHeight);
+        bodyWrap.style.maxHeight = bodyWrap.scrollHeight + 'px';
     }
     
     return wrapper;
@@ -929,13 +961,28 @@ export function enhanceCodeBlocks(mdEl) {
         const wrapper = document.createElement('div');
         wrapper.className = 'code-block-wrapper';
         
-        // Create header with language and buttons
+        // Create header with language, toggle icon, and buttons
         const header = document.createElement('div');
         header.className = 'code-block-header';
+        header.style.cursor = 'pointer';
+        
+        const headerLeft = document.createElement('div');
+        headerLeft.className = 'code-block-header-left';
+        headerLeft.style.display = 'flex';
+        headerLeft.style.alignItems = 'center';
+        headerLeft.style.gap = '0.5rem';
         
         const langLabel = document.createElement('span');
         langLabel.className = 'code-language';
         langLabel.textContent = language.toUpperCase();
+        
+        const toggleIcon = document.createElement('span');
+        toggleIcon.className = 'code-block-toggle-icon';
+        toggleIcon.innerHTML = '<i class="fas fa-chevron-down"></i>';
+        toggleIcon.title = 'Collapse/expand code block';
+        
+        headerLeft.appendChild(langLabel);
+        headerLeft.appendChild(toggleIcon);
         
         // Create button group container
         const buttonGroup = document.createElement('div');
@@ -951,14 +998,49 @@ export function enhanceCodeBlocks(mdEl) {
         const copyBtn = createCopyButton(block);
         buttonGroup.appendChild(copyBtn);
         
-        header.appendChild(langLabel);
+        header.appendChild(headerLeft);
         header.appendChild(buttonGroup);
         
-        // Insert wrapper before pre, then move pre into wrapper
+        // Body wrapper for collapse animation (like md-section-body)
+        const bodyWrap = document.createElement('div');
+        bodyWrap.className = 'code-block-body';
+        
+        // Insert wrapper before pre, then move pre into bodyWrap, then bodyWrap into wrapper
         pre.parentNode.insertBefore(wrapper, pre);
         wrapper.appendChild(header);
-        wrapper.appendChild(pre);
+        wrapper.appendChild(bodyWrap);
+        bodyWrap.appendChild(pre);
+        
+        // Measure and set initial height for collapse animation
+        const measuredHeight = bodyWrap.scrollHeight;
+        bodyWrap.dataset.measuredHeight = String(measuredHeight);
+        bodyWrap.style.maxHeight = measuredHeight + 'px';
+        
+        header.addEventListener('click', (e) => {
+            if (e.target.closest('.code-button-group')) return;
+            toggleCodeBlock(wrapper, bodyWrap, toggleIcon);
+        });
     });
+}
+
+/**
+ * Toggles a code block's collapsed state
+ * @param {HTMLElement} wrapper - The code-block-wrapper element
+ * @param {HTMLElement} bodyWrap - The code-block-body element
+ * @param {HTMLElement} toggleIcon - The chevron icon span
+ */
+function toggleCodeBlock(wrapper, bodyWrap, toggleIcon) {
+    const isCollapsed = wrapper.classList.contains('collapsed');
+    if (isCollapsed) {
+        wrapper.classList.remove('collapsed');
+        const measuredHeight = bodyWrap.dataset.measuredHeight || '5000';
+        bodyWrap.style.maxHeight = measuredHeight + 'px';
+        if (toggleIcon) toggleIcon.classList.remove('collapsed');
+    } else {
+        wrapper.classList.add('collapsed');
+        bodyWrap.style.maxHeight = '0';
+        if (toggleIcon) toggleIcon.classList.add('collapsed');
+    }
 }
 
 /**

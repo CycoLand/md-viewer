@@ -108,7 +108,7 @@ export class FileManager {
             }
         }
         
-        fileArray = fileArray.sort((a, b) => a.name.localeCompare(b.name));
+        fileArray = fileArray.sort((a, b) => new Date(b.modified) - new Date(a.modified));
         
         fileList.innerHTML = fileArray.map(file => {
             // Calculate metadata

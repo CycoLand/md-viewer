@@ -63,20 +63,33 @@ export function autoDetectTitle(content) {
     
     const lines = content.trim().split('\n');
     
-    // Look for first H1 heading
-    const h1Match = content.match(/^#\s+(.+)$/m);
-    if (h1Match && h1Match[1]) {
-        return sanitizeFilename(h1Match[1].trim());
+    // Find first heading *outside* code fences (hashtags in code are not real headings)
+    let inFence = false;
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const trimmed = line.trim();
+        if (trimmed.startsWith('```')) {
+            inFence = !inFence;
+            continue;
+        }
+        if (inFence) continue;
+        const h1Match = trimmed.match(/^#\s+(.+)$/);
+        if (h1Match && h1Match[1]) {
+            return sanitizeFilename(h1Match[1].trim());
+        }
+        const h2Match = trimmed.match(/^##\s+(.+)$/);
+        if (h2Match && h2Match[1]) {
+            return sanitizeFilename(h2Match[1].trim());
+        }
     }
     
-    // Look for first H2 heading
-    const h2Match = content.match(/^##\s+(.+)$/m);
-    if (h2Match && h2Match[1]) {
-        return sanitizeFilename(h2Match[1].trim());
-    }
-    
-    // Use first non-empty line if reasonably short
-    const firstLine = lines.find(line => line.trim().length > 0);
+    // Use first non-empty line if reasonably short (still outside fences)
+    inFence = false;
+    const firstLine = lines.find(line => {
+        const t = line.trim();
+        if (t.startsWith('```')) { inFence = !inFence; return false; }
+        return !inFence && t.length > 0;
+    });
     if (firstLine && firstLine.trim().length <= 60) {
         const cleaned = firstLine.trim()
             .replace(/^#+\s*/, '')

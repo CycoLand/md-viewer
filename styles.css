@@ -1531,6 +1531,31 @@ body {
     backdrop-filter: blur(10px);
 }
 
+/* Code block collapse: body wrapper */
+.code-block-body {
+    overflow: hidden;
+    transition: max-height var(--collapse-duration) ease;
+}
+
+.code-block-wrapper.collapsed .code-block-body {
+    max-height: 0;
+}
+
+.code-block-toggle-icon {
+    display: inline-flex;
+    align-items: center;
+    color: var(--text-dim);
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.code-block-wrapper.collapsed .code-block-toggle-icon {
+    transform: rotate(-90deg);
+}
+
+.code-block-header:hover .code-block-toggle-icon {
+    color: var(--primary-color);
+}
+
 .code-language {
     font-size: 0.75rem;
     font-weight: 600;
