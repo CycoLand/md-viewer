@@ -4,6 +4,7 @@ import { enhanceCodeBlocks } from './codeBlockEnhancer.js';
 import { buildCollapsibleSections, setupHashBasedCollapse, remeasureSection } from './collapsibleSections.js';
 import { generateTOC } from './tocManager.js';
 import { setupSortableTables } from './sortableTables.js';
+import { enhanceListCards } from './listCardEnhancer.js';
 
 
 /**
@@ -143,6 +144,9 @@ export function showRenderedContent(content) {
     // Enhance code blocks with buttons and syntax highlighting
     enhanceCodeBlocks(mdEl);
 
+    // Convert label: value lists to cards (before section height measurement)
+    enhanceListCards(mdEl);
+
     // Build collapsible sections
     buildCollapsibleSections(mdEl);
     
@@ -206,6 +210,9 @@ export function rebuildFromCache() {
 
     // Enhance code blocks
     enhanceCodeBlocks(mdEl);
+
+    // Convert label: value lists to cards (before section height measurement)
+    enhanceListCards(mdEl);
 
     // Build collapsible sections
     buildCollapsibleSections(mdEl);
