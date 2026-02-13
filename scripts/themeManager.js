@@ -75,6 +75,7 @@ export class ThemeManager {
         if (savedPreset && this.presets[savedPreset]) {
             this.applyTheme(this.presets[savedPreset]);
             this.updateHighlightTheme(savedPreset);
+            this.updateFaviconForPreset(savedPreset);
             // Update active state on preset buttons after DOM is ready
             setTimeout(() => {
                 document.querySelectorAll('.theme-preset-btn').forEach(btn => {
@@ -149,9 +150,17 @@ export class ThemeManager {
         
         // Switch highlight.js theme based on the preset
         this.updateHighlightTheme(presetName);
+        this.updateFaviconForPreset(presetName);
         
         // Re-highlight all code blocks with the new theme
         this.rehighlightCode();
+    }
+    
+    updateFaviconForPreset(presetName) {
+        const favicon = document.getElementById('dynamic-favicon');
+        if (!favicon) return;
+        const file = presetName === 'light' ? 'favicon-light.svg' : presetName === 'dark' ? 'favicon-dark.svg' : 'favicon.svg';
+        favicon.href = file + '?v=' + presetName;
     }
     
     updateHighlightTheme(presetName) {

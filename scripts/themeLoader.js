@@ -81,6 +81,10 @@
             });
             console.log('Applied preset theme:', savedPreset);
         }
+        var favicon = document.querySelector('link#dynamic-favicon');
+        if (favicon) {
+            favicon.href = savedPreset === 'light' ? 'favicon-light.svg' : savedPreset === 'dark' ? 'favicon-dark.svg' : 'favicon.svg';
+        }
     }
     
     // Also update highlight.js theme
