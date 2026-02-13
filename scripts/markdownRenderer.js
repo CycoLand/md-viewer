@@ -3,6 +3,7 @@ import { state } from './state.js';
 import { enhanceCodeBlocks } from './codeBlockEnhancer.js';
 import { buildCollapsibleSections, setupHashBasedCollapse, remeasureSection } from './collapsibleSections.js';
 import { generateTOC } from './tocManager.js';
+import { setupSortableTables } from './sortableTables.js';
 
 
 /**
@@ -172,6 +173,9 @@ export function showRenderedContent(content) {
     // Apply current filters
     applyContentFilters(mdEl);
 
+    // Setup sortable table headers
+    setupSortableTables(mdEl);
+
     // Setup document menu
     setupDocumentMenu(mdEl);
 
@@ -229,6 +233,9 @@ export function rebuildFromCache() {
     
     // Mark external links with an indicator
     markExternalLinks(mdEl);
+
+    // Setup sortable table headers (after rebuild)
+    setupSortableTables(mdEl);
 }
 
 /**
