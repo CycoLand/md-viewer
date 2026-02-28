@@ -124,19 +124,22 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('welcome-paste-btn').addEventListener('click', showPasteModal);
 
     document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
-    document.getElementById('sidebar-expand-bookmark').addEventListener('click', toggleSidebar);
     document.getElementById('close-theme-panel').addEventListener('click', closeThemePanel);
 
     // Collapsed sidebar control buttons - show quick menus
+    const collapsedSidebarToggle = document.getElementById('collapsed-sidebar-toggle');
     const collapsedNewDocBtn = document.getElementById('collapsed-new-doc-btn');
     const collapsedSettingsBtn = document.getElementById('collapsed-settings-btn');
     const collapsedThemeBtn = document.getElementById('collapsed-theme-btn');
     
     console.log('Collapsed buttons found:', {
+        sidebarToggle: !!collapsedSidebarToggle,
         newDoc: !!collapsedNewDocBtn,
         settings: !!collapsedSettingsBtn,
         theme: !!collapsedThemeBtn
     });
+    
+    collapsedSidebarToggle?.addEventListener('click', toggleSidebar);
     
     collapsedNewDocBtn?.addEventListener('click', () => {
         console.log('Collapsed new doc clicked');

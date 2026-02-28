@@ -5,6 +5,7 @@ export function toggleSidebar() {
     state.sidebarCollapsed = !state.sidebarCollapsed;
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.querySelector('.main-content');
+    const sidebarToggleBtn = document.getElementById('sidebar-toggle');
     
     if (state.sidebarCollapsed) {
         sidebar.classList.add('collapsed');
@@ -12,6 +13,11 @@ export function toggleSidebar() {
     } else {
         sidebar.classList.remove('collapsed');
         mainContent.classList.remove('sidebar-collapsed');
+        // Update icon when expanded (show left chevron to collapse)
+        if (sidebarToggleBtn) {
+            sidebarToggleBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            sidebarToggleBtn.title = 'Collapse Sidebar';
+        }
     }
 }
 

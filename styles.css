@@ -241,105 +241,6 @@ body {
     font-size: 0.875rem;
 }
 
-/* Circular collapse button at bottom-right of sidebar */
-.sidebar-collapse-btn {
-    position: absolute;
-    bottom: 1.5rem;
-    right: 1.5rem;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background-color: transparent;
-    color: white;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    transition: var(--transition);
-    z-index: 10;
-    overflow: visible;
-}
-
-.sidebar-collapse-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-    transition: transform 0.1s ease, background-color 0.2s;
-    z-index: -1;
-}
-
-.sidebar-collapse-btn i {
-    position: relative;
-    z-index: 1;
-    transition: transform 0.1s ease;
-}
-
-.sidebar-collapse-btn:hover::before {
-    background-color: var(--primary-hover);
-}
-
-.sidebar-collapse-btn:hover {
-    transform: scale(1.1);
-}
-
-.sidebar-collapse-btn:active::before {
-    transform: translateX(8px);
-}
-
-.sidebar-collapse-btn:active i {
-    transform: translateX(8px);
-}
-
-
-.sidebar.collapsed .sidebar-collapse-btn {
-    display: none;
-}
-
-
-/* Bookmark expand button (visible when sidebar collapsed) */
-.sidebar-expand-bookmark {
-    position: fixed;
-    bottom: 1.5rem;
-    left: 0;
-    width: 48px;
-    height: 64px;
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
-    color: white;
-    border: none;
-    cursor: pointer;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 250;
-    border-radius: 0 32px 32px 0;
-    clip-path: none;
-}
-
-.sidebar-expand-bookmark:hover {
-    background-color: var(--primary-hover);
-    width: 62px;
-}
-
-.sidebar-expand-bookmark:active {
-    width: 70px;
-    transition: width 0.1s ease;
-}
-
-.sidebar.collapsed ~ .sidebar-expand-bookmark {
-    display: flex;
-}
-
 /* Collapsed Sidebar Controls (visible when sidebar is collapsed) */
 .collapsed-controls {
     position: fixed;
@@ -2974,11 +2875,6 @@ body:hover .reading-progress-bar:not(.hidden) {
 @media (max-width: 800px) {
     .main-content {
         margin-left: 0;
-    }
-    
-    /* Hide bookmark button on mobile, use top bar toggle instead */
-    .sidebar-expand-bookmark {
-        display: none !important;
     }
     
     .welcome-content h1 {
