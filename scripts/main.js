@@ -127,6 +127,60 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('sidebar-expand-bookmark').addEventListener('click', toggleSidebar);
     document.getElementById('close-theme-panel').addEventListener('click', closeThemePanel);
 
+    // Collapsed sidebar control buttons - show quick menus
+    const collapsedNewDocBtn = document.getElementById('collapsed-new-doc-btn');
+    const collapsedSettingsBtn = document.getElementById('collapsed-settings-btn');
+    const collapsedThemeBtn = document.getElementById('collapsed-theme-btn');
+    
+    console.log('Collapsed buttons found:', {
+        newDoc: !!collapsedNewDocBtn,
+        settings: !!collapsedSettingsBtn,
+        theme: !!collapsedThemeBtn
+    });
+    
+    collapsedNewDocBtn?.addEventListener('click', () => {
+        console.log('Collapsed new doc clicked');
+        showAddDocumentModal();
+    });
+    
+    collapsedSettingsBtn?.addEventListener('click', (e) => {
+        console.log('Collapsed settings clicked');
+        e.stopPropagation();
+        const quickMenu = document.getElementById('settings-quick-menu');
+        const themeQuickMenu = document.getElementById('theme-quick-menu');
+        
+        // Close theme menu if open (keep positioning classes for smooth fade)
+        themeQuickMenu?.classList.remove('show');
+        
+        // Set positioning for collapsed state BEFORE toggling show
+        quickMenu?.classList.remove('from-collapsed-theme');
+        quickMenu?.classList.add('from-collapsed-settings');
+        
+        // Toggle settings quick menu
+        quickMenu?.classList.toggle('show');
+        
+        console.log('Settings quick menu toggled:', quickMenu?.classList.contains('show'));
+    });
+    
+    collapsedThemeBtn?.addEventListener('click', (e) => {
+        console.log('Collapsed theme clicked');
+        e.stopPropagation();
+        const quickMenu = document.getElementById('theme-quick-menu');
+        const settingsQuickMenu = document.getElementById('settings-quick-menu');
+        
+        // Close settings menu if open (keep positioning classes for smooth fade)
+        settingsQuickMenu?.classList.remove('show');
+        
+        // Set positioning for collapsed state BEFORE toggling show
+        quickMenu?.classList.remove('from-collapsed-settings');
+        quickMenu?.classList.add('from-collapsed-theme');
+        
+        // Toggle theme quick menu
+        quickMenu?.classList.toggle('show');
+        
+        console.log('Theme quick menu toggled:', quickMenu?.classList.contains('show'));
+    });
+
     // Overlay is no longer used for theme/settings panels
 
     document.getElementById('paste-modal').addEventListener('click', function(e) {

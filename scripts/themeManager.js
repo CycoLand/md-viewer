@@ -356,6 +356,15 @@ export class ThemeManager {
         // Toggle quick menu on theme button click
         themeToggle?.addEventListener('click', (e) => {
             e.stopPropagation();
+            
+            const isCurrentlyOpen = quickMenu?.classList.contains('show');
+            
+            // Only update positioning if we're OPENING the menu (not closing)
+            if (!isCurrentlyOpen) {
+                quickMenu?.classList.remove('from-collapsed-settings', 'from-collapsed-theme');
+            }
+            
+            // Toggle theme quick menu
             quickMenu?.classList.toggle('show');
             
             // Close settings quick menu if open
@@ -385,7 +394,11 @@ export class ThemeManager {
         
         // Close quick menu when clicking outside
         document.addEventListener('click', (e) => {
-            if (!themeToggle?.contains(e.target) && !quickMenu?.contains(e.target)) {
+            const collapsedThemeBtn = document.getElementById('collapsed-theme-btn');
+            if (!themeToggle?.contains(e.target) && 
+                !quickMenu?.contains(e.target) &&
+                !collapsedThemeBtn?.contains(e.target)) {
+                // Only remove 'show' class, keep positioning classes for smooth fade
                 quickMenu?.classList.remove('show');
             }
         });

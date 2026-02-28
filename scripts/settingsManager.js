@@ -47,6 +47,15 @@ export class SettingsManager {
         // Toggle quick menu on settings button click
         this.settingsToggle?.addEventListener('click', (e) => {
             e.stopPropagation();
+            
+            const isCurrentlyOpen = this.quickMenu?.classList.contains('show');
+            
+            // Only update positioning if we're OPENING the menu (not closing)
+            if (!isCurrentlyOpen) {
+                this.quickMenu?.classList.remove('from-collapsed-settings', 'from-collapsed-theme');
+            }
+            
+            // Toggle settings quick menu
             this.quickMenu?.classList.toggle('show');
             
             // Close theme quick menu if open
@@ -84,7 +93,11 @@ export class SettingsManager {
         
         // Close quick menu when clicking outside
         document.addEventListener('click', (e) => {
-            if (!this.settingsToggle?.contains(e.target) && !this.quickMenu?.contains(e.target)) {
+            const collapsedSettingsBtn = document.getElementById('collapsed-settings-btn');
+            if (!this.settingsToggle?.contains(e.target) && 
+                !this.quickMenu?.contains(e.target) &&
+                !collapsedSettingsBtn?.contains(e.target)) {
+                // Only remove 'show' class, keep positioning classes for smooth fade
                 this.quickMenu?.classList.remove('show');
             }
         });
@@ -137,6 +150,17 @@ export class SettingsManager {
      */
     closePanel() {
         this.settingsPanel?.classList.remove('open');
+    }
+    
+    /**
+     * Toggle settings panel
+     */
+    togglePanel() {
+        if (this.settingsPanel?.classList.contains('open')) {
+            this.closePanel();
+        } else {
+            this.openPanel();
+        }
     }
     
     /**

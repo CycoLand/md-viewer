@@ -340,6 +340,48 @@ body {
     display: flex;
 }
 
+/* Collapsed Sidebar Controls (visible when sidebar is collapsed) */
+.collapsed-controls {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    display: none;
+    flex-direction: column;
+    gap: 0.5rem;
+    z-index: 250;
+    transition: var(--transition);
+}
+
+.sidebar.collapsed ~ .collapsed-controls {
+    display: flex;
+}
+
+.collapsed-control-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-color);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.collapsed-control-btn:hover {
+    background-color: var(--surface-hover);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    transform: scale(1.05);
+}
+
+.collapsed-control-btn:active {
+    transform: scale(0.95);
+}
+
 .file-list-container {
     flex: 1;
     overflow-y: auto;
@@ -2462,9 +2504,10 @@ body {
 
 /* ==================== Quick Menu (Theme & Settings) ==================== */
 .quick-menu {
-    position: absolute;
-    top: calc(100% + 0.5rem);
-    right: 0;
+    position: fixed;
+    /* Default position for sidebar mode */
+    top: 5rem;
+    left: calc(var(--sidebar-width) - 240px);
     background: var(--surface-color);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-lg);
@@ -2474,14 +2517,32 @@ body {
     z-index: 1001;
     opacity: 0;
     pointer-events: none;
-    transform: translateY(-10px);
-    transition: var(--transition);
+    transition: opacity 0.2s ease;
 }
 
 .quick-menu.show {
     opacity: 1;
     pointer-events: auto;
-    transform: translateY(0);
+}
+
+/* Position for settings menu when triggered from collapsed controls */
+/* Settings is the 2nd button: top + first button (40px) + gap (0.5rem) */
+.quick-menu.from-collapsed-settings {
+    top: calc(1rem + 40px); 
+    left: calc(1rem + 40px + 0.75rem);
+}
+
+/* Position for theme menu when triggered from collapsed controls */
+/* Theme is the 3rd button: top + two buttons (80px) + two gaps (1rem) */
+.quick-menu.from-collapsed-theme {
+    top: calc(1rem + 80px + 1rem);
+    left: calc(1rem + 40px + 0.75rem);
+}
+
+/* Make sure menus appear above collapsed controls */
+.quick-menu.from-collapsed-settings,
+.quick-menu.from-collapsed-theme {
+    z-index: 251;
 }
 
 .quick-menu-item {
