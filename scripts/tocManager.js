@@ -124,10 +124,13 @@ export function generateTOC(mdEl, tocEl) {
             </ul>
         `;
         
-        // Preserve water bar element before updating innerHTML
+        // Preserve water bar element before updating innerHTML (exclude fish - they're added by JS)
         const waterBar = tocEl.querySelector('.water-progress-container');
-        const waterBarHtml = waterBar ? waterBar.outerHTML : '';
-        
+        let waterBarHtml = '';
+        if (waterBar) {
+            waterBar.querySelectorAll('.ocean-layer, .water-fish, .water-octopus, .sea-floor-wrap').forEach(f => f.remove());
+            waterBarHtml = waterBar.outerHTML;
+        }
         tocEl.innerHTML = waterBarHtml + tocHtml;
 
         // Add event listener to depth selector

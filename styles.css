@@ -965,11 +965,12 @@ body {
     left: 0;
     width: 100%;
     /* height is set dynamically via JavaScript */
+    /* Semi-transparent so ocean layer (fish, sea floor, octopus) shows through */
     background: linear-gradient(
         180deg,
-        rgba(20, 184, 166, 0.8) 0%,
-        rgba(6, 182, 212, 0.9) 50%,
-        rgba(14, 165, 233, 1) 100%
+        rgba(20, 184, 166, 0.65) 0%,
+        rgba(6, 182, 212, 0.75) 50%,
+        rgba(14, 165, 233, 0.85) 100%
     );
     overflow: hidden;
 }
@@ -1042,8 +1043,80 @@ body {
     pointer-events: none;
 }
 
+/* Ocean layer - anchored to bottom, bar is viewport; z above water bg so fish/treasure/octopus show */
+.ocean-layer {
+    position: absolute;
+    top: auto;
+    left: 0;
+    bottom: 0;
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* Sea floor - sand, coral, treasure chest */
+.sea-floor-wrap {
+    z-index: 2;
+}
+
+.sea-floor {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.sea-sand {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, transparent 0%, rgba(210, 180, 140, 0.3) 30%, rgba(194, 178, 128, 0.7) 70%, #c4a574 100%);
+    border-radius: 0 0 4px 4px;
+}
+
+.sea-floor-decor {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 70px;
+    opacity: 0.9;
+}
+
 .water-fish .fish-svg {
     display: block;
+}
+
+.water-fish-big {
+    z-index: 6;
+}
+
+/* Octopus - near bottom, minimal movement */
+.water-octopus {
+    position: absolute;
+    left: 50%;
+    bottom: 8%;
+    width: 28px;
+    height: 28px;
+    z-index: 7;
+    pointer-events: none;
+    transform: translateX(-50%);
+}
+
+.water-octopus .octopus-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.water-octopus {
+    animation: octopus-float 5s ease-in-out infinite;
+}
+
+@keyframes octopus-float {
+    0%, 100% { opacity: 0.95; }
+    50% { opacity: 1; }
 }
 
 .boat {

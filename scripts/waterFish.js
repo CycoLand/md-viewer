@@ -1,16 +1,21 @@
-// Water Fish - Swimming with flow-field noise and boids-lite
-// Uses layered sine waves (fractal Brownian motion) for organic paths,
-// boundary repulsion for edge avoidance, and separation for natural spacing.
+// Water Fish - Outer box ocean with bar as viewport window
 
-const FISH_COUNT = 4;
-const FISH_COLORS = ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1'];
-const MARGIN = 4;
-const BOUNDARY_FORCE = 0.15;
-const SEPARATION_DISTANCE = 12;
-const SEPARATION_FORCE = 0.08;
+const GROUP_COUNT = 10;
+const FISH_PER_GROUP = 6;
+const FISH_COLORS = ['#ffd700', '#4ecdc4', '#ff6b6b', '#45b7d1', '#9b59b6', '#e74c3c', '#1abc9c', '#f39c12', '#3498db', '#e91e63'];
+const FISH_SIZE = 16;
 const NOISE_STRENGTH = 0.4;
-const BASE_SPEED = 0.3;
+const BASE_SPEED = 0.4;
 const MAX_TURN = 0.12;
+
+// Slow big fish - stay within 10° of horizontal (left/right)
+const BIG_FISH_COUNT = 4;
+const BIG_FISH_SIZE = 26;
+const BIG_FISH_SPEED = 0.12;
+const BIG_FISH_ANGLE_LIMIT = (10 * Math.PI) / 180;  // 10 degrees
+
+// Outer box - fish swim here; bar is a viewport window into it
+const OUTER_BOX_SCALE = 2;  // outer = 2x viewport
 
 // Seeded pseudo-random for reproducible but varied fish behavior
 function mulberry32(seed) {
@@ -34,6 +39,12 @@ function flowNoise(x, y, t, f1, f2, f3) {
 let animationId = null;
 let fishElements = [];
 let fishState = [];
+let groupCenters = [];
+let bigFishElements = [];
+let bigFishState = [];
+let octopusElement = null;
+let oceanLayer = null;
+let seaFloorElement = null;
 
 function createFishSvg(color, size, index) {
     const s = size;
@@ -55,120 +66,251 @@ function createFishSvg(color, size, index) {
     </svg>`;
 }
 
-function spawnFish(waterElement) {
-    const rect = waterElement.getBoundingClientRect();
-    const w = rect.width || 40;
-    const h = rect.height || 300;
+function createSeaFloorSvg() {
+    return `<div class="sea-floor">
+        <div class="sea-sand"></div>
+        <svg class="sea-floor-decor" viewBox="0 0 80 55" preserveAspectRatio="xMidYMax meet">
+            <!-- Coral left -->
+            <path d="M8 45 Q4 28 12 12 Q16 6 8 2" fill="none" stroke="#e74c3c" stroke-width="2" opacity="0.85"/>
+            <path d="M16 45 Q18 22 14 10" fill="none" stroke="#e91e63" stroke-width="1.5" opacity="0.75"/>
+            <!-- Coral right -->
+            <path d="M72 45 Q68 30 64 14 Q60 6 72 2" fill="none" stroke="#ff6b6b" stroke-width="2" opacity="0.85"/>
+            <path d="M64 45 Q62 24 66 12" fill="none" stroke="#e74c3c" stroke-width="1.5" opacity="0.75"/>
+            <!-- Treasure chest -->
+            <rect x="30" y="38" width="20" height="12" rx="2" fill="#8b4513" stroke="#654321" stroke-width="1.2"/>
+            <rect x="32" y="34" width="16" height="5" rx="2" fill="#b8860b"/>
+            <rect x="34" y="36" width="4" height="3" fill="#ffd700"/>
+            <rect x="40" y="36" width="4" height="3" fill="#ffd700"/>
+            <rect x="46" y="36" width="4" height="3" fill="#ffd700"/>
+        </svg>
+    </div>`;
+}
 
+function createOctopusSvg(id) {
+    return `<svg viewBox="0 0 32 32" class="octopus-svg" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="${id}-oct-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#5a3d2e"/>
+                <stop offset="100%" style="stop-color:#8b5a2b"/>
+            </linearGradient>
+        </defs>
+        <!-- Tentacles -->
+        <path class="octopus-tentacle" d="M6 20 Q4 26 8 28" stroke="url(#${id}-oct-grad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path class="octopus-tentacle" d="M10 21 Q8 27 12 28" stroke="url(#${id}-oct-grad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path class="octopus-tentacle" d="M14 22 Q12 28 16 29" stroke="url(#${id}-oct-grad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path class="octopus-tentacle" d="M18 22 Q16 28 20 29" stroke="url(#${id}-oct-grad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path class="octopus-tentacle" d="M22 21 Q20 27 24 28" stroke="url(#${id}-oct-grad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path class="octopus-tentacle" d="M26 20 Q24 26 28 28" stroke="url(#${id}-oct-grad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <!-- Body -->
+        <ellipse cx="16" cy="14" rx="10" ry="9" fill="url(#${id}-oct-grad)"/>
+        <circle cx="12" cy="12" r="2" fill="#1a1a2e"/>
+        <circle cx="20" cy="12" r="2" fill="#1a1a2e"/>
+        <circle cx="12.3" cy="11.3" r="0.5" fill="#fff"/>
+        <circle cx="20.3" cy="11.3" r="0.5" fill="#fff"/>
+    </svg>`;
+}
+
+function spawnFish(waterElement) {
+    const bar = waterElement.closest('.water-progress-bar');
+    if (!bar) return;
+    const barRect = bar.getBoundingClientRect();
+    const vw = Math.max(40, barRect.width);
+    const vh = Math.max(200, barRect.height);
+    const ow = vw * OUTER_BOX_SCALE;
+    const oh = vh * OUTER_BOX_SCALE;
+    const floorHeight = 80;
+
+    oceanLayer?.remove();
+    seaFloorElement?.remove();
     fishState = [];
     fishElements.forEach(el => el?.remove());
     fishElements = [];
+    groupCenters = [];
+    bigFishElements.forEach(el => el?.remove());
+    bigFishElements = [];
+    bigFishState = [];
+    octopusElement?.remove();
+    octopusElement = null;
 
-    for (let i = 0; i < FISH_COUNT; i++) {
-        const rnd = mulberry32(i * 7919);
-        const state = {
-            x: MARGIN + rnd() * (w - 2 * MARGIN),
-            y: MARGIN + rnd() * (h - 2 * MARGIN),
+    // Ocean layer - in water, bottom-anchored (sea floor, treasure, octopus at bottom)
+    oceanLayer = document.createElement('div');
+    oceanLayer.className = 'ocean-layer';
+    oceanLayer.style.cssText = `
+        position:absolute; top:auto; left:${(vw - ow) / 2}px; bottom:0;
+        width:${ow}px; height:${oh}px;
+        z-index:2;
+    `;
+    waterElement.insertBefore(oceanLayer, waterElement.firstChild);
+
+    // Sea floor at bottom of outer box
+    seaFloorElement = document.createElement('div');
+    seaFloorElement.className = 'sea-floor-wrap';
+    seaFloorElement.innerHTML = createSeaFloorSvg();
+    seaFloorElement.style.cssText = `position:absolute;bottom:0;left:0;width:100%;height:70px;pointer-events:none;`;
+    oceanLayer.appendChild(seaFloorElement);
+
+    let globalIndex = 0;
+    for (let g = 0; g < GROUP_COUNT; g++) {
+        const rnd = mulberry32(g * 7919 + 1);
+        const groupColor = FISH_COLORS[g % FISH_COLORS.length];
+        const center = {
+            x: 0.1 * ow + rnd() * 0.8 * ow,
+            y: 0.1 * (oh - floorHeight) + rnd() * 0.7 * (oh - floorHeight),
             angle: rnd() * Math.PI * 2,
-            speed: BASE_SPEED * (0.7 + rnd() * 0.6),
+            speed: BASE_SPEED * (0.85 + rnd() * 0.3),
             phase: rnd() * 1000,
-            size: 8 + rnd() * 4,
-            color: FISH_COLORS[i % FISH_COLORS.length],
             f1: 0.7 + rnd() * 0.6,
             f2: 0.3 + rnd() * 0.4,
             f3: 0.1 + rnd() * 0.2,
         };
-        fishState.push(state);
+        groupCenters.push(center);
 
+        for (let f = 0; f < FISH_PER_GROUP; f++) {
+            const frnd = mulberry32(g * 113 + f * 31 + 1);
+            fishState.push({
+                groupIndex: g,
+                offsetX: (frnd() - 0.5) * 12,
+                offsetY: (frnd() - 0.5) * 12,
+                x: 0, y: 0, angle: 0,
+                color: groupColor,
+                size: FISH_SIZE * (0.9 + frnd() * 0.2),
+            });
+            const fishEl = document.createElement('div');
+            fishEl.className = 'water-fish';
+            fishEl.innerHTML = createFishSvg(fishState[fishState.length - 1].color, fishState[fishState.length - 1].size, globalIndex);
+            oceanLayer.appendChild(fishEl);
+            fishElements.push(fishEl);
+            globalIndex++;
+        }
+    }
+
+    // Big fish - spawn in outer box
+    const bigFishColors = ['#2d5a27', '#1e3d36', '#3d5a2d', '#2d3d5a'];
+    for (let i = 0; i < BIG_FISH_COUNT; i++) {
+        const rnd = mulberry32(9000 + i * 7919);
+        const dir = rnd() > 0.5 ? 0 : Math.PI;  // Start facing left or right
+        bigFishState.push({
+            x: 0.1 * ow + rnd() * 0.8 * ow,
+            y: 0.2 * (oh - floorHeight) + rnd() * 0.6 * (oh - floorHeight),
+            angle: dir + (rnd() - 0.5) * BIG_FISH_ANGLE_LIMIT,
+            speed: BIG_FISH_SPEED * (0.8 + rnd() * 0.4),
+            phase: rnd() * 1000,
+            f1: 0.7 + rnd() * 0.6,
+            f2: 0.3 + rnd() * 0.4,
+            f3: 0.1 + rnd() * 0.2,
+            size: BIG_FISH_SIZE * (0.9 + rnd() * 0.2),
+            color: bigFishColors[i % bigFishColors.length],
+        });
         const fishEl = document.createElement('div');
-        fishEl.className = 'water-fish';
-        fishEl.innerHTML = createFishSvg(state.color, state.size, i);
-        fishEl.dataset.index = i;
-        waterElement.appendChild(fishEl);
-        fishElements.push(fishEl);
+        fishEl.className = 'water-fish water-fish-big';
+        fishEl.innerHTML = createFishSvg(bigFishState[i].color, bigFishState[i].size, 1000 + i);
+        oceanLayer.appendChild(fishEl);
+        bigFishElements.push(fishEl);
+    }
+
+    // Octopus - at bottom of outer box
+    const octId = 'oct-' + Date.now();
+    octopusElement = document.createElement('div');
+    octopusElement.className = 'water-octopus';
+    octopusElement.innerHTML = createOctopusSvg(octId);
+    octopusElement.style.left = (ow / 2) + 'px';
+    octopusElement.style.bottom = '75px';
+    oceanLayer.appendChild(octopusElement);
+}
+
+function clampAngleToHorizontal(desiredAngle, currentAngle, limitRad) {
+    let a = ((desiredAngle + Math.PI) % (2 * Math.PI)) - Math.PI;
+    const goingRight = Math.cos(currentAngle) >= 0;
+    if (goingRight) {
+        return Math.max(-limitRad, Math.min(limitRad, a));
+    } else {
+        if (a > 0) return Math.PI - limitRad;
+        return -Math.PI + limitRad;
     }
 }
 
 function animate(time) {
     const waterElement = document.getElementById('water-level');
-    if (!waterElement || !document.querySelector('.water-progress-container')) {
+    const bar = waterElement?.closest('.water-progress-bar');
+    if (!waterElement || !bar || !oceanLayer) {
         animationId = null;
         return;
     }
 
-    const rect = waterElement.getBoundingClientRect();
-    const w = rect.width || 40;
-    const h = rect.height || 300;
+    const barRect = bar.getBoundingClientRect();
+    const waterRect = waterElement.getBoundingClientRect();
+    const vw = Math.max(40, barRect.width);
+    const vh = Math.max(200, barRect.height);
+    const waterHeight = waterRect.height;
+    const ow = vw * OUTER_BOX_SCALE;
+    const oh = vh * OUTER_BOX_SCALE;
     const t = time * 0.001;
 
+    const margin = 5;
+    const floorHeight = 80;
+    // Fish above water surface disappear; when water empty, show all (surfaceY very low)
+    const surfaceY = Math.max(0, oh - waterHeight - 15);
+
+    // Update group centers - stay in outer box
+    for (let g = 0; g < groupCenters.length; g++) {
+        const c = groupCenters[g];
+        const noiseVal = flowNoise(c.x, c.y, t + c.phase, c.f1, c.f2, c.f3);
+        const desiredAngle = c.angle + noiseVal * NOISE_STRENGTH;
+
+        let angleDiff = desiredAngle - c.angle;
+        angleDiff = ((angleDiff + Math.PI) % (2 * Math.PI)) - Math.PI;
+        c.angle += Math.max(-MAX_TURN, Math.min(MAX_TURN, angleDiff));
+
+        c.x += Math.cos(c.angle) * c.speed;
+        c.y += Math.sin(c.angle) * c.speed;
+
+        c.x = Math.max(margin, Math.min(ow - margin, c.x));
+        c.y = Math.max(margin, Math.min(oh - floorHeight, c.y));
+    }
+
+    // Update little fish
     for (let i = 0; i < fishState.length; i++) {
         const fish = fishState[i];
         const el = fishElements[i];
-        if (!el) continue;
+        const c = groupCenters[fish.groupIndex];
+        if (!el || !c) continue;
 
-        // Flow-field: noise influences desired heading
-        const noiseVal = flowNoise(fish.x, fish.y, t + fish.phase, fish.f1, fish.f2, fish.f3);
-        let desiredAngle = fish.angle + noiseVal * NOISE_STRENGTH;
-
-        // Boundary repulsion - steer away from edges (soft potential field)
-        const edgeMargin = MARGIN + 2;
-        let boundaryFx = 0, boundaryFy = 0;
-        if (fish.x < edgeMargin) boundaryFx += BOUNDARY_FORCE * (edgeMargin - fish.x);
-        if (fish.x > w - edgeMargin) boundaryFx -= BOUNDARY_FORCE * (fish.x - (w - edgeMargin));
-        if (fish.y < edgeMargin) boundaryFy += BOUNDARY_FORCE * (edgeMargin - fish.y);
-        if (fish.y > h - edgeMargin) boundaryFy -= BOUNDARY_FORCE * (fish.y - (h - edgeMargin));
-
-        const boundaryAngle = Math.atan2(boundaryFy, boundaryFx);
-        const boundaryStrength = Math.hypot(boundaryFx, boundaryFy);
-        if (boundaryStrength > 0.01) {
-            const angleDiff = boundaryAngle - fish.angle;
-            const wrapped = ((angleDiff + Math.PI) % (2 * Math.PI)) - Math.PI;
-            desiredAngle = fish.angle + Math.max(-MAX_TURN, Math.min(MAX_TURN, wrapped * 2));
-        }
-
-        // Boids separation - avoid crowding other fish
-        let sepFx = 0, sepFy = 0;
-        for (let j = 0; j < fishState.length; j++) {
-            if (i === j) continue;
-            const other = fishState[j];
-            const dx = other.x - fish.x;
-            const dy = other.y - fish.y;
-            const dist = Math.hypot(dx, dy);
-            if (dist > 0 && dist < SEPARATION_DISTANCE) {
-                const push = (1 - dist / SEPARATION_DISTANCE) * SEPARATION_FORCE;
-                sepFx -= (dx / dist) * push;
-                sepFy -= (dy / dist) * push;
-            }
-        }
-        const sepAngle = Math.atan2(sepFy, sepFx);
-        const sepStrength = Math.hypot(sepFx, sepFy);
-        if (sepStrength > 0.01) {
-            const angleDiff = sepAngle - fish.angle;
-            const wrapped = ((angleDiff + Math.PI) % (2 * Math.PI)) - Math.PI;
-            desiredAngle = fish.angle + Math.max(-MAX_TURN * 2, Math.min(MAX_TURN * 2, wrapped));
-        }
-
-        // Smooth turn toward desired angle
-        let angleDiff = desiredAngle - fish.angle;
-        angleDiff = ((angleDiff + Math.PI) % (2 * Math.PI)) - Math.PI;
-        fish.angle += Math.max(-MAX_TURN, Math.min(MAX_TURN, angleDiff));
-
-        // Move forward
-        fish.x += Math.cos(fish.angle) * fish.speed;
-        fish.y += Math.sin(fish.angle) * fish.speed;
-
-        // Wrap / clamp bounds (soft wrap for continuous feel)
-        if (fish.x < -MARGIN) fish.x = w + MARGIN;
-        if (fish.x > w + MARGIN) fish.x = -MARGIN;
-        if (fish.y < -MARGIN) fish.y = h + MARGIN;
-        if (fish.y > h + MARGIN) fish.y = -MARGIN;
-
-        fish.x = Math.max(0, Math.min(w, fish.x));
-        fish.y = Math.max(0, Math.min(h, fish.y));
+        fish.x = c.x + fish.offsetX;
+        fish.y = c.y + fish.offsetY;
+        fish.angle = c.angle;
 
         el.style.left = fish.x + 'px';
         el.style.top = fish.y + 'px';
         el.style.transform = `translate(-50%, -50%) rotate(${fish.angle}rad)`;
+        el.style.visibility = fish.y >= surfaceY ? 'visible' : 'hidden';
+    }
+
+    // Update big fish - constrain to ±10° of horizontal, stay in outer box
+    for (let i = 0; i < bigFishState.length; i++) {
+        const fish = bigFishState[i];
+        const el = bigFishElements[i];
+        if (!el) continue;
+
+        const noiseVal = flowNoise(fish.x, fish.y, t + fish.phase, fish.f1, fish.f2, fish.f3);
+        const desiredAngle = fish.angle + noiseVal * 0.15;  // Subtle, horizontal bias
+        fish.angle = clampAngleToHorizontal(desiredAngle, fish.angle, BIG_FISH_ANGLE_LIMIT);
+
+        fish.x += Math.cos(fish.angle) * fish.speed;
+        fish.y += Math.sin(fish.angle) * fish.speed * 0.3;  // Less vertical movement
+
+        fish.x = Math.max(margin, Math.min(ow - margin, fish.x));
+        fish.y = Math.max(margin, Math.min(oh - floorHeight, fish.y));
+
+        el.style.left = fish.x + 'px';
+        el.style.top = fish.y + 'px';
+        el.style.transform = `translate(-50%, -50%) rotate(${fish.angle}rad)`;
+        el.style.visibility = fish.y >= surfaceY ? 'visible' : 'hidden';
+    }
+
+    // Octopus - always visible (stays at bottom) - subtle drift
+    if (octopusElement) {
+        const driftX = 2 * Math.sin(t * 0.3) + 1 * Math.sin(t * 0.17);
+        octopusElement.style.transform = `translate(calc(-50% + ${driftX}px), 0)`;
     }
 
     animationId = requestAnimationFrame(animate);
@@ -186,7 +328,17 @@ export function stopWaterFish() {
         cancelAnimationFrame(animationId);
         animationId = null;
     }
+    oceanLayer?.remove();
+    oceanLayer = null;
+    seaFloorElement?.remove();
+    seaFloorElement = null;
     fishElements.forEach(el => el?.remove());
     fishElements = [];
     fishState = [];
+    groupCenters = [];
+    bigFishElements.forEach(el => el?.remove());
+    bigFishElements = [];
+    bigFishState = [];
+    octopusElement?.remove();
+    octopusElement = null;
 }
