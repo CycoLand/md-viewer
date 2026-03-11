@@ -418,6 +418,25 @@
                     <!-- Original content areas (hidden when pagination is active) -->
                     <div id="markdown-content" class="markdown-content"></div>
                     <aside id="toc" class="toc">
+                        <!-- Water Progress Bar -->
+                        <div class="water-progress-container">
+                            <div class="water-progress-bar">
+                                <div class="water" id="water-level">
+                                    <div class="wave wave-1"></div>
+                                    <div class="wave wave-2"></div>
+                                    <div class="boat" id="boat">
+                                        <svg viewBox="0 0 50 30" xmlns="http://www.w3.org/2000/svg">
+                                        <!-- Boat hull -->
+                                        <path d="M 5 20 L 10 25 L 40 25 L 45 20 L 5 20 Z" fill="#8B4513"/>
+                                        <!-- Sail -->
+                                        <polygon points="25,5 25,20 35,17.5" fill="#f8fafc"/>
+                                        <!-- Mast -->
+                                        <line x1="25" y1="5" x2="25" y2="20" stroke="#654321" stroke-width="1.5"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <!-- TOC content generated dynamically -->
                     </aside>
                     <div id="raw-content" class="raw-content" style="display: none;">
