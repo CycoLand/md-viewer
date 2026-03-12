@@ -16,7 +16,7 @@ const BIG_FISH_SPEED = 0.12;
 const BIG_FISH_ANGLE_LIMIT = (10 * Math.PI) / 180;  // 10 degrees
 
 // Outer box - fish swim here; bar is a viewport window into it
-const OUTER_BOX_SCALE = 2;  // outer = 2x viewport
+const OUTER_BOX_SCALE = 1.8;  // outer = 2x viewport
 
 // Seeded pseudo-random for reproducible but varied fish behavior
 function mulberry32(seed) {
