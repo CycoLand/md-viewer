@@ -1,6 +1,6 @@
 // Water Fish - Outer box ocean with bar as viewport window
 
-const GROUP_COUNT = 10;
+const GROUP_COUNT = 100;
 const FISH_PER_GROUP = 6;
 const FISH_COLORS = ['#ffd700', '#4ecdc4', '#ff6b6b', '#45b7d1', '#9b59b6', '#e74c3c', '#1abc9c', '#f39c12', '#3498db', '#e91e63'];
 const FISH_SIZE = 16;
@@ -255,7 +255,7 @@ function animate(time) {
     for (let g = 0; g < groupCenters.length; g++) {
         const c = groupCenters[g];
         const noiseVal = flowNoise(c.x, c.y, t + c.phase, c.f1, c.f2, c.f3);
-        const desiredAngle = c.angle + noiseVal * NOISE_STRENGTH;
+        const desiredAngle = noiseVal * Math.PI;
 
         let angleDiff = desiredAngle - c.angle;
         angleDiff = ((angleDiff + Math.PI) % (2 * Math.PI)) - Math.PI;
