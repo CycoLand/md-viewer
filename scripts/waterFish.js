@@ -1,12 +1,13 @@
 // Water Fish - Outer box ocean with bar as viewport window
 
-const GROUP_COUNT = 100;
+const GROUP_COUNT = 20;
 const FISH_PER_GROUP = 6;
 const FISH_COLORS = ['#ffd700', '#4ecdc4', '#ff6b6b', '#45b7d1', '#9b59b6', '#e74c3c', '#1abc9c', '#f39c12', '#3498db', '#e91e63'];
 const FISH_SIZE = 16;
 const NOISE_STRENGTH = 0.4;
 const BASE_SPEED = 0.4;
 const MAX_TURN = 0.12;
+const BOAT_AVOIDANCE_RADIUS = 100;  // Fish flee if closer than this to boat
 
 // Slow big fish - stay within 10° of horizontal (left/right)
 const BIG_FISH_COUNT = 4;
@@ -251,11 +252,38 @@ function animate(time) {
     // Fish above water surface disappear; when water empty, show all (surfaceY very low)
     const surfaceY = Math.max(0, oh - waterHeight - 15);
 
+    // Boat position in outer box coordinates (centered horizontally, at water surface)
+    const boatX = ow / 2;
+    const boatY = surfaceY;
+
     // Update group centers - stay in outer box
     for (let g = 0; g < groupCenters.length; g++) {
         const c = groupCenters[g];
-        const noiseVal = flowNoise(c.x, c.y, t + c.phase, c.f1, c.f2, c.f3);
-        const desiredAngle = noiseVal * Math.PI;
+        // Create 2D flow field - use noise for both x and y components
+        const noiseX = flowNoise(c.x, c.y, t + c.phase, c.f1, c.f2, c.f3);
+        const noiseY = flowNoise(c.y, c.x, t + c.phase + 100, c.f2, c.f1, c.f3);  // Swap coords and offset for independence
+        let desiredAngle = Math.atan2(noiseY, noiseX);
+
+        // Boat avoidance - fish flee if too close to boat
+        let dx = c.x - boatX;
+        let dy = c.y - boatY;
+        const distToBoat = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distToBoat < BOAT_AVOIDANCE_RADIUS && distToBoat > 0) {
+            // Prevent oscillation when nearly aligned - add consistent bias
+            if (Math.abs(dx) < 5) {
+                dx = g % 2 === 0 ? 5 : -5;  // Each group picks a consistent side
+            }
+            if (Math.abs(dy) < 5) {
+                dy = g % 3 === 0 ? 5 : -5;  // Use different modulo to avoid all going same way
+            }
+            
+            // Calculate angle away from boat
+            const fleeAngle = Math.atan2(dy, dx);
+            // Blend flee behavior with flow field (stronger when closer)
+            const fleeFactor = 1 - (distToBoat / BOAT_AVOIDANCE_RADIUS);
+            desiredAngle = fleeAngle * fleeFactor + desiredAngle * (1 - fleeFactor);
+        }
 
         let angleDiff = desiredAngle - c.angle;
         angleDiff = ((angleDiff + Math.PI) % (2 * Math.PI)) - Math.PI;
@@ -291,8 +319,30 @@ function animate(time) {
         const el = bigFishElements[i];
         if (!el) continue;
 
-        const noiseVal = flowNoise(fish.x, fish.y, t + fish.phase, fish.f1, fish.f2, fish.f3);
-        const desiredAngle = fish.angle + noiseVal * 0.15;  // Subtle, horizontal bias
+        // Create 2D flow field for big fish
+        const noiseX = flowNoise(fish.x, fish.y, t + fish.phase, fish.f1, fish.f2, fish.f3);
+        const noiseY = flowNoise(fish.y, fish.x, t + fish.phase + 100, fish.f2, fish.f1, fish.f3);
+        let desiredAngle = Math.atan2(noiseY, noiseX);
+
+        // Boat avoidance for big fish
+        let dx = fish.x - boatX;
+        let dy = fish.y - boatY;
+        const distToBoat = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distToBoat < BOAT_AVOIDANCE_RADIUS && distToBoat > 0) {
+            // Prevent oscillation when nearly aligned
+            if (Math.abs(dx) < 5) {
+                dx = i % 2 === 0 ? 5 : -5;  // Each big fish picks a consistent side
+            }
+            if (Math.abs(dy) < 5) {
+                dy = i % 3 === 0 ? 5 : -5;
+            }
+            
+            const fleeAngle = Math.atan2(dy, dx);
+            const fleeFactor = 1 - (distToBoat / BOAT_AVOIDANCE_RADIUS);
+            desiredAngle = fleeAngle * fleeFactor + desiredAngle * (1 - fleeFactor);
+        }
+
         fish.angle = clampAngleToHorizontal(desiredAngle, fish.angle, BIG_FISH_ANGLE_LIMIT);
 
         fish.x += Math.cos(fish.angle) * fish.speed;
