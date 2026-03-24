@@ -39,7 +39,7 @@
     
     /* Layout */
     --sidebar-width: 310px;
-    --content-max-width: 1100px;
+    --content-max-width: 700px;
     --border-radius: 8px;
     --border-radius-lg: 12px;
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -995,42 +995,62 @@ body {
 }
 
 .wave-1 {
-    animation: wave-animation-1 3s ease-in-out infinite;
+    animation: wave-animation-1 3.2s ease-in-out infinite;
+    animation-delay: 0s;
 }
 
 .wave-2 {
-    animation: wave-animation-2 4s ease-in-out infinite;
+    animation: wave-animation-2 4.7s ease-in-out infinite;
     opacity: 0.6;
     top: -15px;
+    animation-delay: -1.2s;
 }
 
 @keyframes wave-animation-1 {
-    0%, 100% {
+    0% {
         transform: translateX(-50%) translateY(0) rotate(0deg);
     }
-    25% {
-        transform: translateX(-45%) translateY(-3px) rotate(1deg);
+    17% {
+        transform: translateX(-47%) translateY(-2px) rotate(0.8deg);
     }
-    50% {
-        transform: translateX(-50%) translateY(-5px) rotate(0deg);
+    34% {
+        transform: translateX(-52%) translateY(-4px) rotate(-0.5deg);
     }
-    75% {
-        transform: translateX(-55%) translateY(-3px) rotate(-1deg);
+    51% {
+        transform: translateX(-48%) translateY(-5px) rotate(1.2deg);
+    }
+    68% {
+        transform: translateX(-54%) translateY(-3px) rotate(-1deg);
+    }
+    85% {
+        transform: translateX(-49%) translateY(-1px) rotate(0.3deg);
+    }
+    100% {
+        transform: translateX(-50%) translateY(0) rotate(0deg);
     }
 }
 
 @keyframes wave-animation-2 {
-    0%, 100% {
+    0% {
         transform: translateX(-50%) translateY(0) rotate(0deg);
     }
-    25% {
-        transform: translateX(-55%) translateY(-4px) rotate(-1deg);
+    15% {
+        transform: translateX(-53%) translateY(-3px) rotate(-0.7deg);
     }
-    50% {
-        transform: translateX(-50%) translateY(-6px) rotate(0deg);
+    32% {
+        transform: translateX(-46%) translateY(-5px) rotate(1.1deg);
     }
-    75% {
-        transform: translateX(-45%) translateY(-4px) rotate(1deg);
+    48% {
+        transform: translateX(-51%) translateY(-6px) rotate(-0.3deg);
+    }
+    64% {
+        transform: translateX(-47%) translateY(-4px) rotate(0.9deg);
+    }
+    80% {
+        transform: translateX(-52%) translateY(-2px) rotate(-0.6deg);
+    }
+    100% {
+        transform: translateX(-50%) translateY(0) rotate(0deg);
     }
 }
 
@@ -1127,22 +1147,31 @@ body {
     width: 30px;
     height: 30px;
     z-index: 20;
-    animation: boat-bob 2s ease-in-out infinite;
+    animation: boat-bob 3.2s ease-in-out infinite;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 @keyframes boat-bob {
-    0%, 100% {
-        transform: translateX(-50%) translateY(0) rotate(-2deg);
+    0% {
+        transform: translateX(-50%) translateY(0) rotate(0deg);
     }
-    25% {
-        transform: translateX(-50%) translateY(-2px) rotate(1deg);
+    17% {
+        transform: translateX(-50%) translateY(-2px) rotate(0.8deg);
     }
-    50% {
-        transform: translateX(-50%) translateY(-4px) rotate(2deg);
+    34% {
+        transform: translateX(-50%) translateY(-4px) rotate(-0.5deg);
     }
-    75% {
-        transform: translateX(-50%) translateY(-2px) rotate(-1deg);
+    51% {
+        transform: translateX(-50%) translateY(-5px) rotate(1.2deg);
+    }
+    68% {
+        transform: translateX(-50%) translateY(-3px) rotate(-1deg);
+    }
+    85% {
+        transform: translateX(-50%) translateY(-1px) rotate(0.3deg);
+    }
+    100% {
+        transform: translateX(-50%) translateY(0) rotate(0deg);
     }
 }
 
@@ -1623,10 +1652,11 @@ body {
 
 .markdown-content code {
     background: var(--inline-code-bg);
-    padding: 0.3rem 0.6rem;
+    padding: 0.1rem 0.1rem;
     border-radius: 5px;
     font-family: var(--font-mono);
-    font-size: 0.875rem;
+    font-size: 0.75rem;
+    vertical-align: middle;
     color: var(--inline-code-color);
     font-weight: 500;
     border: 1px solid var(--box-border);
@@ -1636,7 +1666,7 @@ body {
 
 .markdown-content pre {
     background-color: var(--surface-color);
-    padding: 1.5rem;
+    padding: 0.75rem;
     border-radius: var(--border-radius-lg);
     overflow-x: auto;
     margin: 2rem 0;
@@ -1746,7 +1776,7 @@ body {
 /* Code Block Wrapper with Header */
 .code-block-wrapper {
     display: block;
-    margin: 2rem 0;
+    margin: 1rem 0;
     border-radius: var(--border-radius-lg);
     overflow: hidden;
     border: 1px solid var(--border-color);
@@ -1755,9 +1785,6 @@ body {
     width: fit-content;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
     transition: box-shadow 0.3s ease, transform 0.2s ease;
-}
-
-.code-block-wrapper:hover {
 }
 
 /* Comment transitions */
@@ -1793,7 +1820,7 @@ body {
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
-    padding: 0.75rem 1.25rem;
+    padding: 0.25rem 0.75rem;
     background: var(--box-bg-alt);
     border-bottom: 1px solid var(--border-color);
     backdrop-filter: blur(10px);
