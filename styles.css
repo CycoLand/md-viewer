@@ -39,7 +39,7 @@
     
     /* Layout */
     --sidebar-width: 310px;
-    --content-max-width: 700px;
+    --content-max-width: 1100px;
     --border-radius: 8px;
     --border-radius-lg: 12px;
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
