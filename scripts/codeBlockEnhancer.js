@@ -836,9 +836,7 @@ async function renderMermaidDiagram(codeBlock, pre) {
             URL.revokeObjectURL(url);
         });
         
-        // Set measured height for collapse animation (after diagram is rendered)
-        bodyWrap.dataset.measuredHeight = String(bodyWrap.scrollHeight);
-        bodyWrap.style.maxHeight = bodyWrap.scrollHeight + 'px';
+        // Height is measured after this wrapper is attached to the DOM.
         
     } catch (error) {
         console.error('Mermaid rendering error:', error);
@@ -909,8 +907,7 @@ async function renderMermaidDiagram(codeBlock, pre) {
             </div>
         `;
         diagramContainer.classList.add('error');
-        bodyWrap.dataset.measuredHeight = String(bodyWrap.scrollHeight);
-        bodyWrap.style.maxHeight = bodyWrap.scrollHeight + 'px';
+        // Height is measured after this wrapper is attached to the DOM.
     }
     
     return wrapper;
@@ -945,6 +942,15 @@ export function enhanceCodeBlocks(mdEl) {
         if (language === 'mermaid' && typeof mermaid !== 'undefined') {
             const wrapper = await renderMermaidDiagram(block, pre);
             pre.parentNode.replaceChild(wrapper, pre);
+            // Mermaid wrapper is rendered off-DOM, so measure height after insertion.
+            const bodyWrap = wrapper.querySelector('.code-block-body');
+            if (bodyWrap) {
+                requestAnimationFrame(() => {
+                    const measuredHeight = bodyWrap.scrollHeight;
+                    bodyWrap.dataset.measuredHeight = String(measuredHeight);
+                    bodyWrap.style.maxHeight = measuredHeight + 'px';
+                });
+            }
             return;
         }
         
