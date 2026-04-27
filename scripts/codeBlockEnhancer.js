@@ -757,8 +757,9 @@ async function renderMermaidDiagram(codeBlock, pre) {
                 const containerRect = diagramContainer.getBoundingClientRect();
                 const wrapperRect = svgWrapper.getBoundingClientRect();
 
-                const availableWidth = Math.max(1, containerRect.width - 8);
-                const availableHeight = Math.max(1, containerRect.height - 8);
+                // Leave headroom for borders/padding/sub-pixel rounding so fit never overflows.
+                const availableWidth = Math.max(1, containerRect.width - 24);
+                const availableHeight = Math.max(1, containerRect.height - 24);
                 const renderedWidth = Math.max(1, wrapperRect.width);
                 const renderedHeight = Math.max(1, wrapperRect.height);
 
