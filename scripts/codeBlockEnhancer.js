@@ -218,7 +218,8 @@ function getMermaidConfig() {
             defaultRenderer: 'dagre'
         },
         sequence: {
-            useMaxWidth: true,
+            // Keep sequence diagrams consistent with flowchart sizing behavior.
+            useMaxWidth: false,
             wrap: true,
             height: 'auto'
         },
@@ -808,6 +809,7 @@ async function renderMermaidDiagram(codeBlock, pre) {
                 sourceContainer.style.display = 'none';
                 viewSourceBtn.innerHTML = '<i class="fas fa-code"></i> Source';
             }
+            requestAnimationFrame(() => remeasureAncestorSections(wrapper));
         });
         
         copyBtn.addEventListener('click', () => {
@@ -925,6 +927,28 @@ function escapeHtml(text) {
 }
 
 /**
+ * Remeasures the expanded section-body chain after dynamic content changes.
+ * This prevents mermaid diagrams from being clipped by stale parent max-heights.
+ * @param {HTMLElement} element - Element inside a section that changed height
+ */
+function remeasureAncestorSections(element) {
+    let currentBody = element.closest('.md-section-body');
+
+    while (currentBody) {
+        const section = currentBody.closest('.md-section');
+        if (!section || section.classList.contains('collapsed')) break;
+
+        currentBody.style.maxHeight = 'none';
+        const measuredHeight = currentBody.scrollHeight;
+        currentBody.dataset.measuredHeight = String(measuredHeight);
+        currentBody.style.maxHeight = measuredHeight + 'px';
+
+        const parentSection = section.parentElement ? section.parentElement.closest('.md-section') : null;
+        currentBody = parentSection ? parentSection.querySelector(':scope > .md-section-body') : null;
+    }
+}
+
+/**
  * Enhances all code blocks with syntax highlighting, buttons, and comment controls
  * @param {HTMLElement} mdEl - The markdown content element
  */
@@ -949,6 +973,7 @@ export function enhanceCodeBlocks(mdEl) {
                     const measuredHeight = bodyWrap.scrollHeight;
                     bodyWrap.dataset.measuredHeight = String(measuredHeight);
                     bodyWrap.style.maxHeight = measuredHeight + 'px';
+                    remeasureAncestorSections(wrapper);
                 });
             }
             return;
