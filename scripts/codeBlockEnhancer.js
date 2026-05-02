@@ -1124,7 +1124,8 @@ export function enhanceCodeBlocks(mdEl) {
         bodyWrap.appendChild(pre);
         
         // Measure and set initial height for collapse animation
-        const measuredHeight = bodyWrap.scrollHeight;
+        // Add extra pixels to account for horizontal scrollbar height
+        const measuredHeight = bodyWrap.scrollHeight + 12;
         bodyWrap.dataset.measuredHeight = String(measuredHeight);
         bodyWrap.style.maxHeight = measuredHeight + 'px';
         

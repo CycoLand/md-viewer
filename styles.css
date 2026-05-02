@@ -1778,11 +1778,10 @@ body {
     display: block;
     margin: 1rem 0;
     border-radius: var(--border-radius-lg);
-    overflow: hidden;
     border: 1px solid var(--border-color);
     background-color: var(--surface-color);
     max-width: 100%;
-    width: fit-content;
+    width: 100%;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
     transition: box-shadow 0.3s ease, transform 0.2s ease;
 }
@@ -1824,16 +1823,20 @@ body {
     background: var(--box-bg-alt);
     border-bottom: 1px solid var(--border-color);
     backdrop-filter: blur(10px);
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
 }
 
 /* Code block collapse: body wrapper */
 .code-block-body {
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
     transition: max-height var(--collapse-duration) ease;
+    border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
 }
 
 .code-block-wrapper.collapsed .code-block-body {
     max-height: 0;
+    overflow: hidden;
 }
 
 .code-block-toggle-icon {
