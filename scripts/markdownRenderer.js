@@ -1,7 +1,7 @@
 // Markdown rendering utilities
 import { state } from './state.js';
 import { enhanceCodeBlocks } from './codeBlockEnhancer.js';
-import { buildCollapsibleSections, setupHashBasedCollapse, remeasureSection } from './collapsibleSections.js';
+import { buildCollapsibleSections, remeasureSection } from './collapsibleSections.js';
 import { generateTOC } from './tocManager.js';
 import { setupSortableTables } from './sortableTables.js';
 import { enhanceListCards } from './listCardEnhancer.js';
@@ -162,9 +162,6 @@ export function showRenderedContent(content) {
         b.style.maxHeight = height + 'px';
     });
 
-
-    // Handle hash-based navigation
-    setupHashBasedCollapse(mdEl);
 
     // Generate table of contents
     if (tocEl) {
