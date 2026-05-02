@@ -218,7 +218,8 @@ function getMermaidConfig() {
             defaultRenderer: 'dagre'
         },
         sequence: {
-            useMaxWidth: true,
+            // Keep sequence diagrams consistent with flowchart sizing behavior.
+            useMaxWidth: false,
             wrap: true,
             height: 'auto'
         },
@@ -640,9 +641,37 @@ async function renderMermaidDiagram(codeBlock, pre) {
             svgElement.parentNode.insertBefore(svgWrapper, svgElement);
             svgWrapper.appendChild(svgElement);
             
-            // Get the natural dimensions from mermaid's rendered SVG
-            const svgWidth = svgElement.getBoundingClientRect().width || svgElement.clientWidth;
-            const svgHeight = svgElement.getBoundingClientRect().height || svgElement.clientHeight;
+            // Get stable natural dimensions while this wrapper may still be off-DOM.
+            let svgWidth = parseFloat(svgElement.getAttribute('width')) || 0;
+            let svgHeight = parseFloat(svgElement.getAttribute('height')) || 0;
+
+            if ((!svgWidth || !svgHeight) && svgElement.hasAttribute('viewBox')) {
+                const vb = svgElement.getAttribute('viewBox').split(/\s+/).map(Number);
+                if (vb.length === 4 && Number.isFinite(vb[2]) && Number.isFinite(vb[3])) {
+                    svgWidth = vb[2];
+                    svgHeight = vb[3];
+                }
+            }
+
+            if ((!svgWidth || !svgHeight) && typeof svgElement.getBBox === 'function') {
+                try {
+                    const bbox = svgElement.getBBox();
+                    if (bbox.width > 0 && bbox.height > 0) {
+                        svgWidth = bbox.width;
+                        svgHeight = bbox.height;
+                    }
+                } catch (e) {
+                    // Ignore and fall through to defaults.
+                }
+            }
+
+            if (!svgWidth || !svgHeight) {
+                svgWidth = 800;
+                svgHeight = 600;
+            }
+
+            const baseSvgWidth = svgWidth;
+            const baseSvgHeight = svgHeight;
             
             // Get the container width (minus padding)
             const containerWidth = diagramContainer.clientWidth - (2 * 32); // 2rem padding on each side
@@ -657,12 +686,6 @@ async function renderMermaidDiagram(codeBlock, pre) {
                 initialScale = Math.min(initialScale, 2.5);
             }
             
-            // Apply initial scale if needed
-            if (initialScale !== 1) {
-                svgWrapper.style.transform = `scale(${initialScale})`;
-                svgWrapper.style.transformOrigin = 'center center';
-            }
-            
             console.log('SVG dimensions:', svgWidth, 'x', svgHeight, 'Initial scale:', initialScale);
             
             // Ensure viewBox is set for proper scaling
@@ -670,6 +693,7 @@ async function renderMermaidDiagram(codeBlock, pre) {
                 const bbox = svgElement.getBBox();
                 svgElement.setAttribute('viewBox', `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`);
             }
+            svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
             
             // Fix color contrast issues
             const containerBg = window.getComputedStyle(diagramContainer).backgroundColor;
@@ -681,11 +705,11 @@ async function renderMermaidDiagram(codeBlock, pre) {
             zoomControls.innerHTML = `
                 <button class="zoom-btn zoom-in" title="Zoom in"><i class="fas fa-search-plus"></i></button>
                 <button class="zoom-btn zoom-out" title="Zoom out"><i class="fas fa-search-minus"></i></button>
-                <button class="zoom-btn zoom-reset" title="Reset zoom"><i class="fas fa-undo"></i></button>
+                <button class="zoom-btn zoom-reset" title="Reset to fit view"><i class="fas fa-undo"></i></button>
             `;
             diagramContainer.appendChild(zoomControls);
             
-            let currentZoom = initialScale; // Start with the initial scale
+            let currentZoom = 1;
             let panX = 0;
             let panY = 0;
             const zoomStep = 0.2;
@@ -699,8 +723,66 @@ async function renderMermaidDiagram(codeBlock, pre) {
             // Update transform with both zoom and pan
             // Apply to the wrapper, not the SVG directly
             function updateTransform() {
-                svgWrapper.style.transform = `translate(${panX}px, ${panY}px) scale(${currentZoom})`;
+                svgWrapper.style.width = `${baseSvgWidth * currentZoom}px`;
+                svgWrapper.style.height = `${baseSvgHeight * currentZoom}px`;
+                svgElement.style.width = '100%';
+                svgElement.style.height = '100%';
+                svgWrapper.style.transform = `translate(${panX}px, ${panY}px)`;
                 svgWrapper.style.transformOrigin = 'center center';
+            }
+
+            function centerDiagramInView() {
+                // Start from neutral pan, then compute center offset from actual rendered boxes.
+                panX = 0;
+                panY = 0;
+                updateTransform();
+
+                requestAnimationFrame(() => {
+                    const containerRect = diagramContainer.getBoundingClientRect();
+                    const wrapperRect = svgWrapper.getBoundingClientRect();
+
+                    const containerCenterX = containerRect.left + (containerRect.width / 2);
+                    const containerCenterY = containerRect.top + (containerRect.height / 2);
+                    const wrapperCenterX = wrapperRect.left + (wrapperRect.width / 2);
+                    const wrapperCenterY = wrapperRect.top + (wrapperRect.height / 2);
+
+                    panX += containerCenterX - wrapperCenterX;
+                    panY += containerCenterY - wrapperCenterY;
+                    updateTransform();
+                });
+            }
+
+            function getFitZoomScale() {
+                // Use the actual rendered boxes so fit works with transforms and dynamic layouts.
+                const containerRect = diagramContainer.getBoundingClientRect();
+                const wrapperRect = svgWrapper.getBoundingClientRect();
+
+                // Leave headroom for borders/padding/sub-pixel rounding so fit never overflows.
+                const availableWidth = Math.max(1, containerRect.width - 24);
+                const availableHeight = Math.max(1, containerRect.height - 24);
+                const renderedWidth = Math.max(1, wrapperRect.width);
+                const renderedHeight = Math.max(1, wrapperRect.height);
+
+                const widthRatio = availableWidth / renderedWidth;
+                const heightRatio = availableHeight / renderedHeight;
+                const fitRatio = Math.min(widthRatio, heightRatio);
+
+                // Convert from rendered size ratio back into absolute zoom scale.
+                const targetScale = currentZoom * fitRatio;
+
+                // Fit mode should zoom out to fit, not zoom in past 100%.
+                return Math.max(0.2, Math.min(1, targetScale));
+            }
+
+            function fitDiagramToView() {
+                currentZoom = getFitZoomScale();
+                centerDiagramInView();
+                requestAnimationFrame(() => {
+                    const measuredHeight = bodyWrap.scrollHeight;
+                    bodyWrap.dataset.measuredHeight = String(measuredHeight);
+                    bodyWrap.style.maxHeight = measuredHeight + 'px';
+                    remeasureAncestorSections(wrapper);
+                });
             }
             
             // Zoom controls
@@ -715,10 +797,7 @@ async function renderMermaidDiagram(codeBlock, pre) {
             });
             
             zoomControls.querySelector('.zoom-reset').addEventListener('click', () => {
-                currentZoom = initialScale; // Reset to initial scale, not 1
-                panX = 0;
-                panY = 0;
-                updateTransform();
+                fitDiagramToView();
             });
             
             // Pan functionality with mouse
@@ -791,6 +870,9 @@ async function renderMermaidDiagram(codeBlock, pre) {
                     updateTransform();
                 }
             }, { passive: false });
+
+            // Default state: always start at fit view.
+            requestAnimationFrame(() => fitDiagramToView());
         }
         
         diagramContainer.classList.add('rendered');
@@ -808,6 +890,7 @@ async function renderMermaidDiagram(codeBlock, pre) {
                 sourceContainer.style.display = 'none';
                 viewSourceBtn.innerHTML = '<i class="fas fa-code"></i> Source';
             }
+            requestAnimationFrame(() => remeasureAncestorSections(wrapper));
         });
         
         copyBtn.addEventListener('click', () => {
@@ -836,9 +919,7 @@ async function renderMermaidDiagram(codeBlock, pre) {
             URL.revokeObjectURL(url);
         });
         
-        // Set measured height for collapse animation (after diagram is rendered)
-        bodyWrap.dataset.measuredHeight = String(bodyWrap.scrollHeight);
-        bodyWrap.style.maxHeight = bodyWrap.scrollHeight + 'px';
+        // Height is measured after this wrapper is attached to the DOM.
         
     } catch (error) {
         console.error('Mermaid rendering error:', error);
@@ -909,8 +990,7 @@ async function renderMermaidDiagram(codeBlock, pre) {
             </div>
         `;
         diagramContainer.classList.add('error');
-        bodyWrap.dataset.measuredHeight = String(bodyWrap.scrollHeight);
-        bodyWrap.style.maxHeight = bodyWrap.scrollHeight + 'px';
+        // Height is measured after this wrapper is attached to the DOM.
     }
     
     return wrapper;
@@ -925,6 +1005,28 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+/**
+ * Remeasures the expanded section-body chain after dynamic content changes.
+ * This prevents mermaid diagrams from being clipped by stale parent max-heights.
+ * @param {HTMLElement} element - Element inside a section that changed height
+ */
+function remeasureAncestorSections(element) {
+    let currentBody = element.closest('.md-section-body');
+
+    while (currentBody) {
+        const section = currentBody.closest('.md-section');
+        if (!section || section.classList.contains('collapsed')) break;
+
+        currentBody.style.maxHeight = 'none';
+        const measuredHeight = currentBody.scrollHeight;
+        currentBody.dataset.measuredHeight = String(measuredHeight);
+        currentBody.style.maxHeight = measuredHeight + 'px';
+
+        const parentSection = section.parentElement ? section.parentElement.closest('.md-section') : null;
+        currentBody = parentSection ? parentSection.querySelector(':scope > .md-section-body') : null;
+    }
 }
 
 /**
@@ -945,6 +1047,16 @@ export function enhanceCodeBlocks(mdEl) {
         if (language === 'mermaid' && typeof mermaid !== 'undefined') {
             const wrapper = await renderMermaidDiagram(block, pre);
             pre.parentNode.replaceChild(wrapper, pre);
+            // Mermaid wrapper is rendered off-DOM, so measure height after insertion.
+            const bodyWrap = wrapper.querySelector('.code-block-body');
+            if (bodyWrap) {
+                requestAnimationFrame(() => {
+                    const measuredHeight = bodyWrap.scrollHeight;
+                    bodyWrap.dataset.measuredHeight = String(measuredHeight);
+                    bodyWrap.style.maxHeight = measuredHeight + 'px';
+                    remeasureAncestorSections(wrapper);
+                });
+            }
             return;
         }
         

@@ -3,7 +3,7 @@
  * into a center-aligned card grid. Label is larger, value is smaller.
  */
 
-const DEBUG_LIST_CARDS = true;
+const DEBUG_LIST_CARDS = false;
 function log(...args) {
     if (DEBUG_LIST_CARDS) console.log('[listCardEnhancer]', ...args);
 }

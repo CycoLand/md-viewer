@@ -97,7 +97,13 @@ export function generateTOC(mdEl, tocEl) {
     });
 
     if (items.length === 0) {
+        // Preserve water bar when clearing TOC
+        const waterBar = tocEl.querySelector('.water-progress-container');
         tocEl.innerHTML = '';
+        if (waterBar) {
+            tocEl.insertBefore(waterBar, tocEl.firstChild);
+        }
+        document.dispatchEvent(new CustomEvent('tocUpdated'));
     } else {
         const tocHtml = `
             <div class="toc-header">
@@ -117,7 +123,15 @@ export function generateTOC(mdEl, tocEl) {
                 `).join('')}
             </ul>
         `;
-        tocEl.innerHTML = tocHtml;
+        
+        // Preserve water bar element before updating innerHTML (exclude fish - they're added by JS)
+        const waterBar = tocEl.querySelector('.water-progress-container');
+        let waterBarHtml = '';
+        if (waterBar) {
+            waterBar.querySelectorAll('.ocean-layer, .water-fish, .water-octopus, .sea-floor-wrap').forEach(f => f.remove());
+            waterBarHtml = waterBar.outerHTML;
+        }
+        tocEl.innerHTML = waterBarHtml + tocHtml;
 
         // Add event listener to depth selector
         const depthSelector = tocEl.querySelector('.toc-depth-selector');
@@ -139,6 +153,9 @@ export function generateTOC(mdEl, tocEl) {
 
         setupScrollSpy(headings, tocEl);
     }
+
+    // Notify water bar to refresh (it may have been recreated when TOC was replaced)
+    document.dispatchEvent(new CustomEvent('tocUpdated'));
 }
 
 /**

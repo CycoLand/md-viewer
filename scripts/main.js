@@ -6,6 +6,7 @@ import { FileManager } from './fileManager.js';
 import { PaginationManager } from './paginationManager.js';
 import { ClipboardAutoLoader } from './clipboardAutoLoader.js';
 import { initProgressBar, getProgressBar } from './progressBar.js';
+import { WaterProgressBar } from './waterProgressBar.js';
 import './loadingAnimations.js'; // Initialize loading animations
 import {
     toggleSidebar,
@@ -34,6 +35,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize progress bar
     const progressBar = initProgressBar();
+    
+    // Initialize water progress bar
+    const waterProgressBar = new WaterProgressBar();
 
     // Initialize drag and drop
     initializeDragAndDrop(FileManager);

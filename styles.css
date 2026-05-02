@@ -821,7 +821,8 @@ body {
     height: calc(100vh - 3px);
     max-height: calc(100vh - 3px);
     overflow-y: auto;
-    padding: 1.5rem 1rem 1rem 1.5rem;
+    overflow-x: hidden;
+    padding: 1.5rem 65px 1rem 1.5rem; /* Added right padding for water bar */
     margin-right: 5px;
     border-left: 1px solid rgba(148, 163, 184, 0.2);
     background-color: transparent;
@@ -932,6 +933,254 @@ body {
 .toc .indent-3 { padding-left: 3rem; }
 .toc .indent-4 { padding-left: 4rem; }
 .toc .indent-5 { padding-left: 5rem; }
+
+
+
+/* Water Progress Bar */
+.water-progress-container {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    width: 40px !important;
+    height: 600px !important; /* Force height */
+    z-index: 10;
+}
+
+.water-progress-bar {
+    position: relative;
+    width: 100%;
+    height: 100% !important; /* Force height */
+    background: linear-gradient(180deg, #1a2f3f 0%, #0c1c2c 100%);
+    border: 2px solid #14b8a6;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 
+        0 0 20px rgba(20, 184, 166, 0.3),
+        inset 0 0 20px rgba(6, 182, 212, 0.1);
+}
+
+.water {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    /* height is set dynamically via JavaScript */
+    /* Semi-transparent so ocean layer (fish, sea floor, octopus) shows through */
+    background: linear-gradient(
+        180deg,
+        rgba(20, 184, 166, 0.65) 0%,
+        rgba(6, 182, 212, 0.75) 50%,
+        rgba(14, 165, 233, 0.85) 100%
+    );
+    overflow: hidden;
+}
+
+.water.draining {
+    transition: height 0.4s cubic-bezier(0.6, 0.0, 0.4, 1);
+}
+
+.water.filling {
+    transition: height 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.wave {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    width: 200%;
+    height: 40px;
+    transform: translateX(-50%);
+    background: rgba(99, 242, 241, 0.4);
+    border-radius: 45%;
+}
+
+.wave-1 {
+    animation: wave-animation-1 3.2s ease-in-out infinite;
+    animation-delay: 0s;
+}
+
+.wave-2 {
+    animation: wave-animation-2 4.7s ease-in-out infinite;
+    opacity: 0.6;
+    top: -15px;
+    animation-delay: -1.2s;
+}
+
+@keyframes wave-animation-1 {
+    0% {
+        transform: translateX(-50%) translateY(0) rotate(0deg);
+    }
+    17% {
+        transform: translateX(-47%) translateY(-2px) rotate(0.8deg);
+    }
+    34% {
+        transform: translateX(-52%) translateY(-4px) rotate(-0.5deg);
+    }
+    51% {
+        transform: translateX(-48%) translateY(-5px) rotate(1.2deg);
+    }
+    68% {
+        transform: translateX(-54%) translateY(-3px) rotate(-1deg);
+    }
+    85% {
+        transform: translateX(-49%) translateY(-1px) rotate(0.3deg);
+    }
+    100% {
+        transform: translateX(-50%) translateY(0) rotate(0deg);
+    }
+}
+
+@keyframes wave-animation-2 {
+    0% {
+        transform: translateX(-50%) translateY(0) rotate(0deg);
+    }
+    15% {
+        transform: translateX(-53%) translateY(-3px) rotate(-0.7deg);
+    }
+    32% {
+        transform: translateX(-46%) translateY(-5px) rotate(1.1deg);
+    }
+    48% {
+        transform: translateX(-51%) translateY(-6px) rotate(-0.3deg);
+    }
+    64% {
+        transform: translateX(-47%) translateY(-4px) rotate(0.9deg);
+    }
+    80% {
+        transform: translateX(-52%) translateY(-2px) rotate(-0.6deg);
+    }
+    100% {
+        transform: translateX(-50%) translateY(0) rotate(0deg);
+    }
+}
+
+/* Fish - positioned by JS, z below boat */
+.water-fish {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* Ocean layer - anchored to bottom, bar is viewport; z above water bg so fish/treasure/octopus show */
+.ocean-layer {
+    position: absolute;
+    top: auto;
+    left: 0;
+    bottom: 0;
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* Sea floor - sand, coral, treasure chest */
+.sea-floor-wrap {
+    z-index: 2;
+}
+
+.sea-floor {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.sea-sand {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, transparent 0%, rgba(210, 180, 140, 0.3) 30%, rgba(194, 178, 128, 0.7) 70%, #c4a574 100%);
+    border-radius: 0 0 4px 4px;
+}
+
+.sea-floor-decor {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 70px;
+    opacity: 0.9;
+}
+
+.water-fish .fish-svg {
+    display: block;
+}
+
+.water-fish-big {
+    z-index: 6;
+}
+
+/* Octopus - near bottom, minimal movement */
+.water-octopus {
+    position: absolute;
+    left: 50%;
+    bottom: 8%;
+    width: 28px;
+    height: 28px;
+    z-index: 7;
+    pointer-events: none;
+    transform: translateX(-50%);
+}
+
+.water-octopus .octopus-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.water-octopus {
+    animation: octopus-float 5s ease-in-out infinite;
+}
+
+@keyframes octopus-float {
+    0%, 100% { opacity: 0.95; }
+    50% { opacity: 1; }
+}
+
+.boat {
+    position: absolute;
+    top: 0;  /* At water surface; stays inside water so overflow:hidden doesn't clip */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 30px;
+    z-index: 20;
+    animation: boat-bob 3.2s ease-in-out infinite;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+@keyframes boat-bob {
+    0% {
+        transform: translateX(-50%) translateY(0) rotate(0deg);
+    }
+    17% {
+        transform: translateX(-50%) translateY(-2px) rotate(0.8deg);
+    }
+    34% {
+        transform: translateX(-50%) translateY(-4px) rotate(-0.5deg);
+    }
+    51% {
+        transform: translateX(-50%) translateY(-5px) rotate(1.2deg);
+    }
+    68% {
+        transform: translateX(-50%) translateY(-3px) rotate(-1deg);
+    }
+    85% {
+        transform: translateX(-50%) translateY(-1px) rotate(0.3deg);
+    }
+    100% {
+        transform: translateX(-50%) translateY(0) rotate(0deg);
+    }
+}
+
+/* Responsive adjustments for water bar */
+@media (max-width: 1599px) {
+    .water-progress-container {
+        display: none;
+    }
+}
 
 
 /* TOC Document Controls */
@@ -1403,10 +1652,11 @@ body {
 
 .markdown-content code {
     background: var(--inline-code-bg);
-    padding: 0.3rem 0.6rem;
+    padding: 0.1rem 0.1rem;
     border-radius: 5px;
     font-family: var(--font-mono);
-    font-size: 0.875rem;
+    font-size: 0.75rem;
+    vertical-align: middle;
     color: var(--inline-code-color);
     font-weight: 500;
     border: 1px solid var(--box-border);
@@ -1416,7 +1666,7 @@ body {
 
 .markdown-content pre {
     background-color: var(--surface-color);
-    padding: 1.5rem;
+    padding: 0.75rem;
     border-radius: var(--border-radius-lg);
     overflow-x: auto;
     margin: 2rem 0;
@@ -1526,7 +1776,7 @@ body {
 /* Code Block Wrapper with Header */
 .code-block-wrapper {
     display: block;
-    margin: 2rem 0;
+    margin: 1rem 0;
     border-radius: var(--border-radius-lg);
     overflow: hidden;
     border: 1px solid var(--border-color);
@@ -1535,11 +1785,6 @@ body {
     width: fit-content;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
     transition: box-shadow 0.3s ease, transform 0.2s ease;
-}
-
-.code-block-wrapper:hover {
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.16);
-    transform: translateY(-1px);
 }
 
 /* Comment transitions */
@@ -1575,7 +1820,7 @@ body {
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
-    padding: 0.75rem 1.25rem;
+    padding: 0.25rem 0.75rem;
     background: var(--box-bg-alt);
     border-bottom: 1px solid var(--border-color);
     backdrop-filter: blur(10px);
@@ -1700,7 +1945,8 @@ body {
     background-color: var(--surface-color);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-lg);
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     text-align: center;
 }
