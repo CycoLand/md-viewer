@@ -1,0 +1,64 @@
+/* Shell: sidebar + main column, content grid, scroll regions */
+.app-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+.main-content {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    display: flex;
+    flex-direction: column;
+    transition: var(--transition-slow);
+}
+
+.main-content.sidebar-collapsed {
+    margin-left: 0;
+}
+
+.content-area {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    scroll-padding-top: 1rem;
+    transition: opacity var(--page-transition-duration) var(--page-transition-easing);
+}
+
+.content-area.fading {
+    opacity: 0;
+}
+
+.content-body {
+    display: grid;
+    grid-template-columns: 1fr var(--toc-column-width);
+    gap: 1rem;
+    max-width: calc(var(--content-max-width) + 1rem + var(--toc-column-width));
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.content-body:has(.toc.force-hidden) {
+    grid-template-columns: 1fr;
+    max-width: var(--content-max-width);
+}
+
+.markdown-content {
+    grid-column: 1 / 2;
+    overflow-y: visible;
+    padding: 2.5rem 1.5rem 4rem 1.5rem;
+    width: 100%;
+}
+
+.markdown-content > * {
+    max-width: var(--content-max-width);
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.raw-content {
+    grid-column: 1 / 2;
+    overflow-y: visible;
+    padding: 2rem 0 4rem 0;
+}

@@ -1,0 +1,211 @@
+/* Highlight.js theme tuning + fenced code wrappers / copy / collapse */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-section,
+.hljs-link {
+    color: #c678dd;
+    font-weight: 500;
+}
+
+.hljs-function .hljs-keyword {
+    color: #61afef;
+}
+
+.hljs-string,
+.hljs-title,
+.hljs-name,
+.hljs-type,
+.hljs-attribute,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition,
+.hljs-variable,
+.hljs-template-tag,
+.hljs-template-variable {
+    color: #98c379;
+}
+
+.hljs-comment,
+.hljs-quote,
+.hljs-deletion,
+.hljs-meta {
+    color: #5c6370;
+    font-style: italic;
+    transition: opacity 0.3s ease;
+}
+
+.hljs-number,
+.hljs-regexp,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-built_in,
+.hljs-builtin-name {
+    color: #e5c07b;
+}
+
+.hljs-function,
+.hljs-params {
+    color: #61afef;
+}
+
+.hljs-attr {
+    color: #d19a66;
+}
+
+.hljs-doctag,
+.hljs-title.class_,
+.hljs-title.function_ {
+    color: #e06c75;
+}
+
+.code-block-wrapper {
+    display: block;
+    margin: 1rem 0;
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--border-color);
+    background-color: var(--surface-color);
+    max-width: 100%;
+    width: 100%;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.code-block-wrapper.hide-comments .hljs-comment {
+    opacity: 0;
+}
+
+.comment-only-line {
+    display: block;
+    transition: opacity 0.3s ease, max-height 0.3s ease;
+    opacity: 1;
+    max-height: 5em;
+    overflow: hidden;
+}
+
+.code-block-wrapper.hide-comments .comment-only-line {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+.code-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.25rem 0.75rem;
+    background: var(--box-bg-alt);
+    border-bottom: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+}
+
+.code-block-body {
+    overflow-x: auto;
+    overflow-y: hidden;
+    transition: max-height var(--collapse-duration) ease;
+    border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+}
+
+.code-block-wrapper.collapsed .code-block-body {
+    max-height: 0;
+    overflow: hidden;
+}
+
+.code-block-toggle-icon {
+    display: inline-flex;
+    align-items: center;
+    color: var(--text-dim);
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.code-block-wrapper.collapsed .code-block-toggle-icon {
+    transform: rotate(-90deg);
+}
+
+.code-block-header:hover .code-block-toggle-icon {
+    color: var(--primary-color);
+}
+
+.code-language {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-color);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-family: var(--font-mono);
+    opacity: 0.9;
+}
+
+.code-button-group {
+    display: inline-flex;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.code-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background-color: var(--surface-hover);
+    color: var(--text-muted);
+    border: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.code-copy-btn:last-child {
+    border-right: none;
+}
+
+.code-copy-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+    z-index: 1;
+    transform: scale(1.05);
+}
+
+.code-copy-btn.copied {
+    background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+    color: white;
+    z-index: 1;
+    animation: successPulse 0.3s ease;
+}
+
+@keyframes successPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.code-copy-btn i.fa-eye,
+.code-copy-btn i.fa-eye-slash {
+    display: inline-block;
+    width: 1em;
+    text-align: center;
+}
+
+.code-block-wrapper pre {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+.code-block-wrapper pre code {
+    display: block;
+    white-space: pre;
+    width: max-content;
+    min-width: 100%;
+}

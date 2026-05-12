@@ -1,0 +1,121 @@
+/* Compact menus from header / collapsed FABs */
+.quick-menu {
+    position: fixed;
+    top: 5rem;
+    left: calc(var(--sidebar-width) - 240px);
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-xl);
+    padding: 0.5rem;
+    min-width: 220px;
+    z-index: 1001;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.quick-menu.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.quick-menu.from-collapsed-settings {
+    top: calc(1rem + 40px);
+    left: calc(1rem + 40px + 0.75rem);
+}
+
+.quick-menu.from-collapsed-theme {
+    top: calc(1rem + 80px + 1rem);
+    left: calc(1rem + 40px + 0.75rem);
+}
+
+.quick-menu.from-collapsed-settings,
+.quick-menu.from-collapsed-theme {
+    z-index: 251;
+}
+
+.quick-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: none;
+    border-radius: var(--border-radius);
+    color: var(--text-color);
+    font-family: var(--font-family);
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: left;
+}
+
+.quick-menu-item:hover {
+    background: var(--surface-hover);
+}
+
+.quick-menu-item.active {
+    background: rgba(99, 102, 241, 0.15);
+    color: var(--primary-color);
+}
+
+.quick-menu-separator {
+    height: 1px;
+    background: var(--border-color);
+    margin: 0.5rem 0;
+}
+
+.quick-menu-more {
+    color: var(--primary-color);
+}
+
+.quick-menu-more i {
+    font-size: 0.875rem;
+}
+
+.theme-preview {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+}
+
+.theme-preview span {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.quick-menu-setting {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: var(--bg-color);
+    border-radius: var(--border-radius);
+}
+
+.quick-menu-setting:hover {
+    background: var(--surface-hover);
+}
+
+.quick-menu-setting .setting-label {
+    font-size: 0.875rem;
+}
+
+.toggle-switch-small {
+    width: 40px;
+    height: 22px;
+}
+
+.toggle-switch-small .toggle-slider:before {
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+}
+
+.toggle-switch-small input:checked + .toggle-slider:before {
+    transform: translateX(18px);
+}

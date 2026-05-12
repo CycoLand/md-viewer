@@ -1,0 +1,27 @@
+/* Top document read progress strip */
+.reading-progress-bar {
+    position: fixed;
+    top: 0;
+    left: var(--sidebar-width);
+    height: 3px;
+    width: 0%;
+    background: var(--primary-color);
+    z-index: 9999;
+    transition: width 0.2s ease-out, opacity 0.3s ease, left 0.3s ease;
+    opacity: 1;
+    pointer-events: none;
+    box-shadow: none;
+}
+
+body:has(.sidebar.collapsed) .reading-progress-bar {
+    left: 0;
+}
+
+.reading-progress-bar.hidden {
+    opacity: 0;
+    width: 0 !important;
+}
+
+body:hover .reading-progress-bar:not(.hidden) {
+    opacity: 0.8;
+}

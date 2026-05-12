@@ -1,0 +1,272 @@
+/* Modal dialogs, backdrop overlay, add-document flow */
+.add-document-options {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.add-option {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.add-option h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.add-option h4 i {
+    color: var(--primary-color);
+}
+
+.paste-option textarea {
+    width: 100%;
+    min-height: 250px;
+    max-height: 250px;
+    padding: 1.25rem;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    color: var(--text-color);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    resize: none;
+    transition: all 0.2s ease;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.paste-option textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15), inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    background-color: var(--bg-color);
+}
+
+.add-option-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.add-option-divider::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--border-color) 20%, var(--border-color) 80%, transparent);
+}
+
+.add-option-divider span {
+    position: relative;
+    background-color: var(--surface-color);
+    padding: 0.5rem;
+    color: var(--text-dim);
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-semibold);
+    z-index: 1;
+}
+
+.file-drop-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    min-height: 250px;
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius-lg);
+    background-color: var(--bg-color);
+    padding: 2rem;
+    transition: all 0.3s ease;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.file-drop-zone::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+    transition: left 0.6s ease;
+}
+
+.file-drop-zone:hover,
+.file-drop-zone.drag-over {
+    border-color: var(--primary-color);
+    background-color: rgba(99, 102, 241, 0.08);
+    transform: scale(1.01);
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
+}
+
+.file-drop-zone:hover::before,
+.file-drop-zone.drag-over::before {
+    left: 100%;
+}
+
+.file-drop-zone i {
+    font-size: 2.5rem;
+    color: var(--text-dim);
+}
+
+.file-drop-zone p {
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.selected-file-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0.03) 100%);
+    border: 1px solid var(--primary-color);
+    border-radius: var(--border-radius-lg);
+    margin-top: 1rem;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+    animation: slideIn 0.3s ease-out;
+}
+
+.selected-file-info i {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+}
+
+.selected-file-info span {
+    flex: 1;
+    color: var(--text-color);
+    font-weight: var(--font-weight-medium);
+}
+
+.selected-file-info .btn-icon {
+    padding: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: var(--surface-color);
+    border-radius: var(--border-radius-lg);
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+}
+
+.modal-large {
+    max-width: 900px;
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary-color);
+    font-weight: var(--font-weight-bold);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.close-modal:hover {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);
+    color: var(--text-color);
+    transform: rotate(90deg) scale(1.1);
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 500;
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--transition);
+}
+
+.overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

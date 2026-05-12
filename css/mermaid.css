@@ -1,0 +1,127 @@
+/* Mermaid diagram container, zoom, errors, source fallback */
+.mermaid-wrapper {
+    width: auto;
+    max-width: 100%;
+}
+
+.mermaid-diagram {
+    position: relative;
+    padding: 2rem;
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    overflow-x: hidden;
+    overflow-y: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.mermaid-diagram.rendered {
+    background: var(--box-bg);
+}
+
+.mermaid-svg-wrapper {
+    display: inline-block;
+    overflow: visible;
+}
+
+.mermaid-diagram svg {
+    display: block;
+    overflow: visible;
+}
+
+.mermaid-zoom-controls {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 10;
+}
+
+.zoom-btn {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 0.5rem;
+    cursor: pointer;
+    color: var(--text-color);
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.zoom-btn:hover {
+    background: var(--surface-hover);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.zoom-btn:active {
+    transform: scale(0.95);
+}
+
+.zoom-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.mermaid-source {
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+}
+
+.mermaid-source pre {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+.mermaid-source pre code {
+    display: block;
+    white-space: pre;
+    width: max-content;
+    min-width: 100%;
+}
+
+.mermaid-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 2rem;
+    color: var(--error-color);
+    text-align: center;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--border-radius-lg);
+}
+
+.mermaid-error i {
+    font-size: 2rem;
+}
+
+.mermaid-error p {
+    font-weight: 600;
+    margin: 0;
+    color: var(--error-color);
+}
+
+.mermaid-error pre {
+    background-color: rgba(239, 68, 68, 0.1);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    max-width: 100%;
+    overflow-x: auto;
+}

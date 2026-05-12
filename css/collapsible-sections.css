@@ -1,0 +1,95 @@
+/* Collapsible markdown sections (chevron + max-height) */
+.md-section {
+    position: relative;
+}
+
+.md-section .md-heading {
+    position: relative;
+    padding-right: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: padding-right var(--collapse-duration) ease var(--collapse-delay);
+}
+
+.md-section.collapsed .md-heading {
+    padding-right: 2.5rem;
+    opacity: 0.95;
+    transition: padding-right var(--collapse-duration) ease;
+}
+
+.md-section .md-toggle-icon {
+    position: absolute;
+    right: 0.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1em;
+    height: 1em;
+    overflow: visible;
+    pointer-events: none;
+    opacity: 0;
+    transition:
+        opacity var(--chevron-fade-duration) ease,
+        transform var(--chevron-fade-duration) ease,
+        color var(--chevron-color-transition) ease;
+}
+
+.md-section .md-toggle-icon i {
+    font-size: 0.9em;
+    line-height: 1;
+}
+
+.md-section .md-toggle-icon.hidden {
+    opacity: 0;
+    transform: translateY(calc(-50% + 10px));
+    transition:
+        opacity var(--chevron-fade-duration) ease,
+        transform var(--chevron-fade-duration) ease,
+        visibility 0s var(--chevron-fade-duration);
+    visibility: hidden;
+}
+
+.md-section.collapsed .md-toggle-icon:not(.hidden) {
+    opacity: 1;
+    transform: translateY(calc(-50% - var(--chevron-slide-distance)));
+    pointer-events: auto;
+    transition:
+        opacity var(--chevron-fade-duration) ease var(--collapse-delay),
+        transform var(--chevron-fade-duration) ease var(--collapse-delay),
+        color var(--chevron-color-transition) ease;
+    visibility: visible;
+}
+
+.md-section.collapsed .md-heading:hover .md-toggle-icon:not(.hidden) {
+    opacity: 1;
+    color: var(--primary-color);
+    transform: translateY(calc(-50% - var(--chevron-slide-distance)));
+}
+
+.md-section:not(.collapsed) .md-toggle-icon {
+    opacity: 0;
+    transform: translateY(calc(-50% + 10px));
+    transition:
+        opacity var(--chevron-fade-duration) ease,
+        transform var(--chevron-fade-duration) ease,
+        visibility 0s var(--chevron-fade-duration);
+    visibility: hidden;
+}
+
+.md-section-body {
+    overflow: hidden;
+    transition: max-height var(--collapse-duration) ease;
+}
+
+.md-section.collapsed > :not(.md-heading):not(.md-section-body) {
+    display: none;
+}
+
+.md-section.collapsed .md-section-body {
+    max-height: 0 !important;
+}

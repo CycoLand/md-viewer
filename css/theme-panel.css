@@ -1,0 +1,194 @@
+/* Theme customizer slide-over panel */
+.theme-panel {
+    position: fixed;
+    top: 0;
+    left: var(--sidebar-width);
+    width: 400px;
+    height: 100vh;
+    background-color: var(--surface-color);
+    border-right: 1px solid var(--border-color);
+    z-index: 999;
+    transition: var(--transition-slow);
+    overflow-y: auto;
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.2);
+    transform: translateX(-100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.theme-panel.open {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.theme-panel-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, transparent 100%);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+}
+
+.theme-panel-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary-color);
+    font-weight: var(--font-weight-bold);
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    user-select: none;
+}
+
+.close-btn:hover {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);
+    color: var(--text-color);
+    transform: rotate(90deg) scale(1.1);
+}
+
+.theme-panel-content {
+    padding: 1.5rem;
+}
+
+.theme-section {
+    margin-bottom: 2rem;
+}
+
+.theme-section h4 {
+    margin-bottom: 1rem;
+    color: var(--text-color);
+    font-weight: var(--font-weight-semibold);
+}
+
+.theme-presets {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+}
+
+.theme-preset-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.875rem 1.25rem;
+    background-color: var(--bg-color);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-color);
+    font-size: 0.95rem;
+    font-weight: var(--font-weight-medium);
+}
+
+.theme-preset-btn:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color);
+    background-color: var(--surface-hover);
+}
+
+.theme-preset-btn.active {
+    border-color: var(--primary-color);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+}
+
+.preset-colors {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.preset-colors span {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.preset-name {
+    flex: 1;
+    text-align: left;
+}
+
+.input-group {
+    margin-bottom: 1rem;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-medium);
+    color: var(--text-muted);
+}
+
+.input-group input[type="color"],
+.input-group input[type="range"],
+.input-group input[type="text"],
+.input-group select,
+.input-group textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-family);
+    font-size: 0.875rem;
+    transition: var(--transition);
+}
+
+.input-group input[type="color"] {
+    height: 40px;
+    padding: 0.25rem;
+    cursor: pointer;
+}
+
+.input-group input[type="range"] {
+    margin-bottom: 0.5rem;
+}
+
+.input-group input:focus,
+.input-group select:focus,
+.input-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    transform: translateY(-1px);
+}
+
+.input-group input:focus-visible,
+.input-group select:focus-visible,
+.input-group textarea:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.color-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.theme-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
