@@ -1,7 +1,7 @@
 // Main entry point - brings all modules together
 import { state } from './state.js';
 import { ThemeManager } from './themeManager.js';
-import { SettingsManager } from './settingsManager.js';
+import { SettingsManager, registerSettingsManager } from './settingsManager.js';
 import { FileManager } from './fileManager.js';
 import { PaginationManager } from './paginationManager.js';
 import { ClipboardAutoLoader } from './clipboardAutoLoader.js';
@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize managers
     const themeManager = new ThemeManager();
     const settingsManager = new SettingsManager();
+    registerSettingsManager(settingsManager);
     const paginationManager = new PaginationManager();
     
     // Initialize progress bar

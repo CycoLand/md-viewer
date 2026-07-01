@@ -1,4 +1,7 @@
 // Theme management
+import { getSettingsManager } from './settingsManager.js';
+import { parseCharactersPerLine, parseLineHeight } from './typography.js';
+
 export class ThemeManager {
     constructor() {
         this.presets = {
@@ -341,6 +344,10 @@ export class ThemeManager {
         document.getElementById('line-height').addEventListener('input', (e) => {
             document.documentElement.style.setProperty('--line-height', e.target.value);
             document.getElementById('line-height-value').textContent = e.target.value;
+            getSettingsManager()?.updateTypographyFromTheme(
+                document.documentElement.style.getPropertyValue('--content-max-width'),
+                e.target.value
+            );
             this.saveTheme();
         });
 
@@ -356,6 +363,10 @@ export class ThemeManager {
             const value = e.target.value + 'ch';
             document.documentElement.style.setProperty('--content-max-width', value);
             document.getElementById('content-width-value').textContent = value;
+            getSettingsManager()?.updateTypographyFromTheme(
+                value,
+                document.documentElement.style.getPropertyValue('--line-height')
+            );
             this.saveTheme();
         });
 
@@ -407,12 +418,12 @@ export class ThemeManager {
         document.getElementById('font-family').value = theme['--font-family'].replace(/'/g, '');
         document.getElementById('font-size').value = parseInt(theme['--font-size']);
         document.getElementById('font-size-value').textContent = theme['--font-size'];
-        document.getElementById('line-height').value = parseFloat(theme['--line-height']);
+        document.getElementById('line-height').value = parseLineHeight(theme['--line-height']);
         document.getElementById('line-height-value').textContent = theme['--line-height'];
         
         document.getElementById('sidebar-width').value = parseInt(theme['--sidebar-width']);
         document.getElementById('sidebar-width-value').textContent = theme['--sidebar-width'];
-        document.getElementById('content-width').value = parseInt(theme['--content-max-width']);
+        document.getElementById('content-width').value = parseCharactersPerLine(theme['--content-max-width']);
         document.getElementById('content-width-value').textContent = theme['--content-max-width'];
     }
 

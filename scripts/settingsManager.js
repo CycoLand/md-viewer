@@ -3,6 +3,14 @@
 
 import { state, SETTINGS_KEY } from './state.js';
 import { getProgressBar } from './progressBar.js';
+import {
+    TYPOGRAPHY_DEFAULTS,
+    applyTypography,
+    syncThemeTypographyInputs,
+    syncReadingTypographyInputs,
+    parseCharactersPerLine,
+    parseLineHeight
+} from './typography.js';
 
 export class SettingsManager {
     constructor() {
@@ -15,6 +23,9 @@ export class SettingsManager {
         // Setting toggles (full panel)
         this.progressBarToggle = document.getElementById('toggle-progress-bar');
         this.tocToggle = document.getElementById('toggle-toc');
+        this.readingModeToggle = document.getElementById('toggle-reading-mode');
+        this.charactersPerLineSlider = document.getElementById('reading-characters-per-line');
+        this.lineHeightSlider = document.getElementById('reading-line-height');
         
         // Quick toggles
         this.quickProgressBarToggle = document.getElementById('quick-toggle-progress-bar');
@@ -23,50 +34,31 @@ export class SettingsManager {
         this.init();
     }
     
-    /**
-     * Initialize settings manager
-     */
     init() {
-        // Load settings from localStorage
         this.loadSettings();
-        
-        // Apply initial settings
         this.applySettings();
-        
-        // Set up event listeners
         this.setupEventListeners();
-        
-        // Initialize quick menu
         this.initializeQuickMenu();
     }
     
-    /**
-     * Initialize quick menu
-     */
     initializeQuickMenu() {
-        // Toggle quick menu on settings button click
         this.settingsToggle?.addEventListener('click', (e) => {
             e.stopPropagation();
             
             const isCurrentlyOpen = this.quickMenu?.classList.contains('show');
             
-            // Only update positioning if we're OPENING the menu (not closing)
             if (!isCurrentlyOpen) {
                 this.quickMenu?.classList.remove('from-collapsed-settings', 'from-collapsed-theme');
             }
             
-            // Toggle settings quick menu
             this.quickMenu?.classList.toggle('show');
             
-            // Close theme quick menu if open
             const themeQuickMenu = document.getElementById('theme-quick-menu');
             themeQuickMenu?.classList.remove('show');
         });
         
-        // Quick toggle handlers
         this.quickProgressBarToggle?.addEventListener('change', (e) => {
             state.settings.showProgressBar = e.target.checked;
-            // Sync with full panel toggle
             if (this.progressBarToggle) {
                 this.progressBarToggle.checked = e.target.checked;
             }
@@ -76,7 +68,6 @@ export class SettingsManager {
         
         this.quickTocToggle?.addEventListener('change', (e) => {
             state.settings.showTOC = e.target.checked;
-            // Sync with full panel toggle
             if (this.tocToggle) {
                 this.tocToggle.checked = e.target.checked;
             }
@@ -84,36 +75,27 @@ export class SettingsManager {
             this.applyTOCSetting();
         });
         
-        // Open full settings panel
         this.openFullPanelBtn?.addEventListener('click', (e) => {
             e.stopPropagation();
             this.quickMenu?.classList.remove('show');
             this.openPanel();
         });
         
-        // Close quick menu when clicking outside
         document.addEventListener('click', (e) => {
             const collapsedSettingsBtn = document.getElementById('collapsed-settings-btn');
             if (!this.settingsToggle?.contains(e.target) && 
                 !this.quickMenu?.contains(e.target) &&
                 !collapsedSettingsBtn?.contains(e.target)) {
-                // Only remove 'show' class, keep positioning classes for smooth fade
                 this.quickMenu?.classList.remove('show');
             }
         });
     }
     
-    /**
-     * Set up event listeners
-     */
     setupEventListeners() {
-        // Panel close button
         this.closeSettingsBtn?.addEventListener('click', () => this.closePanel());
         
-        // Full panel setting toggles
         this.progressBarToggle?.addEventListener('change', (e) => {
             state.settings.showProgressBar = e.target.checked;
-            // Sync with quick toggle
             if (this.quickProgressBarToggle) {
                 this.quickProgressBarToggle.checked = e.target.checked;
             }
@@ -123,38 +105,59 @@ export class SettingsManager {
         
         this.tocToggle?.addEventListener('change', (e) => {
             state.settings.showTOC = e.target.checked;
-            // Sync with quick toggle
             if (this.quickTocToggle) {
                 this.quickTocToggle.checked = e.target.checked;
             }
             this.saveSettings();
             this.applyTOCSetting();
         });
+
+        this.readingModeToggle?.addEventListener('change', (e) => {
+            state.settings.readingMode = e.target.checked;
+            const preset = e.target.checked
+                ? TYPOGRAPHY_DEFAULTS.reading
+                : TYPOGRAPHY_DEFAULTS.standard;
+
+            state.settings.charactersPerLine = preset.charactersPerLine;
+            state.settings.lineHeight = preset.lineHeight;
+            this.saveSettings();
+            this.applyReadingSettings();
+        });
+
+        this.charactersPerLineSlider?.addEventListener('input', (e) => {
+            state.settings.charactersPerLine = parseInt(e.target.value, 10);
+            this.saveSettings();
+            this.applyReadingSettings({ updateSliders: false });
+            syncReadingTypographyInputs(
+                state.settings.charactersPerLine,
+                state.settings.lineHeight
+            );
+        });
+
+        this.lineHeightSlider?.addEventListener('input', (e) => {
+            state.settings.lineHeight = parseFloat(e.target.value);
+            this.saveSettings();
+            this.applyReadingSettings({ updateSliders: false });
+            syncReadingTypographyInputs(
+                state.settings.charactersPerLine,
+                state.settings.lineHeight
+            );
+        });
     }
     
-    /**
-     * Open settings panel
-     */
     openPanel() {
         this.settingsPanel?.classList.add('open');
         
-        // Close theme panel if open
         const themePanel = document.getElementById('theme-panel');
         if (themePanel?.classList.contains('open')) {
             themePanel.classList.remove('open');
         }
     }
     
-    /**
-     * Close settings panel
-     */
     closePanel() {
         this.settingsPanel?.classList.remove('open');
     }
     
-    /**
-     * Toggle settings panel
-     */
     togglePanel() {
         if (this.settingsPanel?.classList.contains('open')) {
             this.closePanel();
@@ -163,15 +166,11 @@ export class SettingsManager {
         }
     }
     
-    /**
-     * Load settings from localStorage
-     */
     loadSettings() {
         try {
             const saved = localStorage.getItem(SETTINGS_KEY);
             if (saved) {
                 const settings = JSON.parse(saved);
-                // Merge saved settings with defaults
                 state.settings = {
                     ...state.settings,
                     ...settings
@@ -180,8 +179,17 @@ export class SettingsManager {
         } catch (error) {
             console.error('Error loading settings:', error);
         }
+
+        if (!Number.isFinite(state.settings.charactersPerLine)) {
+            state.settings.charactersPerLine = TYPOGRAPHY_DEFAULTS.standard.charactersPerLine;
+        }
+        if (!Number.isFinite(state.settings.lineHeight)) {
+            state.settings.lineHeight = TYPOGRAPHY_DEFAULTS.standard.lineHeight;
+        }
+        if (typeof state.settings.readingMode !== 'boolean') {
+            state.settings.readingMode = false;
+        }
         
-        // Update all toggle states
         if (this.progressBarToggle) {
             this.progressBarToggle.checked = state.settings.showProgressBar;
         }
@@ -194,11 +202,16 @@ export class SettingsManager {
         if (this.quickTocToggle) {
             this.quickTocToggle.checked = state.settings.showTOC;
         }
+        if (this.readingModeToggle) {
+            this.readingModeToggle.checked = state.settings.readingMode;
+        }
+
+        syncReadingTypographyInputs(
+            state.settings.charactersPerLine,
+            state.settings.lineHeight
+        );
     }
     
-    /**
-     * Save settings to localStorage
-     */
     saveSettings() {
         try {
             localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
@@ -207,34 +220,63 @@ export class SettingsManager {
         }
     }
     
-    /**
-     * Apply all settings
-     */
     applySettings() {
         this.applyProgressBarSetting();
         this.applyTOCSetting();
+        this.applyReadingSettings();
+    }
+
+    applyReadingSettings({ updateSliders = true } = {}) {
+        const { charactersPerLine, lineHeight, readingMode } = state.settings;
+
+        applyTypography(charactersPerLine, lineHeight);
+        document.documentElement.classList.toggle('reading-mode', readingMode);
+
+        if (updateSliders) {
+            syncReadingTypographyInputs(charactersPerLine, lineHeight);
+        }
+
+        syncThemeTypographyInputs(charactersPerLine, lineHeight);
+    }
+
+    updateTypographyFromTheme(contentMaxWidth, lineHeight) {
+        state.settings.charactersPerLine = parseCharactersPerLine(contentMaxWidth);
+        state.settings.lineHeight = parseLineHeight(lineHeight);
+        state.settings.readingMode = this.matchesReadingPreset(
+            state.settings.charactersPerLine,
+            state.settings.lineHeight
+        );
+
+        if (this.readingModeToggle) {
+            this.readingModeToggle.checked = state.settings.readingMode;
+        }
+
+        document.documentElement.classList.toggle('reading-mode', state.settings.readingMode);
+        syncReadingTypographyInputs(
+            state.settings.charactersPerLine,
+            state.settings.lineHeight
+        );
+        this.saveSettings();
+    }
+
+    matchesReadingPreset(charactersPerLine, lineHeight) {
+        const { reading } = TYPOGRAPHY_DEFAULTS;
+        return charactersPerLine === reading.charactersPerLine
+            && Math.abs(lineHeight - reading.lineHeight) < 0.001;
     }
     
-    /**
-     * Apply progress bar setting
-     */
     applyProgressBarSetting() {
         const progressBar = getProgressBar();
         
         if (!progressBar) return;
         
         if (state.settings.showProgressBar) {
-            // Show progress bar if conditions are met
             progressBar.updateVisibility();
         } else {
-            // Force hide progress bar immediately
             progressBar.hide();
         }
     }
     
-    /**
-     * Apply TOC setting
-     */
     applyTOCSetting() {
         const toc = document.getElementById('toc');
         
@@ -246,4 +288,12 @@ export class SettingsManager {
             }
         }
     }
+}
+
+export function getSettingsManager() {
+    return window.__settingsManager ?? null;
+}
+
+export function registerSettingsManager(manager) {
+    window.__settingsManager = manager;
 }

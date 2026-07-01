@@ -61,3 +61,8 @@
     --chevron-fade-duration: 0.3s;
     --chevron-color-transition: 0.2s;
 }
+
+html.reading-mode {
+    --paragraph-spacing: 1.5em;
+    --list-spacing: 0.5em;
+}
