@@ -13,11 +13,14 @@ html {
 body {
     font-family: var(--font-family);
     line-height: var(--line-height);
+    letter-spacing: var(--letter-spacing-body);
     color: var(--text-color);
     background-color: var(--bg-color);
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
 }
 
 ::-webkit-scrollbar {

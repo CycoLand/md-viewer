@@ -1,4 +1,8 @@
 /* Rendered markdown body (headings, prose, media, tables, tasks) */
+.markdown-content {
+    letter-spacing: var(--letter-spacing-body);
+}
+
 .markdown-content h1,
 .markdown-content h2,
 .markdown-content h3,
@@ -8,7 +12,8 @@
     margin-top: 2rem;
     margin-bottom: 1rem;
     font-weight: var(--font-weight-bold);
-    line-height: 1.2;
+    line-height: var(--line-height-heading);
+    letter-spacing: var(--letter-spacing-heading);
     color: var(--text-color);
 }
 
@@ -48,8 +53,9 @@
 }
 
 .markdown-content p {
-    margin-bottom: 1rem;
+    margin-bottom: var(--paragraph-spacing);
     line-height: var(--line-height);
+    text-wrap: pretty;
 }
 
 .markdown-content a {
@@ -86,7 +92,8 @@
 }
 
 .markdown-content li {
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--list-spacing);
+    line-height: var(--line-height);
 }
 
 .markdown-content .list-cards {
@@ -273,7 +280,7 @@
     padding: 0.1rem 0.1rem;
     border-radius: 5px;
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: 0.875em;
     vertical-align: middle;
     color: var(--inline-code-color);
     font-weight: 500;

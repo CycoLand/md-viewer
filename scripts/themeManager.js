@@ -353,7 +353,7 @@ export class ThemeManager {
         });
 
         document.getElementById('content-width').addEventListener('input', (e) => {
-            const value = e.target.value + 'px';
+            const value = e.target.value + 'ch';
             document.documentElement.style.setProperty('--content-max-width', value);
             document.getElementById('content-width-value').textContent = value;
             this.saveTheme();

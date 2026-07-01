@@ -35,7 +35,7 @@
     padding: 3rem 2rem;
     overflow-y: auto;
     width: 100%;
-    max-width: 800px;
+    max-width: var(--content-max-width);
     height: calc(100vh - 200px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
     display: none;
@@ -50,7 +50,7 @@
 }
 
 .page-container.single {
-    max-width: 800px;
+    max-width: var(--content-max-width);
     margin: 0 auto;
 }
 
@@ -160,8 +160,9 @@
 .page-container h4 { font-size: 1.1rem; }
 
 .page-container p {
-    margin-bottom: 1rem;
+    margin-bottom: var(--paragraph-spacing);
     line-height: var(--line-height);
+    text-wrap: pretty;
 }
 
 .page-container ul,
@@ -171,7 +172,8 @@
 }
 
 .page-container li {
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--list-spacing);
+    line-height: var(--line-height);
 }
 
 .page-container code {

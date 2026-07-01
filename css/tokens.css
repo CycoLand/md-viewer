@@ -28,14 +28,20 @@
     --font-family: 'Inter', sans-serif;
     --font-mono: 'Recursive', monospace;
     --font-size: 16px;
-    --line-height: 1.4;
+    --line-height: 1.625;
+    --line-height-heading: 1.25;
+    --line-height-tight: 1.2;
+    --letter-spacing-body: 0.011em;
+    --letter-spacing-heading: -0.02em;
+    --paragraph-spacing: 1.25em;
+    --list-spacing: 0.375em;
     --font-weight-normal: 400;
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
 
     --sidebar-width: 310px;
-    --content-max-width: 700px;
+    --content-max-width: 75ch;
     --toc-column-width: 310px;
     --border-radius: 8px;
     --border-radius-lg: 12px;
