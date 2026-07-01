@@ -7,6 +7,7 @@
     max-height: calc(100vh - 3px);
     overflow-y: auto;
     overflow-x: hidden;
+    scrollbar-gutter: stable;
     padding: 1.5rem 65px 1rem 1.5rem;
     margin-right: 5px;
     border-left: 1px solid rgba(148, 163, 184, 0.2);
