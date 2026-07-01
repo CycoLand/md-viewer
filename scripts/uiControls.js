@@ -1,5 +1,6 @@
 // UI control functions
 import { state } from './state.js';
+import { stripInlineMarkdown } from './markdownText.js';
 
 export function toggleSidebar() {
     state.sidebarCollapsed = !state.sidebarCollapsed;
@@ -81,11 +82,11 @@ export function autoDetectTitle(content) {
         if (inFence) continue;
         const h1Match = trimmed.match(/^#\s+(.+)$/);
         if (h1Match && h1Match[1]) {
-            return sanitizeFilename(h1Match[1].trim());
+            return sanitizeFilename(stripInlineMarkdown(h1Match[1].trim()));
         }
         const h2Match = trimmed.match(/^##\s+(.+)$/);
         if (h2Match && h2Match[1]) {
-            return sanitizeFilename(h2Match[1].trim());
+            return sanitizeFilename(stripInlineMarkdown(h2Match[1].trim()));
         }
     }
     
@@ -97,10 +98,9 @@ export function autoDetectTitle(content) {
         return !inFence && t.length > 0;
     });
     if (firstLine && firstLine.trim().length <= 60) {
-        const cleaned = firstLine.trim()
-            .replace(/^#+\s*/, '')
-            .replace(/[*_~`]/g, '')
-            .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1');
+        const cleaned = stripInlineMarkdown(
+            firstLine.trim().replace(/^#+\s*/, '')
+        );
         
         if (cleaned.length > 0 && cleaned.length <= 60) {
             return sanitizeFilename(cleaned);

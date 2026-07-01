@@ -3,6 +3,7 @@
 
 import { state, SETTINGS_KEY } from './state.js';
 import { getProgressBar } from './progressBar.js';
+import { refreshRenderedView } from './markdownRenderer.js';
 import {
     TYPOGRAPHY_DEFAULTS,
     applyTypography,
@@ -23,6 +24,7 @@ export class SettingsManager {
         // Setting toggles (full panel)
         this.progressBarToggle = document.getElementById('toggle-progress-bar');
         this.tocToggle = document.getElementById('toggle-toc');
+        this.plainTextHeadingsToggle = document.getElementById('toggle-plain-text-headings');
         this.readingModeToggle = document.getElementById('toggle-reading-mode');
         this.charactersPerLineSlider = document.getElementById('reading-characters-per-line');
         this.lineHeightSlider = document.getElementById('reading-line-height');
@@ -112,6 +114,12 @@ export class SettingsManager {
             this.applyTOCSetting();
         });
 
+        this.plainTextHeadingsToggle?.addEventListener('change', (e) => {
+            state.settings.plainTextHeadings = e.target.checked;
+            this.saveSettings();
+            refreshRenderedView();
+        });
+
         this.readingModeToggle?.addEventListener('change', (e) => {
             state.settings.readingMode = e.target.checked;
             const preset = e.target.checked
@@ -189,6 +197,9 @@ export class SettingsManager {
         if (typeof state.settings.readingMode !== 'boolean') {
             state.settings.readingMode = false;
         }
+        if (typeof state.settings.plainTextHeadings !== 'boolean') {
+            state.settings.plainTextHeadings = true;
+        }
         
         if (this.progressBarToggle) {
             this.progressBarToggle.checked = state.settings.showProgressBar;
@@ -204,6 +215,9 @@ export class SettingsManager {
         }
         if (this.readingModeToggle) {
             this.readingModeToggle.checked = state.settings.readingMode;
+        }
+        if (this.plainTextHeadingsToggle) {
+            this.plainTextHeadingsToggle.checked = state.settings.plainTextHeadings;
         }
 
         syncReadingTypographyInputs(
