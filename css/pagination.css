@@ -138,8 +138,8 @@
 .page-container h6 {
     margin-top: 2rem;
     margin-bottom: 1rem;
-    font-weight: var(--font-weight-bold);
-    line-height: 1.2;
+    font-weight: var(--font-weight-heading);
+    line-height: var(--line-height-heading);
     color: var(--text-color);
 }
 
@@ -176,13 +176,20 @@
     line-height: var(--line-height);
 }
 
+.page-container ul > li::marker,
+.page-container ol > li::marker {
+    color: var(--list-marker-color);
+    font-weight: var(--font-weight-normal);
+}
+
 .page-container code {
-    background-color: rgba(99, 102, 241, 0.1);
+    background-color: var(--code-block-bg);
     padding: 0.2rem 0.4rem;
     border-radius: 4px;
     font-family: var(--font-mono);
     font-size: 0.875rem;
-    color: #e5c07b;
+    color: var(--code-block-color);
+    border: 1px solid var(--code-block-border);
 }
 
 .page-container blockquote {

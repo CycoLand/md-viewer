@@ -11,7 +11,7 @@
 .markdown-content h6 {
     margin-top: 2rem;
     margin-bottom: 1rem;
-    font-weight: var(--font-weight-bold);
+    font-weight: var(--font-weight-heading);
     line-height: var(--line-height-heading);
     letter-spacing: var(--letter-spacing-heading);
     color: var(--text-color);
@@ -94,6 +94,12 @@
 .markdown-content li {
     margin-bottom: var(--list-spacing);
     line-height: var(--line-height);
+}
+
+.markdown-content ul > li::marker,
+.markdown-content ol > li::marker {
+    color: var(--list-marker-color);
+    font-weight: var(--font-weight-normal);
 }
 
 .markdown-content .list-cards {
@@ -283,21 +289,21 @@
     font-size: 0.875em;
     vertical-align: middle;
     color: var(--inline-code-color);
-    font-weight: 500;
-    border: 1px solid var(--box-border);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    font-weight: var(--font-weight-normal);
+    border: 1px solid var(--code-block-border);
+    box-shadow: none;
     white-space: nowrap;
 }
 
 .markdown-content pre {
     position: relative;
-    background-color: var(--surface-color);
+    background-color: var(--code-block-bg);
     padding: 0.75rem;
     border-radius: var(--border-radius-lg);
     overflow-x: auto;
     margin: 2rem 0;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    border: 1px solid var(--code-block-border);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .markdown-content pre code {
@@ -305,7 +311,7 @@
     padding: 0;
     border: none;
     box-shadow: none;
-    color: var(--text-color);
+    color: var(--code-block-color);
     font-size: 0.875rem;
     line-height: 1.6;
 }
@@ -316,6 +322,7 @@
     padding: 0;
     background: transparent;
     border: none;
+    color: var(--code-block-color);
 }
 
 .markdown-content pre code.hljs::before {
@@ -325,7 +332,7 @@
     right: 0.5rem;
     font-size: 0.7rem;
     text-transform: uppercase;
-    color: var(--text-dim);
+    color: #57606a;
     font-weight: 500;
     letter-spacing: 0.5px;
 }
@@ -433,7 +440,7 @@
 }
 
 .raw-content pre {
-    background-color: var(--surface-color);
+    background-color: var(--code-block-bg);
     padding: 1.5rem;
     border-radius: var(--border-radius);
     height: 100%;
@@ -441,6 +448,8 @@
     font-family: var(--font-mono);
     font-size: 0.875rem;
     line-height: 1.5;
+    color: var(--code-block-color);
+    border: 1px solid var(--code-block-border);
     white-space: pre-wrap;
     word-wrap: break-word;
 }
