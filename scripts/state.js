@@ -12,6 +12,7 @@ export const state = {
     settings: {
         showProgressBar: true,
         showTOC: true,
+        showWaterProgressBar: false,
         plainTextHeadings: true,
         readingMode: false,
         charactersPerLine: 68,

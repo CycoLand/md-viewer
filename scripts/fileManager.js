@@ -3,6 +3,7 @@ import { state, STORAGE_KEY } from './state.js';
 import { showRenderedContent, showRawContent } from './markdownRenderer.js';
 import { showLoading, hideLoading, getTransitionDuration } from './loadingAnimations.js';
 import { getProgressBar } from './progressBar.js';
+import { getWaterProgressBar } from './waterProgressBar.js';
 
 export class FileManager {
     static generateId() {
@@ -195,6 +196,11 @@ export class FileManager {
                 const progressBar = getProgressBar();
                 if (progressBar) {
                     progressBar.onFileChange();
+                }
+
+                const waterProgressBar = getWaterProgressBar();
+                if (waterProgressBar) {
+                    waterProgressBar.onFileChange();
                 }
             }, 50); // Small delay to ensure content is rendered
         }, transitionDuration); // Wait for fade out to complete

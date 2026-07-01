@@ -196,6 +196,17 @@
                 <span class="toggle-slider"></span>
             </label>
         </div>
+
+        <div class="setting-item quick-menu-setting">
+            <div class="setting-label">
+                <i class="fas fa-water"></i>
+                <span>Water Progress</span>
+            </div>
+            <label class="toggle-switch toggle-switch-small">
+                <input type="checkbox" id="quick-toggle-water-progress-bar">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
         
         <div class="quick-menu-separator"></div>
         <button id="open-full-settings-panel" class="quick-menu-item quick-menu-more">
@@ -311,6 +322,17 @@
                     </div>
                     <label class="toggle-switch">
                         <input type="checkbox" id="toggle-toc" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <i class="fas fa-water"></i>
+                        <span>Water Progress Bar</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-water-progress-bar">
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
@@ -465,7 +487,7 @@
                     <div id="markdown-content" class="markdown-content"></div>
                     <aside id="toc" class="toc">
                         <!-- Water Progress Bar -->
-                        <div class="water-progress-container">
+                        <div class="water-progress-container hidden">
                             <div class="water-progress-bar">
                                 <div class="water" id="water-level">
                                     <div class="wave wave-1"></div>

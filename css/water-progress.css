@@ -8,6 +8,10 @@
     z-index: 10;
 }
 
+.water-progress-container.hidden {
+    display: none !important;
+}
+
 .water-progress-bar {
     position: relative;
     width: 100%;

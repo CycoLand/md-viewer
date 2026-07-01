@@ -3,6 +3,7 @@
 
 import { state, SETTINGS_KEY } from './state.js';
 import { getProgressBar } from './progressBar.js';
+import { getWaterProgressBar } from './waterProgressBar.js';
 import { refreshRenderedView } from './markdownRenderer.js';
 import {
     TYPOGRAPHY_DEFAULTS,
@@ -24,6 +25,7 @@ export class SettingsManager {
         // Setting toggles (full panel)
         this.progressBarToggle = document.getElementById('toggle-progress-bar');
         this.tocToggle = document.getElementById('toggle-toc');
+        this.waterProgressBarToggle = document.getElementById('toggle-water-progress-bar');
         this.plainTextHeadingsToggle = document.getElementById('toggle-plain-text-headings');
         this.readingModeToggle = document.getElementById('toggle-reading-mode');
         this.charactersPerLineSlider = document.getElementById('reading-characters-per-line');
@@ -32,6 +34,7 @@ export class SettingsManager {
         // Quick toggles
         this.quickProgressBarToggle = document.getElementById('quick-toggle-progress-bar');
         this.quickTocToggle = document.getElementById('quick-toggle-toc');
+        this.quickWaterProgressBarToggle = document.getElementById('quick-toggle-water-progress-bar');
         
         this.init();
     }
@@ -76,6 +79,15 @@ export class SettingsManager {
             this.saveSettings();
             this.applyTOCSetting();
         });
+
+        this.quickWaterProgressBarToggle?.addEventListener('change', (e) => {
+            state.settings.showWaterProgressBar = e.target.checked;
+            if (this.waterProgressBarToggle) {
+                this.waterProgressBarToggle.checked = e.target.checked;
+            }
+            this.saveSettings();
+            this.applyWaterProgressBarSetting();
+        });
         
         this.openFullPanelBtn?.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -112,6 +124,15 @@ export class SettingsManager {
             }
             this.saveSettings();
             this.applyTOCSetting();
+        });
+
+        this.waterProgressBarToggle?.addEventListener('change', (e) => {
+            state.settings.showWaterProgressBar = e.target.checked;
+            if (this.quickWaterProgressBarToggle) {
+                this.quickWaterProgressBarToggle.checked = e.target.checked;
+            }
+            this.saveSettings();
+            this.applyWaterProgressBarSetting();
         });
 
         this.plainTextHeadingsToggle?.addEventListener('change', (e) => {
@@ -200,6 +221,9 @@ export class SettingsManager {
         if (typeof state.settings.plainTextHeadings !== 'boolean') {
             state.settings.plainTextHeadings = true;
         }
+        if (typeof state.settings.showWaterProgressBar !== 'boolean') {
+            state.settings.showWaterProgressBar = false;
+        }
         
         if (this.progressBarToggle) {
             this.progressBarToggle.checked = state.settings.showProgressBar;
@@ -212,6 +236,12 @@ export class SettingsManager {
         }
         if (this.quickTocToggle) {
             this.quickTocToggle.checked = state.settings.showTOC;
+        }
+        if (this.waterProgressBarToggle) {
+            this.waterProgressBarToggle.checked = state.settings.showWaterProgressBar;
+        }
+        if (this.quickWaterProgressBarToggle) {
+            this.quickWaterProgressBarToggle.checked = state.settings.showWaterProgressBar;
         }
         if (this.readingModeToggle) {
             this.readingModeToggle.checked = state.settings.readingMode;
@@ -237,6 +267,7 @@ export class SettingsManager {
     applySettings() {
         this.applyProgressBarSetting();
         this.applyTOCSetting();
+        this.applyWaterProgressBarSetting();
         this.applyReadingSettings();
     }
 
@@ -301,6 +332,16 @@ export class SettingsManager {
                 toc.classList.add('force-hidden');
             }
         }
+
+        this.applyWaterProgressBarSetting();
+    }
+
+    applyWaterProgressBarSetting() {
+        const waterProgressBar = getWaterProgressBar();
+
+        if (!waterProgressBar) return;
+
+        waterProgressBar.updateVisibility();
     }
 }
 
