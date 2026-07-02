@@ -37,6 +37,7 @@
     position: relative;
     max-height: calc(100vh - 8rem);
     overflow: auto;
+    scrollbar-gutter: stable;
     scrollbar-width: thin;
     scrollbar-color: var(--border-color) transparent;
     mask-image: linear-gradient(to bottom, transparent, white 12px, white calc(100% - 12px), transparent);
@@ -53,6 +54,7 @@
 
 .toc-items {
     position: relative;
+    padding-bottom: 5px;
 }
 
 .toc-track-host {
@@ -61,12 +63,23 @@
     left: 0;
     pointer-events: none;
     z-index: 0;
+    overflow: hidden;
 }
 
 .toc-track-svg {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
     overflow: visible;
+}
+
+.toc-track-active-clip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+    transition: clip-path 0.2s ease;
 }
 
 .toc-track-path-base {
@@ -79,7 +92,6 @@
     stroke: var(--primary-color);
     stroke-width: 1.5;
     vector-effect: non-scaling-stroke;
-    transition: clip-path 0.2s ease;
 }
 
 .toc-track-dot {
@@ -92,9 +104,9 @@
     border-radius: 50%;
     background: var(--primary-color);
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-color) 25%, transparent);
-    offset-rotate: 0deg;
+    transform: translate(-50%, -50%);
     opacity: 0;
-    transition: opacity 0.2s ease, offset-distance 0.2s ease;
+    transition: opacity 0.2s ease, left 0.2s ease, top 0.2s ease;
 }
 
 .toc-nav {

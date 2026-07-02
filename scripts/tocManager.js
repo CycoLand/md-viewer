@@ -7,6 +7,7 @@ let trackResizeObserver = null;
 let trackUpdateScheduled = false;
 let trackState = null;
 let trackRefreshListener = null;
+let lastNavLayout = null;
 
 function teardownTocTrack() {
     trackResizeObserver?.disconnect();
@@ -18,6 +19,7 @@ function teardownTocTrack() {
     }
 
     trackState = null;
+    lastNavLayout = null;
 }
 
 export function setDocumentControlHandlers(handlers) {
@@ -112,10 +114,14 @@ function buildTocHtml(items) {
             <div class="toc-scroll">
                 <div class="toc-items">
                     <div class="toc-track-host" aria-hidden="true">
-                        <svg class="toc-track-svg" preserveAspectRatio="none">
+                        <svg class="toc-track-svg toc-track-svg-base" preserveAspectRatio="none">
                             <path class="toc-track-path-base" fill="none"></path>
-                            <path class="toc-track-path-active" fill="none"></path>
                         </svg>
+                        <div class="toc-track-active-clip">
+                            <svg class="toc-track-svg toc-track-svg-active" preserveAspectRatio="none">
+                                <path class="toc-track-path-active" fill="none"></path>
+                            </svg>
+                        </div>
                         <div class="toc-track-dot"></div>
                     </div>
                     <nav class="toc-nav">${linksHtml}</nav>
@@ -138,10 +144,15 @@ function scheduleTrackUpdate() {
         const trackHost = tocEl.querySelector('.toc-track-host');
         if (!nav || !trackHost) return;
 
-        const computed = computeTocTrack(nav, items);
+        const layoutKey = `${nav.offsetWidth}:${nav.offsetHeight}`;
+        if (!trackState.computed || layoutKey !== lastNavLayout) {
+            lastNavLayout = layoutKey;
+            trackState.computed = computeTocTrack(nav, items);
+        }
+
         updateTocTrackVisuals(
             trackHost,
-            computed,
+            trackState.computed,
             spy.getItems()
         );
     });
@@ -150,7 +161,8 @@ function scheduleTrackUpdate() {
 function setupTocTrack(tocEl, items, spy) {
     teardownTocTrack();
 
-    trackState = { tocEl, items, spy };
+    trackState = { tocEl, items, spy, computed: null };
+    lastNavLayout = null;
     trackRefreshListener = () => scheduleTrackUpdate();
 
     scheduleTrackUpdate();

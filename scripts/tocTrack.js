@@ -3,6 +3,8 @@
  */
 
 const BASE = 8;
+/** Half dot (3px) + box-shadow ring (2px) — keep inside scroll area */
+const DOT_HALO = 5;
 
 let previousThumbInfo = null;
 
@@ -27,18 +29,71 @@ function computeItemLineLengths(path, positions) {
 
     for (let i = 0; i < positions.length; i++) {
         const [top, bottom] = positions[i];
-        let length = i > 0
-            ? itemLineLengths[i - 1][1] + (top - positions[i - 1][1])
-            : top;
+        let length = i > 0 ? itemLineLengths[i - 1][1] : 0;
 
         while (length < totalLength && pathEl.getPointAtLength(length).y < top) {
             length++;
         }
 
-        itemLineLengths.push([length, length + bottom - top]);
+        const topLength = length;
+        while (length < totalLength && pathEl.getPointAtLength(length).y < bottom) {
+            length++;
+        }
+
+        itemLineLengths.push([topLength, length]);
     }
 
     return itemLineLengths;
+}
+
+function createPathElement(path) {
+    const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    pathEl.setAttribute('d', path);
+    return pathEl;
+}
+
+/** Walk along the path from an anchor until targetY is reached; returns on-track x at that y. */
+function getPathPointAtY(path, anchorDistance, targetY, forward) {
+    const pathEl = createPathElement(path);
+    const total = pathEl.getTotalLength();
+    let distance = Math.max(0, Math.min(anchorDistance, total));
+    let point = pathEl.getPointAtLength(distance);
+
+    if (Math.abs(point.y - targetY) < 0.5) {
+        return { x: point.x, y: targetY };
+    }
+
+    const step = forward ? 0.5 : -0.5;
+    const limit = forward ? total : 0;
+
+    while (forward ? distance < limit : distance > limit) {
+        const prevPoint = point;
+        distance += step;
+        point = pathEl.getPointAtLength(distance);
+
+        const crossed = forward ? point.y >= targetY : point.y <= targetY;
+        if (crossed) {
+            const dy = point.y - prevPoint.y;
+            if (Math.abs(dy) > 0.001) {
+                const t = (targetY - prevPoint.y) / dy;
+                return {
+                    x: prevPoint.x + t * (point.x - prevPoint.x),
+                    y: targetY
+                };
+            }
+            return { x: point.x, y: targetY };
+        }
+    }
+
+    // Padding zone below/above a vertical segment (path ends before row edge)
+    if (forward && targetY > point.y) {
+        return { x: point.x, y: targetY };
+    }
+    if (!forward && targetY < point.y) {
+        return { x: point.x, y: targetY };
+    }
+
+    return { x: point.x, y: point.y };
 }
 
 export function computeTocTrack(container, items) {
@@ -50,6 +105,7 @@ export function computeTocTrack(container, items) {
     let height = 0;
     let path = '';
     const positions = [];
+    const rowBounds = [];
     const links = [];
 
     for (let i = 0; i < items.length; i++) {
@@ -59,11 +115,13 @@ export function computeTocTrack(container, items) {
 
         const styles = getComputedStyle(element);
         const x = getLineOffset(item.level) + 0.5;
-        const top = element.offsetTop + (parseFloat(styles.paddingTop) || 0);
-        const bottom = element.offsetTop + element.clientHeight - (parseFloat(styles.paddingBottom) || 0);
+        const rowTop = element.offsetTop;
+        const rowBottom = element.offsetTop + element.offsetHeight;
+        const top = rowTop + (parseFloat(styles.paddingTop) || 0);
+        const bottom = rowBottom - (parseFloat(styles.paddingBottom) || 0);
 
         width = Math.max(x + 8, width);
-        height = Math.max(height, bottom);
+        height = Math.max(height, rowBottom);
 
         if (links.length === 0) {
             path += `M ${x} ${top} L ${x} ${bottom}`;
@@ -73,6 +131,7 @@ export function computeTocTrack(container, items) {
         }
 
         positions.push([top, bottom, x]);
+        rowBounds.push({ rowTop, rowBottom, x });
         links.push(item.id);
     }
 
@@ -81,15 +140,35 @@ export function computeTocTrack(container, items) {
     }
 
     const itemLineLengths = computeItemLineLengths(path, positions);
+    height += DOT_HALO;
 
     return {
         width,
         height,
+        contentHeight: height - DOT_HALO,
         path,
         positions,
+        rowBounds,
         links,
         itemLineLengths
     };
+}
+
+function clipPolygon(top, bottom) {
+    return `polygon(0 ${top}px, 100% ${top}px, 100% ${bottom}px, 0 ${bottom}px)`;
+}
+
+function setActiveClip(activeClip, width, height, clipTop, clipBottom) {
+    if (!activeClip) return;
+
+    activeClip.style.width = `${width}px`;
+    activeClip.style.height = `${height}px`;
+    activeClip.style.clipPath = clipPolygon(clipTop, clipBottom);
+}
+
+function clearActiveClip(activeClip) {
+    if (!activeClip) return;
+    activeClip.style.clipPath = clipPolygon(0, 0);
 }
 
 function getScrollDirection(startIdx, endIdx) {
@@ -110,12 +189,15 @@ function getScrollDirection(startIdx, endIdx) {
 export function updateTocTrackVisuals(trackHost, computed, activeItems) {
     if (!trackHost || !computed) return;
 
-    const svg = trackHost.querySelector('.toc-track-svg');
+    const baseSvg = trackHost.querySelector('.toc-track-svg-base');
+    const activeSvg = trackHost.querySelector('.toc-track-svg-active');
+    const activeClip = trackHost.querySelector('.toc-track-active-clip');
     const basePath = trackHost.querySelector('.toc-track-path-base');
     const activePath = trackHost.querySelector('.toc-track-path-active');
     const dot = trackHost.querySelector('.toc-track-dot');
 
-    if (svg) {
+    for (const svg of [baseSvg, activeSvg]) {
+        if (!svg) continue;
         svg.setAttribute('viewBox', `0 0 ${computed.width} ${computed.height}`);
         svg.style.width = `${computed.width}px`;
         svg.style.height = `${computed.height}px`;
@@ -129,9 +211,7 @@ export function updateTocTrackVisuals(trackHost, computed, activeItems) {
 
     const startIdx = activeItems.findIndex((item) => item.active);
     if (startIdx === -1) {
-        if (activePath) {
-            activePath.style.clipPath = 'polygon(0 0, 100% 0, 100% 0, 0 0)';
-        }
+        clearActiveClip(activeClip);
         if (dot) {
             dot.style.opacity = '0';
         }
@@ -148,24 +228,33 @@ export function updateTocTrackVisuals(trackHost, computed, activeItems) {
 
     const [startTop] = computed.positions[startPosIdx];
     const endBottom = computed.positions[endPosIdx][1];
+    const startRow = computed.rowBounds[startPosIdx];
+    const endRow = computed.rowBounds[endPosIdx];
     const isUp = getScrollDirection(startIdx, endIdx);
 
-    if (activePath) {
-        activePath.style.clipPath =
-            `polygon(0 ${startTop}px, 100% ${startTop}px, 100% ${endBottom}px, 0 ${endBottom}px)`;
-    }
+    const maxDotY = computed.contentHeight ?? (computed.height - DOT_HALO);
+    const targetY = Math.max(0, Math.min(
+        isUp ? startRow.rowTop : endRow.rowBottom,
+        maxDotY
+    ));
+    const anchorDistance = isUp
+        ? computed.itemLineLengths[startPosIdx][0]
+        : computed.itemLineLengths[endPosIdx][1];
+    const dotPoint = getPathPointAtY(
+        computed.path,
+        anchorDistance,
+        targetY,
+        !isUp
+    );
+    const clipTop = isUp ? dotPoint.y : startTop;
+    const clipBottom = isUp ? endBottom : dotPoint.y;
+
+    setActiveClip(activeClip, computed.width, computed.height, clipTop, clipBottom);
 
     if (dot) {
-        const offsetDistance = isUp
-            ? computed.itemLineLengths[startPosIdx][0]
-            : computed.itemLineLengths[endPosIdx][1];
-
-        dot.style.offsetPath = `path("${computed.path}")`;
-        dot.style.offsetDistance = `${offsetDistance}px`;
-        dot.style.offsetRotate = '0deg';
-        dot.style.left = '0';
-        dot.style.top = '0';
-        dot.style.transform = 'none';
+        dot.style.left = `${dotPoint.x}px`;
+        dot.style.top = `${dotPoint.y}px`;
+        dot.style.transform = 'translate(-50%, -50%)';
         dot.style.opacity = '1';
     }
 
