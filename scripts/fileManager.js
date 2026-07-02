@@ -230,6 +230,19 @@ export class FileManager {
         document.getElementById('content-area').style.display = 'none';
     }
 
+    static async copyCurrentFileAsMarkdown() {
+        if (!state.currentFileId) return;
+
+        const file = this.getFile(state.currentFileId);
+        if (!file) return;
+
+        try {
+            await navigator.clipboard.writeText(file.content ?? '');
+        } catch (err) {
+            console.error('Failed to copy markdown:', err);
+        }
+    }
+
     static exportCurrentFileAsHtml() {
         if (!state.currentFileId) return;
         

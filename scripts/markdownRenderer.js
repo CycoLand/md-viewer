@@ -76,6 +76,9 @@ function createDocumentHeader(file, content) {
                         <i class="fas fa-book-open"></i> View Pages
                     </button>
                     <div class="menu-separator"></div>
+                    <button class="menu-item" data-action="copy-markdown">
+                        <i class="fas fa-copy"></i> Copy as Markdown
+                    </button>
                     <button class="menu-item" data-action="export-html">
                         <i class="fas fa-download"></i> Export HTML
                     </button>
@@ -492,6 +495,10 @@ function setupDocumentMenu(mdEl) {
                             }
                             break;
                             
+                        case 'copy-markdown':
+                            FileManager.copyCurrentFileAsMarkdown();
+                            break;
+
                         case 'export-html':
                             FileManager.exportCurrentFileAsHtml();
                             break;
