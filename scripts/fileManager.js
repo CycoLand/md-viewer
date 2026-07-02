@@ -161,17 +161,32 @@ export class FileManager {
         const file = this.getFile(fileId);
         if (!file) return;
 
+        const resetScroll = state.currentFileId !== fileId;
         state.currentFileId = fileId;
         this.renderFileList();
-        this.showFile(file);
+        this.showFile(file, { resetScroll });
     }
 
-    static showFile(file) {
+    static resetDocumentScroll() {
+        const contentArea = document.getElementById('content-area');
+        if (contentArea) {
+            contentArea.scrollTop = 0;
+        }
+
+        document.querySelector('.toc-scroll')?.scrollTo({ top: 0 });
+        document.querySelector('.toc')?.scrollTo({ top: 0 });
+    }
+
+    static showFile(file, { resetScroll = false } = {}) {
         document.getElementById('welcome-screen').style.display = 'none';
         document.getElementById('content-area').style.display = 'flex';
 
         const contentArea = document.getElementById('content-area');
         const transitionDuration = getTransitionDuration();
+
+        if (resetScroll) {
+            this.resetDocumentScroll();
+        }
         
         // Fade out current content
         showLoading(contentArea);
@@ -190,6 +205,10 @@ export class FileManager {
             
             // Fade in new content
             setTimeout(() => {
+                if (resetScroll) {
+                    this.resetDocumentScroll();
+                }
+
                 hideLoading(contentArea);
                 
                 // Notify progress bar that content has changed
