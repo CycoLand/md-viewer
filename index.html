@@ -6,8 +6,8 @@
     <title>MD Viewer</title>
     <link rel="icon" id="dynamic-favicon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css">
-    <link id="highlight-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link id="highlight-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Recursive:wght,MONO@300..1000,1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -145,8 +145,8 @@
                 </div>
                 <div class="input-group">
                     <label for="line-height">Line Height</label>
-                    <input type="range" id="line-height" min="1.2" max="2.0" step="0.1" value="1.6">
-                    <span id="line-height-value">1.6</span>
+                    <input type="range" id="line-height" min="1.2" max="2.0" step="0.025" value="1.625">
+                    <span id="line-height-value">1.625</span>
                 </div>
             </div>
             
@@ -159,8 +159,8 @@
                 </div>
                 <div class="input-group">
                     <label for="content-width">Max Content Width</label>
-                    <input type="range" id="content-width" min="600" max="1200" value="1100">
-                    <span id="content-width-value">1100px</span>
+                    <input type="range" id="content-width" min="50" max="80" value="68">
+                    <span id="content-width-value">68ch</span>
                 </div>
             </div>
             
@@ -193,6 +193,17 @@
             </div>
             <label class="toggle-switch toggle-switch-small">
                 <input type="checkbox" id="quick-toggle-toc" checked>
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+
+        <div class="setting-item quick-menu-setting">
+            <div class="setting-label">
+                <i class="fas fa-water"></i>
+                <span>Water Progress</span>
+            </div>
+            <label class="toggle-switch toggle-switch-small">
+                <input type="checkbox" id="quick-toggle-water-progress-bar">
                 <span class="toggle-slider"></span>
             </label>
         </div>
@@ -314,6 +325,63 @@
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
+
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <i class="fas fa-water"></i>
+                        <span>Water Progress Bar</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-water-progress-bar">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <i class="fas fa-heading"></i>
+                        <span>Plain Text Headings</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-plain-text-headings" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <p class="setting-description">
+                    When on, headings ignore inline markdown and show as plain text. Turn off to render bold, code, links, and other formatting inside headings.
+                </p>
+            </div>
+
+            <div class="settings-section">
+                <h4>Reading</h4>
+
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <i class="fas fa-book-open"></i>
+                        <span>Reading Mode</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-reading-mode">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <p class="setting-description">
+                    Uses shorter lines and extra spacing for easier long-form reading. Fine-tune below.
+                </p>
+
+                <div class="setting-slider-group">
+                    <label for="reading-characters-per-line">Characters per Line</label>
+                    <input type="range" id="reading-characters-per-line" min="45" max="80" value="68">
+                    <span id="reading-characters-per-line-value" class="setting-slider-value">68ch</span>
+                </div>
+
+                <div class="setting-slider-group">
+                    <label for="reading-line-height">Line Height</label>
+                    <input type="range" id="reading-line-height" min="1.2" max="2.0" step="0.025" value="1.625">
+                    <span id="reading-line-height-value" class="setting-slider-value">1.625</span>
+                </div>
             </div>
         </div>
     </div>
@@ -419,7 +487,7 @@
                     <div id="markdown-content" class="markdown-content"></div>
                     <aside id="toc" class="toc">
                         <!-- Water Progress Bar -->
-                        <div class="water-progress-container">
+                        <div class="water-progress-container hidden">
                             <div class="water-progress-bar">
                                 <div class="water" id="water-level">
                                     <div class="wave wave-1"></div>

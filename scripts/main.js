@@ -1,12 +1,12 @@
 // Main entry point - brings all modules together
 import { state } from './state.js';
 import { ThemeManager } from './themeManager.js';
-import { SettingsManager } from './settingsManager.js';
+import { SettingsManager, registerSettingsManager } from './settingsManager.js';
 import { FileManager } from './fileManager.js';
 import { PaginationManager } from './paginationManager.js';
 import { ClipboardAutoLoader } from './clipboardAutoLoader.js';
 import { initProgressBar, getProgressBar } from './progressBar.js';
-import { WaterProgressBar } from './waterProgressBar.js';
+import { initWaterProgressBar } from './waterProgressBar.js';
 import './loadingAnimations.js'; // Initialize loading animations
 import {
     toggleSidebar,
@@ -31,13 +31,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize managers
     const themeManager = new ThemeManager();
     const settingsManager = new SettingsManager();
+    registerSettingsManager(settingsManager);
     const paginationManager = new PaginationManager();
     
     // Initialize progress bar
     const progressBar = initProgressBar();
     
     // Initialize water progress bar
-    const waterProgressBar = new WaterProgressBar();
+    const waterProgressBar = initWaterProgressBar();
 
     // Initialize drag and drop
     initializeDragAndDrop(FileManager);

@@ -6,6 +6,32 @@ import { generateTOC } from './tocManager.js';
 import { setupSortableTables } from './sortableTables.js';
 import { enhanceListCards } from './listCardEnhancer.js';
 import { enhanceCheckmarkLists } from './checkmarkLists.js';
+import { stripHeadingInlineMarkdown } from './markdownText.js';
+
+function shouldUsePlainTextHeadings() {
+    return state.settings.plainTextHeadings !== false;
+}
+
+function prepareBodyHtml(sanitizedHtml) {
+    const bodyContainer = document.createElement('div');
+    bodyContainer.innerHTML = sanitizedHtml;
+    if (shouldUsePlainTextHeadings()) {
+        stripHeadingInlineMarkdown(bodyContainer);
+    }
+    return bodyContainer.innerHTML;
+}
+
+/**
+ * Re-render the current document (e.g. after a display setting changes).
+ */
+export function refreshRenderedView() {
+    if (!state.currentFileId || state.rawMode) return;
+
+    const file = state.files.get(state.currentFileId);
+    if (!file) return;
+
+    showRenderedContent(file.content);
+}
 
 
 /**
@@ -126,6 +152,8 @@ export function showRenderedContent(content) {
         ADD_ATTR: ['disabled'], // Allow disabled attribute so we can control it
         ADD_TAGS: ['input'] // Ensure input tags are allowed
     });
+
+    const displayHtml = prepareBodyHtml(sanitizedHtml);
     
     // Get current file info for metadata
     const file = state.currentFileId ? state.files.get(state.currentFileId) : null;
@@ -133,7 +161,7 @@ export function showRenderedContent(content) {
     // Create document header with metadata
     const headerHtml = createDocumentHeader(file, content);
     
-    mdEl.innerHTML = headerHtml + sanitizedHtml;
+    mdEl.innerHTML = headerHtml + displayHtml;
     
     if (state.currentFileId) {
         state.renderCache.set(state.currentFileId, sanitizedHtml);
@@ -204,7 +232,7 @@ export function rebuildFromCache() {
     
     if (!cached) return;
 
-    mdEl.innerHTML = cached;
+    mdEl.innerHTML = prepareBodyHtml(cached);
 
     // Generate unique IDs for headings
     generateHeadingIds(mdEl);

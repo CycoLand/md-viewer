@@ -103,7 +103,8 @@ export class PaginationManager {
         tempContainer.style.position = 'absolute';
         tempContainer.style.visibility = 'hidden';
         tempContainer.style.left = '-9999px';
-        tempContainer.style.width = '800px';
+        tempContainer.style.width = getComputedStyle(document.documentElement)
+            .getPropertyValue('--content-max-width').trim() || '75ch';
         tempContainer.style.padding = '3rem 2rem';
         document.body.appendChild(tempContainer);
 

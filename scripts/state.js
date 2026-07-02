@@ -11,7 +11,12 @@ export const state = {
     },
     settings: {
         showProgressBar: true,
-        showTOC: true
+        showTOC: true,
+        showWaterProgressBar: false,
+        plainTextHeadings: true,
+        readingMode: false,
+        charactersPerLine: 68,
+        lineHeight: 1.625
     }
 };
 

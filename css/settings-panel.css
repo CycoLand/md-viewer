@@ -147,3 +147,40 @@
 .toggle-switch input:checked:hover + .toggle-slider {
     background-color: var(--primary-hover);
 }
+
+.setting-description {
+    margin: -0.25rem 0 1rem;
+    padding: 0 0.25rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--text-dim);
+}
+
+.setting-slider-group {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: var(--bg-color);
+    border-radius: var(--border-radius);
+}
+
+.setting-slider-group label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-medium);
+    color: var(--text-muted);
+}
+
+.setting-slider-group input[type="range"] {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    accent-color: var(--primary-color);
+}
+
+.setting-slider-value {
+    display: inline-block;
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-medium);
+    color: var(--text-color);
+    font-variant-numeric: tabular-nums;
+}

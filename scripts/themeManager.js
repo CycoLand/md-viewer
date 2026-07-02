@@ -1,4 +1,7 @@
 // Theme management
+import { getSettingsManager } from './settingsManager.js';
+import { parseCharactersPerLine, parseLineHeight } from './typography.js';
+
 export class ThemeManager {
     constructor() {
         this.presets = {
@@ -14,8 +17,6 @@ export class ThemeManager {
                 '--accent-color': '#06b6d4',
                 '--border-color': '#334155',
                 '--code-color': '#e5c07b',
-                '--inline-code-color': '#e5c07b',
-                '--inline-code-bg': 'rgba(99, 102, 241, 0.15)',
                 '--box-border': 'rgba(99, 102, 241, 0.3)',
                 '--success-color': '#10b981',
                 '--warning-color': '#f59e0b',
@@ -33,8 +34,6 @@ export class ThemeManager {
                 '--accent-color': '#6b7280',
                 '--border-color': '#374151',
                 '--code-color': '#e5c07b',
-                '--inline-code-color': '#e5c07b',
-                '--inline-code-bg': 'rgba(156, 163, 175, 0.15)',
                 '--box-border': 'rgba(156, 163, 175, 0.3)',
                 '--success-color': '#10b981',
                 '--warning-color': '#f59e0b',
@@ -52,8 +51,6 @@ export class ThemeManager {
                 '--accent-color': '#2563eb',
                 '--border-color': '#d1d5db',
                 '--code-color': '#415bac',
-                '--inline-code-color': '#dc2626',
-                '--inline-code-bg': '#f3f4f6',
                 '--box-border': '#d1d5db',
                 '--success-color': '#10b981',
                 '--warning-color': '#f59e0b',
@@ -71,8 +68,6 @@ export class ThemeManager {
                 '--accent-color': '#06b6d4',
                 '--border-color': '#1e3a4c',
                 '--code-color': '#5eead4',
-                '--inline-code-color': '#5eead4',
-                '--inline-code-bg': 'rgba(20, 184, 166, 0.15)',
                 '--box-border': 'rgba(20, 184, 166, 0.3)',
                 '--success-color': '#10b981',
                 '--warning-color': '#fbbf24',
@@ -90,8 +85,6 @@ export class ThemeManager {
                 '--accent-color': '#f472b6',
                 '--border-color': '#3d2842',
                 '--code-color': '#fbbf24',
-                '--inline-code-color': '#fbbf24',
-                '--inline-code-bg': 'rgba(249, 115, 22, 0.15)',
                 '--box-border': 'rgba(249, 115, 22, 0.3)',
                 '--success-color': '#10b981',
                 '--warning-color': '#fbbf24',
@@ -109,8 +102,6 @@ export class ThemeManager {
                 '--accent-color': '#84cc16',
                 '--border-color': '#1e3a28',
                 '--code-color': '#a3e635',
-                '--inline-code-color': '#a3e635',
-                '--inline-code-bg': 'rgba(34, 197, 94, 0.15)',
                 '--box-border': 'rgba(34, 197, 94, 0.3)',
                 '--success-color': '#22c55e',
                 '--warning-color': '#fbbf24',
@@ -128,8 +119,6 @@ export class ThemeManager {
                 '--accent-color': '#fb923c',
                 '--border-color': '#1e40af',
                 '--code-color': '#60a5fa',
-                '--inline-code-color': '#60a5fa',
-                '--inline-code-bg': 'rgba(59, 130, 246, 0.15)',
                 '--box-border': 'rgba(59, 130, 246, 0.3)',
                 '--success-color': '#10b981',
                 '--warning-color': '#fb923c',
@@ -147,8 +136,6 @@ export class ThemeManager {
                 '--accent-color': '#ec4899',
                 '--border-color': '#e0e7ff',
                 '--code-color': '#0ea5e9',
-                '--inline-code-color': '#db2777',
-                '--inline-code-bg': '#fce7f3',
                 '--box-border': '#e0e7ff',
                 '--success-color': '#10b981',
                 '--warning-color': '#f59e0b',
@@ -262,8 +249,7 @@ export class ThemeManager {
         const highlightLink = document.getElementById('highlight-theme');
         if (!highlightLink) return;
         
-        // Use light theme for light preset, dark theme for others
-        const themeName = presetName === 'light' ? 'github' : 'github-dark';
+        const themeName = 'github';
         highlightLink.href = `https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/${themeName}.min.css`;
     }
     
@@ -341,6 +327,10 @@ export class ThemeManager {
         document.getElementById('line-height').addEventListener('input', (e) => {
             document.documentElement.style.setProperty('--line-height', e.target.value);
             document.getElementById('line-height-value').textContent = e.target.value;
+            getSettingsManager()?.updateTypographyFromTheme(
+                document.documentElement.style.getPropertyValue('--content-max-width'),
+                e.target.value
+            );
             this.saveTheme();
         });
 
@@ -353,9 +343,13 @@ export class ThemeManager {
         });
 
         document.getElementById('content-width').addEventListener('input', (e) => {
-            const value = e.target.value + 'px';
+            const value = e.target.value + 'ch';
             document.documentElement.style.setProperty('--content-max-width', value);
             document.getElementById('content-width-value').textContent = value;
+            getSettingsManager()?.updateTypographyFromTheme(
+                value,
+                document.documentElement.style.getPropertyValue('--line-height')
+            );
             this.saveTheme();
         });
 
@@ -407,12 +401,12 @@ export class ThemeManager {
         document.getElementById('font-family').value = theme['--font-family'].replace(/'/g, '');
         document.getElementById('font-size').value = parseInt(theme['--font-size']);
         document.getElementById('font-size-value').textContent = theme['--font-size'];
-        document.getElementById('line-height').value = parseFloat(theme['--line-height']);
+        document.getElementById('line-height').value = parseLineHeight(theme['--line-height']);
         document.getElementById('line-height-value').textContent = theme['--line-height'];
         
         document.getElementById('sidebar-width').value = parseInt(theme['--sidebar-width']);
         document.getElementById('sidebar-width-value').textContent = theme['--sidebar-width'];
-        document.getElementById('content-width').value = parseInt(theme['--content-max-width']);
+        document.getElementById('content-width').value = parseCharactersPerLine(theme['--content-max-width']);
         document.getElementById('content-width-value').textContent = theme['--content-max-width'];
     }
 

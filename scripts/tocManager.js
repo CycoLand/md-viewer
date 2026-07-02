@@ -1,71 +1,219 @@
-// Table of Contents management
-// Table of Contents management
+// Table of Contents — Fumadocs-style scroll spy + stepped track
+import { getTocScrollSpy, resetTocScrollSpy } from './tocScrollSpy.js';
+import { computeTocTrack, getItemOffset, resetTocTrack, updateTocTrackVisuals } from './tocTrack.js';
 
-// Store reference to handlers so they can be attached after TOC regeneration
 let documentControlHandlers = null;
+let trackResizeObserver = null;
+let trackUpdateScheduled = false;
+let trackState = null;
+let trackRefreshListener = null;
+let lastNavLayout = null;
 
-/**
- * Set the document control button handlers
- * @param {Object} handlers - Object with handler functions
- */
+function teardownTocTrack() {
+    trackResizeObserver?.disconnect();
+    trackResizeObserver = null;
+
+    if (trackRefreshListener) {
+        getTocScrollSpy().unlisten(trackRefreshListener);
+        trackRefreshListener = null;
+    }
+
+    trackState = null;
+    lastNavLayout = null;
+}
+
 export function setDocumentControlHandlers(handlers) {
     documentControlHandlers = handlers;
 }
 
-/**
- * Attach document control button handlers
- */
 function attachDocumentControlHandlers() {
     if (!documentControlHandlers) return;
-    
+
     const viewRenderedBtn = document.getElementById('view-rendered-btn');
     const viewRawBtn = document.getElementById('view-raw-btn');
     const viewPagesBtn = document.getElementById('view-pages-btn');
     const exportHtmlBtn = document.getElementById('export-html-btn');
-    
-    // View mode buttons
+
     if (viewRenderedBtn && documentControlHandlers.onViewModeChange) {
         viewRenderedBtn.addEventListener('click', () => {
             setActiveViewButton('rendered');
             documentControlHandlers.onViewModeChange('rendered');
         });
     }
-    
+
     if (viewRawBtn && documentControlHandlers.onViewModeChange) {
         viewRawBtn.addEventListener('click', () => {
             setActiveViewButton('raw');
             documentControlHandlers.onViewModeChange('raw');
         });
     }
-    
+
     if (viewPagesBtn && documentControlHandlers.onViewModeChange) {
         viewPagesBtn.addEventListener('click', () => {
             setActiveViewButton('pages');
             documentControlHandlers.onViewModeChange('pages');
         });
     }
-    
+
     if (exportHtmlBtn && documentControlHandlers.onExportHtml) {
         exportHtmlBtn.addEventListener('click', documentControlHandlers.onExportHtml);
     }
 }
 
-/**
- * Set the active view button
- * @param {string} view - The view mode: 'rendered', 'raw', or 'pages'
- */
 function setActiveViewButton(view) {
-    document.querySelectorAll('.view-mode-btn').forEach(btn => {
+    document.querySelectorAll('.view-mode-btn').forEach((btn) => {
         btn.classList.remove('active');
     });
-    
+
     const activeBtn = document.getElementById(`view-${view}-btn`);
     if (activeBtn) {
         activeBtn.classList.add('active');
     }
 }
 
+function preserveWaterBar(tocEl) {
+    const waterBar = tocEl.querySelector('.water-progress-container');
+    if (!waterBar) return '';
 
+    waterBar.querySelectorAll('.ocean-layer, .water-fish, .water-octopus, .sea-floor-wrap').forEach((node) => {
+        node.remove();
+    });
+
+    return waterBar.outerHTML;
+}
+
+function buildTocItems(headings) {
+    return headings.map((heading) => {
+        const level = parseInt(heading.tagName.substring(1), 10);
+        const text = heading.textContent
+            .replace(/^\s*[▶▼]\s*/, '')
+            .trim();
+
+        return {
+            id: heading.id,
+            text,
+            level
+        };
+    });
+}
+
+function buildTocHtml(items) {
+    const linksHtml = items.map((item) => `
+        <a
+            href="#${item.id}"
+            class="toc-link"
+            data-target="${item.id}"
+            data-level="${item.level}"
+            style="padding-inline-start: ${getItemOffset(item.level)}px"
+        >${item.text}</a>
+    `).join('');
+
+    return `
+        <div class="toc-panel">
+            <h4 class="toc-title">On this page</h4>
+            <div class="toc-scroll">
+                <div class="toc-items">
+                    <div class="toc-track-host" aria-hidden="true">
+                        <svg class="toc-track-svg toc-track-svg-base" preserveAspectRatio="none">
+                            <path class="toc-track-path-base" fill="none"></path>
+                        </svg>
+                        <div class="toc-track-active-clip">
+                            <svg class="toc-track-svg toc-track-svg-active" preserveAspectRatio="none">
+                                <path class="toc-track-path-active" fill="none"></path>
+                            </svg>
+                        </div>
+                        <div class="toc-track-dot"></div>
+                    </div>
+                    <nav class="toc-nav">${linksHtml}</nav>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function scheduleTrackUpdate() {
+    if (!trackState || trackUpdateScheduled) return;
+    trackUpdateScheduled = true;
+
+    requestAnimationFrame(() => {
+        trackUpdateScheduled = false;
+        if (!trackState) return;
+
+        const { tocEl, items, spy } = trackState;
+        const nav = tocEl.querySelector('.toc-nav');
+        const trackHost = tocEl.querySelector('.toc-track-host');
+        if (!nav || !trackHost) return;
+
+        const layoutKey = `${nav.offsetWidth}:${nav.offsetHeight}`;
+        if (!trackState.computed || layoutKey !== lastNavLayout) {
+            lastNavLayout = layoutKey;
+            trackState.computed = computeTocTrack(nav, items);
+        }
+
+        updateTocTrackVisuals(
+            trackHost,
+            trackState.computed,
+            spy.getItems()
+        );
+    });
+}
+
+function setupTocTrack(tocEl, items, spy) {
+    teardownTocTrack();
+
+    trackState = { tocEl, items, spy, computed: null };
+    lastNavLayout = null;
+    trackRefreshListener = () => scheduleTrackUpdate();
+
+    scheduleTrackUpdate();
+
+    const nav = tocEl.querySelector('.toc-nav');
+    if (nav) {
+        trackResizeObserver = new ResizeObserver(trackRefreshListener);
+        trackResizeObserver.observe(nav);
+    }
+
+    spy.listen(trackRefreshListener);
+
+    // Layout/fonts can settle after the first paint — refresh once more.
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => scheduleTrackUpdate());
+    });
+}
+
+function setupTocLinks(tocEl, scrollContainer) {
+    tocEl.querySelectorAll('.toc-link').forEach((link) => {
+        link.addEventListener('click', (event) => {
+            event.preventDefault();
+            const targetId = link.getAttribute('data-target');
+            const target = targetId ? document.getElementById(targetId) : null;
+            if (!target || !scrollContainer) return;
+
+            const containerTop = scrollContainer.getBoundingClientRect().top;
+            const targetTop = target.getBoundingClientRect().top;
+            const nextTop = scrollContainer.scrollTop + (targetTop - containerTop) - 16;
+
+            scrollContainer.scrollTo({
+                top: Math.max(0, nextTop),
+                behavior: 'smooth'
+            });
+        });
+    });
+}
+
+function setupTocScrollSpy(tocEl, items) {
+    const scrollContainer = document.querySelector('.content-area');
+    if (!scrollContainer) return;
+
+    resetTocScrollSpy();
+
+    const spy = getTocScrollSpy();
+    spy.watch(scrollContainer);
+    spy.setItems(items);
+
+    setupTocTrack(tocEl, items, spy);
+    setupTocLinks(tocEl, scrollContainer);
+}
 
 /**
  * Generates and displays the table of contents
@@ -75,139 +223,33 @@ function setActiveViewButton(view) {
 export function generateTOC(mdEl, tocEl) {
     if (!tocEl) return;
 
-    // Get current depth preference (default to 3)
-    const depth = parseInt(tocEl.dataset.tocDepth || '3');
-    
-    // Build selector based on depth, excluding the document title
-    let selector = '';
-    for (let i = 1; i <= depth; i++) {
-        selector += (i > 1 ? ', ' : '') + `h${i}:not(.document-title)`;
-    }
-    
-    const headings = Array.from(mdEl.querySelectorAll(selector));
-    
-    // Check if there are any H1s in the rendered content
-    const hasH1 = headings.some(h => h.tagName === 'H1');
-    
-    const items = headings.map(h => {
-        const level = parseInt(h.tagName.substring(1));
-        // If no H1s exist, shift all levels down by 1 for indentation
-        const displayLevel = hasH1 ? level : level - 1;
-        return { id: h.id, text: h.textContent.replace(/^\s*▶\s*/, '').replace(/^\s*▼\s*/, ''), level: displayLevel };
-    });
+    const headings = Array.from(
+        mdEl.querySelectorAll('h1, h2, h3, h4, h5, h6:not(.document-title)')
+    );
 
-    if (items.length === 0) {
-        // Preserve water bar when clearing TOC
-        const waterBar = tocEl.querySelector('.water-progress-container');
-        tocEl.innerHTML = '';
-        if (waterBar) {
-            tocEl.insertBefore(waterBar, tocEl.firstChild);
-        }
+    const waterBarHtml = preserveWaterBar(tocEl);
+    teardownTocTrack();
+    resetTocTrack();
+
+    if (headings.length === 0) {
+        tocEl.innerHTML = waterBarHtml;
+        teardownTocTrack();
+        resetTocScrollSpy();
         document.dispatchEvent(new CustomEvent('tocUpdated'));
-    } else {
-        const tocHtml = `
-            <div class="toc-header">
-                <h4>Contents</h4>
-                <select class="toc-depth-selector" data-depth="${depth}">
-                    <option value="2" ${depth === 2 ? 'selected' : ''}>H1-H2</option>
-                    <option value="3" ${depth === 3 ? 'selected' : ''}>H1-H3</option>
-                    <option value="4" ${depth === 4 ? 'selected' : ''}>H1-H4</option>
-                    <option value="6" ${depth === 6 ? 'selected' : ''}>All</option>
-                </select>
-            </div>
-            <ul>
-                ${items.map(it => `
-                    <li class="indent-${Math.min(5, Math.max(0, it.level - 1))}">
-                        <a href="#${it.id}" data-target="${it.id}">${it.text}</a>
-                    </li>
-                `).join('')}
-            </ul>
-        `;
-        
-        // Preserve water bar element before updating innerHTML (exclude fish - they're added by JS)
-        const waterBar = tocEl.querySelector('.water-progress-container');
-        let waterBarHtml = '';
-        if (waterBar) {
-            waterBar.querySelectorAll('.ocean-layer, .water-fish, .water-octopus, .sea-floor-wrap').forEach(f => f.remove());
-            waterBarHtml = waterBar.outerHTML;
-        }
-        tocEl.innerHTML = waterBarHtml + tocHtml;
-
-        // Add event listener to depth selector
-        const depthSelector = tocEl.querySelector('.toc-depth-selector');
-        depthSelector.addEventListener('change', (e) => {
-            tocEl.dataset.tocDepth = e.target.value;
-            generateTOC(mdEl, tocEl);
-        });
-
-        tocEl.querySelectorAll('a').forEach(a => {
-            a.addEventListener('click', (e) => {
-                e.preventDefault();
-                const targetId = a.getAttribute('data-target');
-                const el = document.getElementById(targetId);
-                if (el) {
-                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            });
-        });
-
-        setupScrollSpy(headings, tocEl);
+        return;
     }
 
-    // Notify water bar to refresh (it may have been recreated when TOC was replaced)
+    const items = buildTocItems(headings);
+    tocEl.innerHTML = waterBarHtml + buildTocHtml(items);
+
+    setupTocScrollSpy(tocEl, items);
+    attachDocumentControlHandlers();
+
     document.dispatchEvent(new CustomEvent('tocUpdated'));
 }
 
-/**
- * Sets up scroll spy for TOC highlighting
- * @param {Array<HTMLElement>} headings - Array of heading elements
- * @param {HTMLElement} tocEl - The TOC container element
- */
-function setupScrollSpy(headings, tocEl) {
-    const links = Array.from(tocEl.querySelectorAll('a'));
-    const scrollContainer = document.querySelector('.content-area');
-    
-    if (!scrollContainer) return;
-    
-    function onScroll() {
-        let currentId = null;
-        // Get 1/3 down from the top of the viewport
-        const viewportThird = window.innerHeight / 3;
-        let closestDistance = Infinity;
-
-        // Find which section's middle is closest to the viewport third point
-        for (let i = 0; i < headings.length; i++) {
-            const h = headings[i];
-            
-            // Get the next heading (or use a large value if this is the last one)
-            const nextHeading = headings[i + 1];
-            const currentTop = h.getBoundingClientRect().top;
-            const nextTop = nextHeading ? nextHeading.getBoundingClientRect().top : currentTop + 1000;
-            
-            // Calculate the middle of this section
-            const sectionMiddle = (currentTop + nextTop) / 2;
-            
-            // Calculate distance from section middle to viewport third point
-            const distance = Math.abs(sectionMiddle - viewportThird);
-            
-            // If this section is closest so far, make it current
-            if (distance < closestDistance) {
-                closestDistance = distance;
-                currentId = h.id;
-            }
-        }
-
-        links.forEach(link => {
-            const targetId = link.getAttribute('data-target');
-            if (targetId === currentId) {
-                link.classList.add('active');
-            } else {
-                link.classList.remove('active');
-            }
-        });
-    }
-
-    // Listen to scroll events on the content-area, not window
-    scrollContainer.addEventListener('scroll', onScroll);
-    onScroll();
+export function destroyTOC() {
+    teardownTocTrack();
+    resetTocTrack();
+    resetTocScrollSpy();
 }

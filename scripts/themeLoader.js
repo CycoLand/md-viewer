@@ -167,12 +167,9 @@
         }
     }
     
-    // Also update highlight.js theme
-    if (savedPreset === 'light') {
-        const highlightLink = document.getElementById('highlight-theme');
-        console.log('Attempting to update highlight theme, element found:', !!highlightLink);
-        if (highlightLink) {
-            highlightLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
-        }
+    // Use light highlight theme to match code block styling
+    const highlightLink = document.getElementById('highlight-theme');
+    if (highlightLink) {
+        highlightLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
     }
 })();
