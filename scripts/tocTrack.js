@@ -52,6 +52,13 @@ function createPathElement(path) {
     return pathEl;
 }
 
+function getPathPoint(path, distance) {
+    const pathEl = createPathElement(path);
+    const total = pathEl.getTotalLength();
+    const clamped = Math.max(0, Math.min(distance, total));
+    return pathEl.getPointAtLength(clamped);
+}
+
 /** Walk along the path from an anchor until targetY is reached; returns on-track x at that y. */
 function getPathPointAtY(path, anchorDistance, targetY, forward) {
     const pathEl = createPathElement(path);
@@ -231,21 +238,30 @@ export function updateTocTrackVisuals(trackHost, computed, activeItems) {
     const startRow = computed.rowBounds[startPosIdx];
     const endRow = computed.rowBounds[endPosIdx];
     const isUp = getScrollDirection(startIdx, endIdx);
+    const isFirst = startPosIdx === 0;
+    const isLast = endPosIdx === computed.links.length - 1;
 
-    const maxDotY = computed.contentHeight ?? (computed.height - DOT_HALO);
-    const targetY = Math.max(0, Math.min(
-        isUp ? startRow.rowTop : endRow.rowBottom,
-        maxDotY
-    ));
     const anchorDistance = isUp
         ? computed.itemLineLengths[startPosIdx][0]
         : computed.itemLineLengths[endPosIdx][1];
-    const dotPoint = getPathPointAtY(
-        computed.path,
-        anchorDistance,
-        targetY,
-        !isUp
-    );
+
+    let dotPoint;
+    if (isUp && isFirst) {
+        // No preceding section — stay at the top of this item's vertical segment
+        dotPoint = getPathPoint(computed.path, anchorDistance);
+    } else if (!isUp && isLast) {
+        // No following section — stay at the bottom of this item's vertical segment
+        dotPoint = getPathPoint(computed.path, anchorDistance);
+    } else {
+        const targetY = isUp ? startRow.rowTop : endRow.rowBottom;
+        dotPoint = getPathPointAtY(
+            computed.path,
+            anchorDistance,
+            targetY,
+            !isUp
+        );
+    }
+
     const clipTop = isUp ? dotPoint.y : startTop;
     const clipBottom = isUp ? endBottom : dotPoint.y;
 

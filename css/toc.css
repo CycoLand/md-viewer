@@ -40,7 +40,6 @@
     scrollbar-gutter: stable;
     scrollbar-width: thin;
     scrollbar-color: var(--border-color) transparent;
-    mask-image: linear-gradient(to bottom, transparent, white 12px, white calc(100% - 12px), transparent);
 }
 
 .toc-scroll::-webkit-scrollbar {
