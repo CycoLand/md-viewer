@@ -8,7 +8,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-gutter: stable;
-    padding: 1.5rem 65px 1rem 1.25rem;
+    padding: 1.5rem var(--toc-padding-inline-end) 1rem 1.25rem;
     margin-right: 5px;
     background-color: transparent;
     font-size: 0.875rem;

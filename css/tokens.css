@@ -49,6 +49,7 @@
     --sidebar-width: 310px;
     --content-max-width: 75ch;
     --toc-column-width: 310px;
+    --toc-padding-inline-end: 1.25rem;
     --border-radius: 8px;
     --border-radius-lg: 12px;
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -66,6 +67,10 @@
     --chevron-slide-distance: 5px;
     --chevron-fade-duration: 0.3s;
     --chevron-color-transition: 0.2s;
+}
+
+html.water-progress-enabled {
+    --toc-padding-inline-end: 65px;
 }
 
 html.reading-mode {

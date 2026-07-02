@@ -337,6 +337,11 @@ export class SettingsManager {
     }
 
     applyWaterProgressBarSetting() {
+        document.documentElement.classList.toggle(
+            'water-progress-enabled',
+            Boolean(state.settings.showWaterProgressBar)
+        );
+
         const waterProgressBar = getWaterProgressBar();
 
         if (!waterProgressBar) return;
