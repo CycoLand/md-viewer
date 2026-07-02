@@ -5,6 +5,7 @@
     top: 3px;
     height: calc(100vh - 3px);
     max-height: calc(100vh - 3px);
+    min-width: 0;
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-gutter: stable;
@@ -22,6 +23,8 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .toc-title {
@@ -36,7 +39,10 @@
 .toc-scroll {
     position: relative;
     max-height: calc(100vh - 8rem);
-    overflow: auto;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
     scrollbar-gutter: stable;
     scrollbar-width: thin;
     scrollbar-color: var(--border-color) transparent;
@@ -53,6 +59,8 @@
 
 .toc-items {
     position: relative;
+    min-width: 0;
+    max-width: 100%;
     padding-bottom: 5px;
 }
 
@@ -113,11 +121,15 @@
     z-index: 1;
     display: flex;
     flex-direction: column;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .toc-link {
     position: relative;
     display: block;
+    min-width: 0;
+    max-width: 100%;
     padding: 0.375rem 0.5rem 0.375rem 0;
     color: var(--text-muted);
     text-decoration: none;
@@ -127,6 +139,8 @@
     border-radius: 4px;
     transition: color 0.15s ease;
     scroll-margin-block: 1rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .toc-link:hover {
