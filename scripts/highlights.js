@@ -1,18 +1,21 @@
 /**
  * Persistent text highlights.
- * - Right-click drag to paint
+ * - Right-click drag to paint (plain right-click keeps the context menu)
  * - Click a highlight to remove
  * - Hover handles to resize
  */
 import { state, STORAGE_KEY } from './state.js';
 
 const CONTEXT_CHARS = 32;
+const PAINT_DRAG_THRESHOLD_PX = 5;
 const SKIP_SELECTOR =
     'pre, code, .document-header, .document-menu, script, style, .md-highlight-handle';
 
 // --- Session UI state ---
 let paintMode = false;
 let paintAnchor = null;
+let paintPending = null; // { x, y, anchor } until drag exceeds threshold
+let suppressContextMenu = false;
 let resizeState = null;
 
 let handleStartEl = null;
@@ -610,7 +613,17 @@ function cancelResize() {
 function exitPaintMode() {
     paintMode = false;
     paintAnchor = null;
+    paintPending = null;
     document.body.classList.remove('highlight-paint-mode');
+}
+
+function beginPaintMode(anchor) {
+    paintMode = true;
+    paintAnchor = anchor;
+    paintPending = null;
+    suppressContextMenu = true;
+    document.body.classList.add('highlight-paint-mode');
+    hideFloatingHandles();
 }
 
 function commitPaintHighlight() {
@@ -649,11 +662,28 @@ function updatePaintSelection(clientX, clientY) {
     }
 }
 
+function maybeActivatePaintDrag(e) {
+    if (!paintPending || paintMode) return;
+    if ((e.buttons & 2) === 0) {
+        paintPending = null;
+        return;
+    }
+    if (!paintPending.anchor) return;
+
+    const dx = e.clientX - paintPending.x;
+    const dy = e.clientY - paintPending.y;
+    if (Math.hypot(dx, dy) < PAINT_DRAG_THRESHOLD_PX) return;
+
+    beginPaintMode(paintPending.anchor);
+    updatePaintSelection(e.clientX, e.clientY);
+}
+
 // --- Public API ---
 
 /** Clear highlight interaction UI (e.g. when switching to raw mode). */
 export function clearHighlightUI() {
     hideFloatingHandles();
+    suppressContextMenu = false;
     exitPaintMode();
     if (resizeState) cancelResize();
 }
@@ -690,9 +720,14 @@ export function initHighlights() {
             return;
         }
 
-        if (paintMode && e.button === 2) {
-            commitPaintHighlight();
-            exitPaintMode();
+        if (e.button === 2) {
+            if (paintMode) {
+                commitPaintHighlight();
+                exitPaintMode();
+                // suppressContextMenu stays true until contextmenu event
+            } else {
+                paintPending = null;
+            }
             return;
         }
 
@@ -714,11 +749,13 @@ export function initHighlights() {
         if (!mdEl || state.rawMode) return;
 
         if (e.button === 2 && mdEl.contains(e.target) && !isSkippable(e.target)) {
-            e.preventDefault();
-            paintMode = true;
-            document.body.classList.add('highlight-paint-mode');
-            paintAnchor = caretRangeFromPoint(e.clientX, e.clientY);
-            hideFloatingHandles();
+            // Arm paint; only activate after a real drag (see mousemove).
+            paintPending = {
+                x: e.clientX,
+                y: e.clientY,
+                anchor: caretRangeFromPoint(e.clientX, e.clientY)
+            };
+            suppressContextMenu = false;
         }
     });
 
@@ -727,11 +764,12 @@ export function initHighlights() {
             updateResizePreview(e.clientX, e.clientY);
             return;
         }
+        maybeActivatePaintDrag(e);
         updatePaintSelection(e.clientX, e.clientY);
     });
 
     document.addEventListener('mouseover', (e) => {
-        if (resizeState || paintMode || state.rawMode) return;
+        if (resizeState || paintMode || paintPending || state.rawMode) return;
         const mark = e.target.closest?.('mark.md-highlight');
         if (!mark?.dataset.highlightId) return;
 
@@ -756,10 +794,11 @@ export function initHighlights() {
     });
 
     document.addEventListener('contextmenu', (e) => {
-        const mdEl = getMdEl();
-        if (!mdEl || state.rawMode) return;
-        if (mdEl.contains(e.target) && !isSkippable(e.target)) {
+        if (suppressContextMenu) {
             e.preventDefault();
+            suppressContextMenu = false;
+            clearSelection();
+            exitPaintMode();
         }
     });
 
@@ -769,8 +808,9 @@ export function initHighlights() {
             cancelResize();
             return;
         }
-        if (paintMode) {
+        if (paintMode || paintPending) {
             clearSelection();
+            suppressContextMenu = false;
             exitPaintMode();
         }
     });
