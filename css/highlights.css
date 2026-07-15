@@ -1,0 +1,55 @@
+/* Persistent text highlights — match native ::selection */
+
+.md-highlight {
+    background-color: var(--selection-bg);
+    color: var(--selection-color);
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    cursor: pointer;
+}
+
+/* Floating edge handles (positioned from first/last client rects) */
+.md-highlight-handle {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1100;
+    width: 8px;
+    height: 1.15em;
+    margin: 0;
+    padding: 0;
+    border: 2px solid color-mix(in srgb, var(--selection-bg) 70%, var(--text-color));
+    border-radius: 999px;
+    background: var(--surface-color);
+    box-shadow: var(--shadow);
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    pointer-events: none;
+    cursor: ew-resize;
+    transition: opacity 0.12s ease, transform 0.12s ease, background-color 0.12s ease;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.md-highlight-handle.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.md-highlight-handle.is-visible:hover {
+    background: color-mix(in srgb, var(--selection-bg) 70%, var(--text-color));
+    transform: translate(-50%, -50%) scale(1.15);
+}
+
+body.highlight-resize-mode,
+body.highlight-resize-mode .markdown-content {
+    cursor: ew-resize;
+}
+
+body.highlight-paint-mode,
+body.highlight-paint-mode .markdown-content {
+    cursor: cell;
+}

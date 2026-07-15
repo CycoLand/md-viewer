@@ -6,6 +6,7 @@ import { generateTOC } from './tocManager.js';
 import { setupSortableTables } from './sortableTables.js';
 import { enhanceListCards } from './listCardEnhancer.js';
 import { enhanceCheckmarkLists } from './checkmarkLists.js';
+import { applyHighlights, clearHighlightUI } from './highlights.js';
 import { stripHeadingInlineMarkdown } from './markdownText.js';
 
 function shouldUsePlainTextHeadings() {
@@ -221,6 +222,9 @@ export function showRenderedContent(content) {
     // Mark external links with an indicator
     markExternalLinks(mdEl);
 
+    // Re-apply persisted highlights
+    applyHighlights(mdEl);
+
 }
 
 /**
@@ -278,6 +282,9 @@ export function rebuildFromCache() {
 
     // Setup sortable table headers (after rebuild)
     setupSortableTables(mdEl);
+
+    // Re-apply persisted highlights
+    applyHighlights(mdEl);
 }
 
 /**
@@ -312,11 +319,12 @@ export function showRawContent(content) {
     const mdEl = document.getElementById('markdown-content');
     const rawEl = document.getElementById('raw-content');
     const tocEl = document.getElementById('toc');
-    
+
     mdEl.style.display = 'none';
     rawEl.style.display = 'block';
     if (tocEl) tocEl.style.display = 'none';
-    
+
+    clearHighlightUI();
     rawEl.textContent = content;
 }
 

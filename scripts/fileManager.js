@@ -10,13 +10,35 @@ export class FileManager {
         return 'file_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     }
 
+    static normalizeHighlights(fileData) {
+        if (Array.isArray(fileData.highlights)) {
+            return fileData.highlights.filter(
+                (h) => h && typeof h.quote === 'string' && h.quote.length > 0
+            );
+        }
+        // Migrate legacy annotations (drop comments)
+        if (Array.isArray(fileData.annotations)) {
+            return fileData.annotations
+                .filter((a) => a && a.type !== 'comment' && typeof a.quote === 'string')
+                .map((a) => ({
+                    id: a.id || ('hl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9)),
+                    quote: a.quote,
+                    prefix: a.prefix || '',
+                    suffix: a.suffix || '',
+                    createdAt: a.createdAt || new Date().toISOString()
+                }));
+        }
+        return [];
+    }
+
     static addFile(name, content, id = null) {
         const fileId = id || this.generateId();
         state.files.set(fileId, {
             id: fileId,
             name: name,
             content: content,
-            modified: new Date().toISOString()
+            modified: new Date().toISOString(),
+            highlights: []
         });
         this.saveFiles();
         this.renderFileList();
@@ -61,7 +83,8 @@ export class FileManager {
                     id,
                     name: f.name || 'Untitled.md',
                     content: typeof f.content === 'string' ? f.content : '',
-                    modified: f.modified || new Date().toISOString()
+                    modified: f.modified || new Date().toISOString(),
+                    highlights: FileManager.normalizeHighlights(f)
                 });
             });
             this.renderFileList();

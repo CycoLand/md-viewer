@@ -25,6 +25,7 @@ import {
     clearSelectedFile,
     createDocumentFromModal
 } from './uiControls.js';
+import { initHighlights } from './highlights.js';
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
@@ -39,6 +40,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize water progress bar
     const waterProgressBar = initWaterProgressBar();
+
+    // Text highlights
+    initHighlights();
 
     // Initialize drag and drop
     initializeDragAndDrop(FileManager);
