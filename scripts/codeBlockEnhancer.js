@@ -1040,7 +1040,8 @@ export function enhanceCodeBlocks(mdEl) {
         // Check if this is a mermaid block
         const languageClass = Array.from(block.classList).find(cls => cls.startsWith('language-'));
         const language = languageClass ? languageClass.replace('language-', '') : 'text';
-        
+        block.dataset.mdLanguage = language;
+
         const pre = block.parentElement;
         
         // Handle mermaid diagrams

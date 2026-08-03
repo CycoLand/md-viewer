@@ -10,8 +10,13 @@ const API_URL = 'https://www.stands4.com/services/v2/abbr.php';
 // "TODO", but those simply resolve to "no definition found" on click.
 const ACRONYM_REGEX = /\b[A-Z][A-Z0-9]{1,7}\b/g;
 
-const SKIP_SELECTOR =
-    'pre, code, script, style, .document-header, .document-menu-dropdown, a, button, label, .md-acronym';
+const BASE_SKIP_SELECTOR =
+    'script, style, .document-header, .document-menu-dropdown, .code-block-header, a, button, label, .md-acronym';
+
+// Fenced code blocks in these languages (or with no language at all, which
+// codeBlockEnhancer.js labels "text") get full acronym detection, same as
+// prose. Anything else only gets detection inside comment tokens.
+const PLAIN_TEXT_LANGUAGES = new Set(['text', 'txt', 'plaintext', 'plain', 'md', 'markdown']);
 
 const EXACT_IT_CATEGORIES = new Set(['it', 'i.t.', 'ict']);
 const IT_CATEGORY_SUBSTRINGS = [
@@ -51,8 +56,26 @@ export function clearAcronymCache() {
 
 // --- DOM annotation ---
 
+function isPlainTextCodeBlock(codeEl) {
+    const lang = (codeEl.dataset.mdLanguage || '').toLowerCase();
+    return PLAIN_TEXT_LANGUAGES.has(lang);
+}
+
 function isSkippable(el) {
-    return !el || Boolean(el.closest(SKIP_SELECTOR));
+    if (!el) return true;
+    if (el.closest(BASE_SKIP_SELECTOR)) return true;
+
+    const codeEl = el.closest('pre code');
+    if (codeEl) {
+        // Comment tokens (hljs-comment) are fair game in any language.
+        if (el.closest('.hljs-comment')) return false;
+        // Plain-text/markdown fences get full detection, like prose.
+        if (isPlainTextCodeBlock(codeEl)) return false;
+        // Real code (identifiers, keywords, strings, etc.) stays untouched.
+        return true;
+    }
+
+    return false;
 }
 
 function collectTextNodes(root) {
@@ -121,6 +144,33 @@ function isItCategory(category) {
     return IT_CATEGORY_SUBSTRINGS.some((k) => c.includes(k));
 }
 
+// Same wording can legitimately show up under several categories (e.g. "URL"
+// under both Networking and Internet) — collapse those into one entry with
+// its categories combined, rather than repeating the definition.
+function dedupeMatches(matches) {
+    const byDefinition = new Map();
+    const order = [];
+
+    matches.forEach((r) => {
+        const definition = (r.definition || '').trim();
+        if (!definition) return;
+        const key = definition.toLowerCase();
+        const category = (r.category || '').trim();
+
+        let entry = byDefinition.get(key);
+        if (!entry) {
+            entry = { definition, categories: [] };
+            byDefinition.set(key, entry);
+            order.push(entry);
+        }
+        if (category && !entry.categories.includes(category)) {
+            entry.categories.push(category);
+        }
+    });
+
+    return order;
+}
+
 // --- API ---
 
 async function fetchDefinitions(term) {
@@ -150,8 +200,8 @@ async function fetchDefinitions(term) {
     else if (Array.isArray(data?.results?.result)) results = data.results.result;
     else if (data?.results?.result) results = [data.results.result];
 
-    const matches = results.filter((r) => isItCategory(r.category));
-    return { status: 'ok', matches };
+    const itMatches = results.filter((r) => isItCategory(r.category));
+    return { status: 'ok', matches: dedupeMatches(itMatches) };
 }
 
 // --- Popup ---
@@ -226,18 +276,37 @@ function renderNoKeyBody(body) {
     });
 }
 
+// Cap how many category names are spelled out per definition — a term like
+// XML can legitimately span 7+ categories, which would otherwise blow the
+// badge past a couple lines. Capping to a fixed count keeps it deterministic
+// regardless of how long individual category names are (a CSS line-clamp on
+// the badge backs this up as a hard guarantee).
+const MAX_VISIBLE_CATEGORIES = 2;
+
+function formatCategories(categories) {
+    if (categories.length <= MAX_VISIBLE_CATEGORIES) return categories.join(', ');
+    const shown = categories.slice(0, MAX_VISIBLE_CATEGORIES).join(', ');
+    const remaining = categories.length - MAX_VISIBLE_CATEGORIES;
+    return `${shown} +${remaining} more`;
+}
+
 function renderResultBody(body, result, term) {
     const matches = result.matches || [];
     if (!matches.length) {
         body.innerHTML = `<p class="md-acronym-popup-empty">No IT/technology definition found for "${escapeHtml(term)}".</p>`;
         return;
     }
-    body.innerHTML = matches.map((m) => `
+    body.innerHTML = matches.map((m) => {
+        // Defensive: older cached entries may still have a single `category`
+        // string instead of a `categories` array.
+        const categories = m.categories || (m.category ? [m.category] : []);
+        return `
         <div class="md-acronym-popup-entry">
             <p class="md-acronym-popup-definition">${escapeHtml(m.definition || '')}</p>
-            ${m.category ? `<span class="md-acronym-popup-category">${escapeHtml(m.category)}</span>` : ''}
+            ${categories.length ? `<span class="md-acronym-popup-category">${escapeHtml(formatCategories(categories))}</span>` : ''}
         </div>
-    `).join('');
+    `;
+    }).join('');
 }
 
 async function openPopupFor(span) {

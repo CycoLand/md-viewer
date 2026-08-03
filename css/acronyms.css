@@ -1,7 +1,8 @@
 /* Hoverable acronym annotations + definition popup */
 
 .md-acronym {
-    text-decoration: none;
+    text-decoration-line: none;
+    text-decoration-style: dotted;
     text-decoration-color: var(--text-dim);
     text-underline-offset: 3px;
     cursor: help;
@@ -9,13 +10,17 @@
     transition: var(--transition);
 }
 
-html.acronym-underline-always .md-acronym {
-    text-decoration: underline dotted;
+/* :where() keeps this at the same specificity as the base rule, so it can't
+   outrank :hover/:focus-visible below on the shared text-decoration-color
+   property (that mismatch let hover/focus render in the ambient text color
+   instead of the primary highlight, most visible on gray comment tokens). */
+:where(html.acronym-underline-always) .md-acronym {
+    text-decoration-line: underline;
 }
 
 .md-acronym:hover,
 .md-acronym:focus-visible {
-    text-decoration: underline dotted;
+    text-decoration-line: underline;
     text-decoration-color: var(--primary-color);
     background: var(--box-bg);
     outline: none;
@@ -106,13 +111,21 @@ html.acronym-underline-always .md-acronym {
 }
 
 .md-acronym-popup-category {
-    display: inline-block;
+    display: -webkit-box;
+    max-width: 100%;
     font-size: 0.75rem;
     font-weight: var(--font-weight-medium);
+    line-height: 1.4;
     color: var(--accent-color);
     background: var(--box-bg);
     padding: 0.125rem 0.5rem;
-    border-radius: 999px;
+    border-radius: var(--border-radius);
+    /* Hard backstop: content is already capped to a couple of category
+       names in JS, but clamp here too so an unexpectedly long name can
+       never push this past two lines. */
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .md-acronym-popup-empty,
