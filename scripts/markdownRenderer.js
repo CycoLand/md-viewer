@@ -7,6 +7,7 @@ import { setupSortableTables } from './sortableTables.js';
 import { enhanceListCards } from './listCardEnhancer.js';
 import { enhanceCheckmarkLists } from './checkmarkLists.js';
 import { applyHighlights, clearHighlightUI } from './highlights.js';
+import { annotateAcronyms } from './acronyms.js';
 import { stripHeadingInlineMarkdown } from './markdownText.js';
 
 function shouldUsePlainTextHeadings() {
@@ -225,6 +226,9 @@ export function showRenderedContent(content) {
     // Re-apply persisted highlights
     applyHighlights(mdEl);
 
+    // Wrap ALL-CAPS acronym-looking tokens for hover/click definitions
+    annotateAcronyms(mdEl);
+
 }
 
 /**
@@ -285,6 +289,9 @@ export function rebuildFromCache() {
 
     // Re-apply persisted highlights
     applyHighlights(mdEl);
+
+    // Wrap ALL-CAPS acronym-looking tokens for hover/click definitions
+    annotateAcronyms(mdEl);
 }
 
 /**

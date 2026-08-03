@@ -184,3 +184,34 @@
     color: var(--text-color);
     font-variant-numeric: tabular-nums;
 }
+
+.setting-text-group {
+    margin-bottom: 0.75rem;
+}
+
+.setting-text-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-medium);
+    color: var(--text-muted);
+}
+
+.setting-text-group input[type="text"],
+.setting-text-group input[type="password"] {
+    width: 100%;
+    padding: 0.625rem 0.75rem;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    color: var(--text-color);
+    font-family: var(--font-family);
+    font-size: 0.875rem;
+    transition: var(--transition);
+}
+
+.setting-text-group input[type="text"]:focus,
+.setting-text-group input[type="password"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}

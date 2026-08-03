@@ -13,6 +13,7 @@ import {
     parseCharactersPerLine,
     parseLineHeight
 } from './typography.js';
+import { clearAcronymCache } from './acronyms.js';
 
 export class SettingsManager {
     constructor() {
@@ -30,7 +31,11 @@ export class SettingsManager {
         this.readingModeToggle = document.getElementById('toggle-reading-mode');
         this.charactersPerLineSlider = document.getElementById('reading-characters-per-line');
         this.lineHeightSlider = document.getElementById('reading-line-height');
-        
+        this.acronymUnderlineToggle = document.getElementById('toggle-acronym-underline');
+        this.acronymUidInput = document.getElementById('acronym-api-uid');
+        this.acronymTokenIdInput = document.getElementById('acronym-api-tokenid');
+        this.clearAcronymCacheBtn = document.getElementById('clear-acronym-cache-btn');
+
         // Quick toggles
         this.quickProgressBarToggle = document.getElementById('quick-toggle-progress-bar');
         this.quickTocToggle = document.getElementById('quick-toggle-toc');
@@ -172,8 +177,28 @@ export class SettingsManager {
                 state.settings.lineHeight
             );
         });
+
+        this.acronymUnderlineToggle?.addEventListener('change', (e) => {
+            state.settings.acronymAlwaysUnderline = e.target.checked;
+            this.saveSettings();
+            this.applyAcronymUnderlineSetting();
+        });
+
+        this.acronymUidInput?.addEventListener('input', (e) => {
+            state.settings.acronymUid = e.target.value.trim();
+            this.saveSettings();
+        });
+
+        this.acronymTokenIdInput?.addEventListener('input', (e) => {
+            state.settings.acronymTokenId = e.target.value.trim();
+            this.saveSettings();
+        });
+
+        this.clearAcronymCacheBtn?.addEventListener('click', () => {
+            clearAcronymCache();
+        });
     }
-    
+
     openPanel() {
         this.settingsPanel?.classList.add('open');
         
@@ -224,7 +249,16 @@ export class SettingsManager {
         if (typeof state.settings.showWaterProgressBar !== 'boolean') {
             state.settings.showWaterProgressBar = false;
         }
-        
+        if (typeof state.settings.acronymUid !== 'string') {
+            state.settings.acronymUid = '';
+        }
+        if (typeof state.settings.acronymTokenId !== 'string') {
+            state.settings.acronymTokenId = '';
+        }
+        if (typeof state.settings.acronymAlwaysUnderline !== 'boolean') {
+            state.settings.acronymAlwaysUnderline = false;
+        }
+
         if (this.progressBarToggle) {
             this.progressBarToggle.checked = state.settings.showProgressBar;
         }
@@ -249,6 +283,15 @@ export class SettingsManager {
         if (this.plainTextHeadingsToggle) {
             this.plainTextHeadingsToggle.checked = state.settings.plainTextHeadings;
         }
+        if (this.acronymUnderlineToggle) {
+            this.acronymUnderlineToggle.checked = state.settings.acronymAlwaysUnderline;
+        }
+        if (this.acronymUidInput) {
+            this.acronymUidInput.value = state.settings.acronymUid;
+        }
+        if (this.acronymTokenIdInput) {
+            this.acronymTokenIdInput.value = state.settings.acronymTokenId;
+        }
 
         syncReadingTypographyInputs(
             state.settings.charactersPerLine,
@@ -269,6 +312,14 @@ export class SettingsManager {
         this.applyTOCSetting();
         this.applyWaterProgressBarSetting();
         this.applyReadingSettings();
+        this.applyAcronymUnderlineSetting();
+    }
+
+    applyAcronymUnderlineSetting() {
+        document.documentElement.classList.toggle(
+            'acronym-underline-always',
+            Boolean(state.settings.acronymAlwaysUnderline)
+        );
     }
 
     applyReadingSettings({ updateSliders = true } = {}) {

@@ -1,0 +1,136 @@
+/* Hoverable acronym annotations + definition popup */
+
+.md-acronym {
+    text-decoration: none;
+    text-decoration-color: var(--text-dim);
+    text-underline-offset: 3px;
+    cursor: help;
+    border-radius: 3px;
+    transition: var(--transition);
+}
+
+html.acronym-underline-always .md-acronym {
+    text-decoration: underline dotted;
+}
+
+.md-acronym:hover,
+.md-acronym:focus-visible {
+    text-decoration: underline dotted;
+    text-decoration-color: var(--primary-color);
+    background: var(--box-bg);
+    outline: none;
+}
+
+.md-acronym-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2100;
+    width: 300px;
+    max-width: calc(100vw - 16px);
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-xl);
+    opacity: 0;
+    transform: translateY(-4px);
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.md-acronym-popup.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.md-acronym-popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.75rem 0.75rem 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.md-acronym-popup-term {
+    font-weight: var(--font-weight-bold);
+    color: var(--primary-color);
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+}
+
+.md-acronym-popup-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: var(--border-radius);
+    line-height: 1;
+    transition: var(--transition);
+}
+
+.md-acronym-popup-close:hover {
+    background: var(--surface-hover);
+    color: var(--text-color);
+}
+
+.md-acronym-popup-body {
+    padding: 0.75rem 1rem 1rem;
+    max-height: 260px;
+    overflow-y: auto;
+    font-size: 0.875rem;
+    color: var(--text-color);
+}
+
+.md-acronym-popup-body p {
+    margin: 0 0 0.5rem;
+    line-height: 1.5;
+}
+
+.md-acronym-popup-body p:last-child {
+    margin-bottom: 0;
+}
+
+.md-acronym-popup-entry {
+    padding: 0.5rem 0;
+}
+
+.md-acronym-popup-entry + .md-acronym-popup-entry {
+    border-top: 1px solid var(--border-color);
+}
+
+.md-acronym-popup-definition {
+    color: var(--text-color);
+}
+
+.md-acronym-popup-category {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: var(--font-weight-medium);
+    color: var(--accent-color);
+    background: var(--box-bg);
+    padding: 0.125rem 0.5rem;
+    border-radius: 999px;
+}
+
+.md-acronym-popup-empty,
+.md-acronym-popup-error {
+    color: var(--text-muted);
+}
+
+.md-acronym-popup-error {
+    color: var(--error-color);
+}
+
+.md-acronym-popup-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+}
+
+.md-acronym-popup-settings-btn {
+    margin-top: 0.25rem;
+}

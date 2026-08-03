@@ -16,9 +16,13 @@ export const state = {
         plainTextHeadings: true,
         readingMode: false,
         charactersPerLine: 68,
-        lineHeight: 1.625
+        lineHeight: 1.625,
+        acronymUid: '',
+        acronymTokenId: '',
+        acronymAlwaysUnderline: false
     }
 };
 
 export const STORAGE_KEY = 'markdownViewerDocs';
 export const SETTINGS_KEY = 'markdownViewerSettings';
+export const ACRONYM_CACHE_KEY = 'markdownViewerAcronymCache';

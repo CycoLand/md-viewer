@@ -26,6 +26,7 @@ import {
     createDocumentFromModal
 } from './uiControls.js';
 import { initHighlights } from './highlights.js';
+import { initAcronyms } from './acronyms.js';
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
@@ -43,6 +44,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Text highlights
     initHighlights();
+
+    // Acronym hover/click definitions
+    initAcronyms();
+    document.addEventListener('openSettingsPanel', (e) => {
+        settingsManager.openPanel();
+        const focusId = e.detail?.focus;
+        if (focusId) document.getElementById(focusId)?.focus();
+    });
 
     // Initialize drag and drop
     initializeDragAndDrop(FileManager);

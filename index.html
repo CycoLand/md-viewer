@@ -383,6 +383,43 @@
                     <span id="reading-line-height-value" class="setting-slider-value">1.625</span>
                 </div>
             </div>
+
+            <div class="settings-section">
+                <h4>Acronym Definitions</h4>
+
+                <p class="setting-description">
+                    Hover an acronym in a document to see it underlined; click it for its definition, filtered to IT/technology categories via the free <a href="https://www.abbreviations.com/api.php" target="_blank" rel="noopener noreferrer">STANDS4 Abbreviations API</a> (100 lookups/day). Your key is stored only in this browser, never sent anywhere but stands4.com.
+                </p>
+
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <i class="fas fa-underline"></i>
+                        <span>Always Show Underline</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-acronym-underline">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <p class="setting-description">
+                    When off, the dotted underline only appears on hover — handy if you use ALL CAPS for emphasis elsewhere, since not every underlined word turns out to be a real acronym.
+                </p>
+
+                <div class="setting-text-group">
+                    <label for="acronym-api-uid">API User ID</label>
+                    <input type="text" id="acronym-api-uid" placeholder="e.g. 123456" autocomplete="off" spellcheck="false">
+                </div>
+
+                <div class="setting-text-group">
+                    <label for="acronym-api-tokenid">Developer Token</label>
+                    <input type="password" id="acronym-api-tokenid" placeholder="Your token ID" autocomplete="off" spellcheck="false">
+                </div>
+
+                <button type="button" id="clear-acronym-cache-btn" class="btn btn-secondary btn-small">
+                    <i class="fas fa-trash"></i> Clear Cached Definitions
+                </button>
+            </div>
         </div>
     </div>
 
