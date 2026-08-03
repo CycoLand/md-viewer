@@ -353,6 +353,12 @@ async function openPopupFor(span) {
 // --- Init ---
 
 export function initAcronyms() {
+    // Capture phase: collapsible-section headings toggle on a bubble-phase
+    // click listener bound to the heading itself, which fires before a
+    // bubble-phase listener on document ever would. Running in capture lets
+    // us stopPropagation() before that heading listener sees the click at
+    // all, so clicking an acronym inside a heading opens the popup instead
+    // of also collapsing the section.
     document.addEventListener('click', (e) => {
         const span = e.target.closest('.md-acronym');
         if (span) {
@@ -367,7 +373,7 @@ export function initAcronyms() {
         if (popupEl && !popupEl.contains(e.target)) {
             closePopup();
         }
-    });
+    }, true);
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
