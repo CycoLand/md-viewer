@@ -20,10 +20,18 @@
     --box-bg: rgba(99, 102, 241, 0.08);
     --box-bg-alt: rgba(99, 102, 241, 0.12);
     --box-border: rgba(99, 102, 241, 0.3);
-    --code-block-bg: #f8f8f9;
-    --code-block-color: #000000;
-    --code-block-border: #e4e4e7;
-    --code-block-header-bg: #ececef;
+    /* Code blocks follow the selected surface/text theme. */
+    --code-block-bg: var(--surface-color);
+    --code-block-color: var(--text-color);
+    --code-block-border: var(--border-color);
+    --code-block-header-bg: var(--surface-hover);
+    --code-button-bg: var(--surface-hover);
+    --code-button-color: var(--text-color);
+    --code-token-keyword: #d73a49;
+    --code-token-string: #032f62;
+    --code-token-comment: #6a737d;
+    --code-token-number: #005cc5;
+    --code-token-function: #6f42c1;
     --inline-code-bg: var(--code-block-bg);
     --inline-code-color: var(--code-block-color);
     --list-marker-color: color-mix(in srgb, var(--text-muted) 42%, transparent);
