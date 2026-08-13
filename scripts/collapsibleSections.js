@@ -90,17 +90,32 @@ export function buildCollapsibleSections(mdEl) {
  */
 function toggleSection(section, bodyEl, iconWrap) {
     const isCollapsed = section.classList.contains('collapsed');
-    
+
     if (isCollapsed) {
         // Expanding - use the measured height stored on initial load
         section.classList.remove('collapsed');
         if (iconWrap) iconWrap.classList.add('hidden');
         if (bodyEl) {
+            bodyEl.classList.remove('is-resting');
             const measuredHeight = bodyEl.dataset.measuredHeight || '5000';
             bodyEl.style.maxHeight = measuredHeight + 'px';
+            bodyEl.addEventListener('transitionend', function onExpanded(e) {
+                if (e.propertyName !== 'max-height') return;
+                bodyEl.removeEventListener('transitionend', onExpanded);
+                if (!section.classList.contains('collapsed')) {
+                    bodyEl.classList.add('is-resting');
+                }
+            });
         }
     } else {
         // Collapsing
+        if (bodyEl) {
+            // Drop the resting (unclipped) state and pin an explicit starting
+            // height so the max-height transition to 0 has something to animate from.
+            bodyEl.classList.remove('is-resting');
+            bodyEl.style.maxHeight = bodyEl.scrollHeight + 'px';
+            void bodyEl.offsetHeight; // force reflow before flipping to 0
+        }
         section.classList.add('collapsed');
         if (iconWrap) iconWrap.classList.remove('hidden');
         if (bodyEl) {

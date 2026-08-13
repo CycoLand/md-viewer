@@ -86,10 +86,19 @@
     transition: max-height var(--collapse-duration) ease;
 }
 
+/* Once expanded and idle (no collapse/expand animation in flight), drop the
+   height clip entirely so wide content (tables) can bleed past the text
+   column instead of being silently cut off by the animation's overflow:hidden. */
+.md-section-body.is-resting {
+    overflow: visible;
+    max-height: none !important;
+}
+
 .md-section.collapsed > :not(.md-heading):not(.md-section-body) {
     display: none;
 }
 
 .md-section.collapsed .md-section-body {
     max-height: 0 !important;
+    overflow: hidden !important;
 }

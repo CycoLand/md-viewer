@@ -337,11 +337,35 @@
     letter-spacing: 0.5px;
 }
 
+/* Tables wrap and stay within the text column by default, matching the rest
+   of the prose. They scroll internally instead of ever clipping, and only
+   grow past the text column (see .table-wide below) when JS has determined
+   that wrapping at the normal width reads poorly. */
+.markdown-content .table-scroll-wrapper {
+    max-width: 100%;
+    width: fit-content;
+    overflow-x: auto;
+    overflow-y: hidden;
+    margin: 2rem 0;
+    position: relative;
+    z-index: 1;
+    transition: max-width 0.2s ease;
+}
+
+@media (min-width: 1600px) {
+    .markdown-content .table-scroll-wrapper.table-wide {
+        /* Reach all the way to the content row's right edge — i.e. past the
+           text column and across the table-of-contents gutter — before a
+           table needs its own horizontal scrollbar. */
+        max-width: calc(100% + 2.5rem + var(--toc-column-width));
+    }
+}
+
 .markdown-content table {
-    width: auto;
+    width: max-content;
     max-width: 100%;
     border-collapse: collapse;
-    margin: 2rem 0;
+    margin: 0;
     background-color: var(--surface-color);
     border-radius: var(--border-radius-lg);
     overflow: hidden;

@@ -131,12 +131,171 @@ function onHeaderClick(table, colIndex) {
 }
 
 /**
+ * Wraps a table in a scrollable container so wide tables never get clipped —
+ * they scroll internally, and are allowed (via CSS) to grow past the text
+ * column into the table-of-contents gutter before that scrolling kicks in.
+ * @param {HTMLTableElement} table
+ * @returns {HTMLElement} the wrapper (existing or newly created)
+ */
+function wrapTableForOverflow(table) {
+    if (table.parentElement && table.parentElement.classList.contains('table-scroll-wrapper')) {
+        return table.parentElement;
+    }
+    const wrapper = document.createElement('div');
+    wrapper.className = 'table-scroll-wrapper';
+    table.parentNode.insertBefore(wrapper, table);
+    wrapper.appendChild(table);
+    return wrapper;
+}
+
+const WIDE_BREAKOUT_MIN_VIEWPORT = 1600; // matches the TOC visibility breakpoint
+
+let wordMeasureEl = null;
+
+/**
+ * Renders a word off-screen with the given cell's font to get its true
+ * layout width — far more reliable than estimating line counts from
+ * clientHeight (which is thrown off by padding, rounding, etc).
+ * @param {string} word
+ * @param {CSSStyleDeclaration} style - computed style of the cell it came from
+ * @returns {number}
+ */
+function measureWordWidth(word, style) {
+    if (!wordMeasureEl) {
+        wordMeasureEl = document.createElement('span');
+        wordMeasureEl.style.position = 'absolute';
+        wordMeasureEl.style.visibility = 'hidden';
+        wordMeasureEl.style.left = '-9999px';
+        wordMeasureEl.style.top = '0';
+        wordMeasureEl.style.whiteSpace = 'nowrap';
+        document.body.appendChild(wordMeasureEl);
+    }
+    wordMeasureEl.style.fontFamily = style.fontFamily;
+    wordMeasureEl.style.fontSize = style.fontSize;
+    wordMeasureEl.style.fontWeight = style.fontWeight;
+    wordMeasureEl.style.letterSpacing = style.letterSpacing;
+    wordMeasureEl.textContent = word;
+    return wordMeasureEl.getBoundingClientRect().width;
+}
+
+/**
+ * A cell only counts as genuinely cramped if a word is being cut off outright,
+ * or — for cells with a real phrase (3+ words) — the column is barely wider
+ * than the single longest word, meaning it's effectively forced to one word
+ * per line. Short 2-word cells wrapping to two lines is normal table
+ * behavior, not a sign the table needs more room.
+ * @param {HTMLTableCellElement} cell
+ * @returns {boolean}
+ */
+function isCellCramped(cell) {
+    if (cell.scrollWidth > cell.clientWidth + 1) return true;
+
+    const words = (cell.textContent || '').trim().split(/\s+/).filter(Boolean);
+    if (words.length < 3) return false;
+
+    const style = getComputedStyle(cell);
+    const paddingH = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+    const availableWidth = cell.clientWidth - paddingH;
+
+    let longest = 0;
+    for (const word of words) {
+        const width = measureWordWidth(word, style);
+        if (width > longest) longest = width;
+    }
+
+    return availableWidth < longest * 1.4;
+}
+
+/**
+ * Decides whether a table reads poorly at its normal (unwidened) width —
+ * i.e. text is being cut off, or several cells are collapsing to ~one word
+ * per line. Deliberately conservative: this should be the exception, not
+ * the default, so a couple of stray wrapped cells isn't enough on its own.
+ * The table normally sizes to its own max-content width and simply scrolls
+ * inside its wrapper when that's wider than the column, so to see how it
+ * WOULD wrap at the normal column width we have to temporarily force both
+ * the wrapper and table down to that width before measuring.
+ * @param {HTMLElement} wrapper
+ * @param {HTMLTableElement} table
+ * @returns {boolean}
+ */
+function tableLooksCramped(wrapper, table) {
+    const prevWrapperWidth = wrapper.style.width;
+    const prevWrapperMaxWidth = wrapper.style.maxWidth;
+    const prevTableWidth = table.style.width;
+
+    wrapper.style.maxWidth = '100%';
+    wrapper.style.width = '100%';
+    table.style.width = '100%';
+
+    const cells = table.querySelectorAll('td, th');
+    let cramped = 0;
+    let eligible = 0;
+    for (const cell of cells) {
+        const words = (cell.textContent || '').trim().split(/\s+/).filter(Boolean);
+        const overflowing = cell.scrollWidth > cell.clientWidth + 1;
+        if (words.length < 3 && !overflowing) continue; // too short to judge by this heuristic
+        eligible++;
+        if (overflowing || isCellCramped(cell)) cramped++;
+    }
+
+    wrapper.style.width = prevWrapperWidth;
+    wrapper.style.maxWidth = prevWrapperMaxWidth;
+    table.style.width = prevTableWidth;
+
+    // Require multiple cramped cells, not just a single outlier.
+    if (eligible === 0 || cramped < 2) return false;
+    return cramped / eligible > 0.4;
+}
+
+/**
+ * Only lets a table grow past the text column when it would otherwise be
+ * hard to read (cut-off words or ~one word per line); otherwise it stays at
+ * the normal column width and wraps like the rest of the prose.
+ * @param {HTMLElement} wrapper
+ * @param {HTMLTableElement} table
+ */
+function evaluateTableWidth(wrapper, table) {
+    // Measure against the normal (unwidened) layout every time, so a table
+    // that no longer needs the extra room (e.g. after a resize) can shrink back.
+    wrapper.classList.remove('table-wide');
+    if (window.innerWidth < WIDE_BREAKOUT_MIN_VIEWPORT) return;
+    wrapper.classList.toggle('table-wide', tableLooksCramped(wrapper, table));
+}
+
+let wideTableResizeHandler = null;
+let trackedWideTableWrappers = [];
+
+function scheduleWideTableReevaluation() {
+    if (wideTableResizeHandler) {
+        window.removeEventListener('resize', wideTableResizeHandler);
+    }
+    let resizeTimer = null;
+    wideTableResizeHandler = () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            trackedWideTableWrappers = trackedWideTableWrappers.filter(w => w.isConnected);
+            trackedWideTableWrappers.forEach(wrapper => {
+                const table = wrapper.querySelector('table');
+                if (table) evaluateTableWidth(wrapper, table);
+            });
+        }, 150);
+    };
+    window.addEventListener('resize', wideTableResizeHandler);
+}
+
+/**
  * Makes all tables inside the given element sortable (header click, indicators, original order).
  * @param {HTMLElement} root - Container that holds .markdown-content or tables (e.g. #markdown-content)
  */
 export function setupSortableTables(root) {
     const tables = root.querySelectorAll ? root.querySelectorAll('table') : [];
+    trackedWideTableWrappers = [];
     tables.forEach(table => {
+        const wrapper = wrapTableForOverflow(table);
+        trackedWideTableWrappers.push(wrapper);
+        evaluateTableWidth(wrapper, table);
+
         const thead = table.querySelector('thead');
         const tbody = table.querySelector('tbody');
         if (!thead || !tbody) return;
@@ -163,4 +322,6 @@ export function setupSortableTables(root) {
 
         setSortStack(table, getSortStack(table));
     });
+
+    scheduleWideTableReevaluation();
 }
