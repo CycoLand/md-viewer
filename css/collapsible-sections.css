@@ -3,13 +3,16 @@
     position: relative;
 }
 
+/* Shrink-wraps the heading text (so the underline and the collapsed chevron
+   end where the text does) while still wrapping like normal text. Not a flex
+   container: that would turn every inline span (e.g. acronym annotations)
+   into its own unwrappable item and push long headings past the column. */
 .md-section .md-heading {
     position: relative;
     padding-right: 0;
     cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
+    display: inline-block;
+    overflow-wrap: anywhere;
     transition: padding-right var(--collapse-duration) ease var(--collapse-delay);
 }
 
@@ -87,8 +90,9 @@
 }
 
 /* Once expanded and idle (no collapse/expand animation in flight), drop the
-   height clip entirely so wide content (tables) can bleed past the text
-   column instead of being silently cut off by the animation's overflow:hidden. */
+   height clip entirely. Content can still grow after the height was measured
+   (e.g. a table's scroll wrapper gains a scrollbar), and a resting section
+   shouldn't silently cut it off with the animation's overflow:hidden. */
 .md-section-body.is-resting {
     overflow: visible;
     max-height: none !important;
