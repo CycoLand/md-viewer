@@ -194,7 +194,7 @@ export function showRenderedContent(content) {
         // Set to the measured height for smooth animations
         b.style.maxHeight = height + 'px';
         // Idle (non-collapsed) sections don't need the height clip at rest —
-        // dropping it lets wide content (tables) bleed past the text column.
+        // dropping it keeps content that grows after this measurement visible.
         if (!b.closest('.md-section').classList.contains('collapsed')) {
             b.classList.add('is-resting');
         }
@@ -272,7 +272,7 @@ export function rebuildFromCache() {
         // Set to the measured height for smooth animations
         b.style.maxHeight = height + 'px';
         // Idle (non-collapsed) sections don't need the height clip at rest —
-        // dropping it lets wide content (tables) bleed past the text column.
+        // dropping it keeps content that grows after this measurement visible.
         if (!b.closest('.md-section').classList.contains('collapsed')) {
             b.classList.add('is-resting');
         }

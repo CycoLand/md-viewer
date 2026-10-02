@@ -50,6 +50,11 @@
     overflow-y: visible;
     padding: 2.5rem 1.5rem 4rem 1.5rem;
     width: 100%;
+    /* Grid items default to min-width: auto, so content with a wide minimum
+       width (e.g. a table with a long unbreakable cell, before the first
+       heading) would stretch the 1fr track past the viewport. Let the track
+       stay put; tables scroll in their wrapper. */
+    min-width: 0;
 }
 
 .markdown-content > * {

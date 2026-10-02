@@ -7,6 +7,8 @@
  * Multiple columns: most recently clicked is primary, then previous sorts, then original order.
  */
 
+import { openTableOverlay } from './tableOverlay.js';
+
 const SORT_STACK_KEY = 'sortableSortStack';
 
 /**
@@ -130,158 +132,152 @@ function onHeaderClick(table, colIndex) {
     applySort(table);
 }
 
-/**
- * Wraps a table in a scrollable container so wide tables never get clipped —
- * they scroll internally, and are allowed (via CSS) to grow past the text
- * column into the table-of-contents gutter before that scrolling kicks in.
- * @param {HTMLTableElement} table
- * @returns {HTMLElement} the wrapper (existing or newly created)
- */
-function wrapTableForOverflow(table) {
-    if (table.parentElement && table.parentElement.classList.contains('table-scroll-wrapper')) {
-        return table.parentElement;
-    }
-    const wrapper = document.createElement('div');
-    wrapper.className = 'table-scroll-wrapper';
-    table.parentNode.insertBefore(wrapper, table);
-    wrapper.appendChild(table);
-    return wrapper;
-}
+// Where long paths and URLs in table cells may wrap: just after a separator
+// (`src/` + `Services/` + `{Cycodum.` ...), but not between two of them, so
+// `https://` stays whole. Not `_`: it's a word character, so splitting there
+// would create new word boundaries for acronym detection, which runs on these
+// text nodes afterwards.
+const BREAK_AFTER_SEPARATOR = /(?<=[/.,:{}()=@])(?![/.,:{}()=@])/;
 
-const WIDE_BREAKOUT_MIN_VIEWPORT = 1600; // matches the TOC visibility breakpoint
-
-let wordMeasureEl = null;
+// Runs longer than this with no break point at all (commit hashes, tokens)
+// may also break anywhere. Shorter ones always stay whole, so a cramped
+// column can't squeeze names into fragments.
+const MAX_UNBREAKABLE_RUN = 20;
 
 /**
- * Renders a word off-screen with the given cell's font to get its true
- * layout width — far more reliable than estimating line counts from
- * clientHeight (which is thrown off by padding, rounding, etc).
- * @param {string} word
- * @param {CSSStyleDeclaration} style - computed style of the cell it came from
+ * Length of the longest stretch of text the browser can't already wrap
+ * (it breaks at spaces and after hyphens by itself).
+ * @param {string} text
  * @returns {number}
  */
-function measureWordWidth(word, style) {
-    if (!wordMeasureEl) {
-        wordMeasureEl = document.createElement('span');
-        wordMeasureEl.style.position = 'absolute';
-        wordMeasureEl.style.visibility = 'hidden';
-        wordMeasureEl.style.left = '-9999px';
-        wordMeasureEl.style.top = '0';
-        wordMeasureEl.style.whiteSpace = 'nowrap';
-        document.body.appendChild(wordMeasureEl);
-    }
-    wordMeasureEl.style.fontFamily = style.fontFamily;
-    wordMeasureEl.style.fontSize = style.fontSize;
-    wordMeasureEl.style.fontWeight = style.fontWeight;
-    wordMeasureEl.style.letterSpacing = style.letterSpacing;
-    wordMeasureEl.textContent = word;
-    return wordMeasureEl.getBoundingClientRect().width;
+function longestUnbreakableRun(text) {
+    return Math.max(...text.split(/[\s-]/).map(run => run.length));
 }
 
 /**
- * A cell only counts as genuinely cramped if a word is being cut off outright,
- * or — for cells with a real phrase (3+ words) — the column is barely wider
- * than the single longest word, meaning it's effectively forced to one word
- * per line. Short 2-word cells wrapping to two lines is normal table
- * behavior, not a sign the table needs more room.
- * @param {HTMLTableCellElement} cell
- * @returns {boolean}
- */
-function isCellCramped(cell) {
-    if (cell.scrollWidth > cell.clientWidth + 1) return true;
-
-    const words = (cell.textContent || '').trim().split(/\s+/).filter(Boolean);
-    if (words.length < 3) return false;
-
-    const style = getComputedStyle(cell);
-    const paddingH = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
-    const availableWidth = cell.clientWidth - paddingH;
-
-    let longest = 0;
-    for (const word of words) {
-        const width = measureWordWidth(word, style);
-        if (width > longest) longest = width;
-    }
-
-    return availableWidth < longest * 1.4;
-}
-
-/**
- * Decides whether a table reads poorly at its normal (unwidened) width —
- * i.e. text is being cut off, or several cells are collapsing to ~one word
- * per line. Deliberately conservative: this should be the exception, not
- * the default, so a couple of stray wrapped cells isn't enough on its own.
- * The table normally sizes to its own max-content width and simply scrolls
- * inside its wrapper when that's wider than the column, so to see how it
- * WOULD wrap at the normal column width we have to temporarily force both
- * the wrapper and table down to that width before measuring.
- * @param {HTMLElement} wrapper
- * @param {HTMLTableElement} table
- * @returns {boolean}
- */
-function tableLooksCramped(wrapper, table) {
-    const prevWrapperWidth = wrapper.style.width;
-    const prevWrapperMaxWidth = wrapper.style.maxWidth;
-    const prevTableWidth = table.style.width;
-
-    wrapper.style.maxWidth = '100%';
-    wrapper.style.width = '100%';
-    table.style.width = '100%';
-
-    const cells = table.querySelectorAll('td, th');
-    let cramped = 0;
-    let eligible = 0;
-    for (const cell of cells) {
-        const words = (cell.textContent || '').trim().split(/\s+/).filter(Boolean);
-        const overflowing = cell.scrollWidth > cell.clientWidth + 1;
-        if (words.length < 3 && !overflowing) continue; // too short to judge by this heuristic
-        eligible++;
-        if (overflowing || isCellCramped(cell)) cramped++;
-    }
-
-    wrapper.style.width = prevWrapperWidth;
-    wrapper.style.maxWidth = prevWrapperMaxWidth;
-    table.style.width = prevTableWidth;
-
-    // Require multiple cramped cells, not just a single outlier.
-    if (eligible === 0 || cramped < 2) return false;
-    return cramped / eligible > 0.4;
-}
-
-/**
- * Only lets a table grow past the text column when it would otherwise be
- * hard to read (cut-off words or ~one word per line); otherwise it stays at
- * the normal column width and wraps like the rest of the prose.
- * @param {HTMLElement} wrapper
+ * Table layout sizes each column by its widest unbreakable run, so one long
+ * path in a cell can squeeze every other column to one word per line. This
+ * inserts <wbr> break points after separators in a table's inline code and
+ * bare-URL links so they wrap at natural points, and marks overlong runs
+ * with no natural break as .break-anywhere.
  * @param {HTMLTableElement} table
  */
-function evaluateTableWidth(wrapper, table) {
-    // Measure against the normal (unwidened) layout every time, so a table
-    // that no longer needs the extra room (e.g. after a resize) can shrink back.
-    wrapper.classList.remove('table-wide');
-    if (window.innerWidth < WIDE_BREAKOUT_MIN_VIEWPORT) return;
-    wrapper.classList.toggle('table-wide', tableLooksCramped(wrapper, table));
-}
+function addBreakPoints(table) {
+    const targets = [...table.querySelectorAll('code, a')].filter(el =>
+        !el.closest('pre') &&
+        // Markdown can't produce these inside code or links, so either means done.
+        !el.querySelector('wbr, .break-anywhere') &&
+        (el.tagName === 'CODE' || el.textContent.includes('://'))
+    );
 
-let wideTableResizeHandler = null;
-let trackedWideTableWrappers = [];
+    targets.forEach(el => {
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        const textNodes = [];
+        while (walker.nextNode()) textNodes.push(walker.currentNode);
 
-function scheduleWideTableReevaluation() {
-    if (wideTableResizeHandler) {
-        window.removeEventListener('resize', wideTableResizeHandler);
-    }
-    let resizeTimer = null;
-    wideTableResizeHandler = () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-            trackedWideTableWrappers = trackedWideTableWrappers.filter(w => w.isConnected);
-            trackedWideTableWrappers.forEach(wrapper => {
-                const table = wrapper.querySelector('table');
-                if (table) evaluateTableWidth(wrapper, table);
+        textNodes.forEach(node => {
+            const chunks = node.data.split(BREAK_AFTER_SEPARATOR);
+            const isLong = chunks.map(chunk => longestUnbreakableRun(chunk) > MAX_UNBREAKABLE_RUN);
+            if (chunks.length < 2 && !isLong[0]) return;
+
+            const frag = document.createDocumentFragment();
+            chunks.forEach((chunk, i) => {
+                if (isLong[i]) {
+                    const span = document.createElement('span');
+                    span.className = 'break-anywhere';
+                    span.textContent = chunk;
+                    frag.append(span);
+                } else {
+                    frag.append(chunk);
+                }
+                if (i < chunks.length - 1) frag.append(document.createElement('wbr'));
             });
-        }, 150);
-    };
-    window.addEventListener('resize', wideTableResizeHandler);
+            node.replaceWith(frag);
+        });
+    });
+}
+
+/**
+ * Wraps a table in a container + scrollable inner wrapper so wide tables
+ * never get clipped — they scroll internally by default. An expand button
+ * (see setupTableExpandButton) is added on top when there's real overflow,
+ * letting the user opt into a full-screen view of the table instead of the
+ * app guessing on their behalf.
+ * @param {HTMLTableElement} table
+ */
+function wrapTableForOverflow(table) {
+    if (table.parentElement && table.parentElement.classList.contains('table-scroll-wrapper')) return;
+
+    const container = document.createElement('div');
+    container.className = 'table-container';
+
+    const scrollWrapper = document.createElement('div');
+    scrollWrapper.className = 'table-scroll-wrapper';
+
+    table.parentNode.insertBefore(container, table);
+    scrollWrapper.appendChild(table);
+    container.appendChild(scrollWrapper);
+}
+
+/**
+ * Adds (or removes) the expand button for a table, based purely on whether
+ * it actually overflows the text column — no guessing about readability,
+ * just: is there more content here than fits? The user decides whether
+ * that's worth opening full-screen.
+ * @param {HTMLElement} container
+ * @param {HTMLElement} scrollWrapper
+ */
+function setupTableExpandButton(container, scrollWrapper) {
+    const hasOverflow = scrollWrapper.scrollWidth > scrollWrapper.clientWidth + 1;
+    const button = container.querySelector('.table-expand-btn');
+
+    if (!hasOverflow) {
+        if (button) button.remove();
+        return;
+    }
+    if (button) return;
+
+    const expandBtn = document.createElement('button');
+    expandBtn.type = 'button';
+    expandBtn.className = 'table-expand-btn';
+    expandBtn.title = 'Expand table';
+    expandBtn.setAttribute('aria-label', 'Expand table');
+    expandBtn.innerHTML = '<i class="fas fa-expand-alt"></i>';
+    expandBtn.addEventListener('click', () => openTableOverlay(container, expandBtn));
+    container.insertBefore(expandBtn, scrollWrapper);
+}
+
+let tableResizeObserver = null;
+
+/**
+ * Re-checks each table for overflow whenever it or its wrapper changes size —
+ * window resizes, the sidebar toggling and late-loading web fonts all change
+ * whether a table fits. Watching the wrapper as well as the table matters:
+ * once a table has shrunk to its minimum width it stops resizing, and only
+ * the wrapper keeps narrowing past it.
+ * @param {NodeListOf<HTMLTableElement>} tables
+ */
+function observeTableOverflow(tables) {
+    // One observer per render; drop the one watching the previous DOM.
+    tableResizeObserver?.disconnect();
+    if (typeof ResizeObserver === 'undefined') return;
+
+    tableResizeObserver = new ResizeObserver(entries => {
+        const wrappers = new Set();
+        for (const { target } of entries) {
+            const wrapper = target.classList.contains('table-scroll-wrapper') ? target : target.parentElement;
+            // Skip tables that are currently out in the full-screen overlay.
+            if (wrapper?.classList.contains('table-scroll-wrapper') && wrapper.querySelector(':scope > table')) {
+                wrappers.add(wrapper);
+            }
+        }
+        wrappers.forEach(wrapper => setupTableExpandButton(wrapper.parentElement, wrapper));
+    });
+
+    tables.forEach(table => {
+        tableResizeObserver.observe(table);
+        tableResizeObserver.observe(table.parentElement);
+    });
 }
 
 /**
@@ -290,11 +286,9 @@ function scheduleWideTableReevaluation() {
  */
 export function setupSortableTables(root) {
     const tables = root.querySelectorAll ? root.querySelectorAll('table') : [];
-    trackedWideTableWrappers = [];
     tables.forEach(table => {
-        const wrapper = wrapTableForOverflow(table);
-        trackedWideTableWrappers.push(wrapper);
-        evaluateTableWidth(wrapper, table);
+        addBreakPoints(table);
+        wrapTableForOverflow(table);
 
         const thead = table.querySelector('thead');
         const tbody = table.querySelector('tbody');
@@ -323,5 +317,7 @@ export function setupSortableTables(root) {
         setSortStack(table, getSortStack(table));
     });
 
-    scheduleWideTableReevaluation();
+    // Adds the expand buttons (the observer's first callback fires right
+    // after layout) and keeps them in sync as sizes change.
+    observeTableOverflow(tables);
 }
