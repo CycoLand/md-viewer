@@ -188,6 +188,7 @@
     .mermaid-zoom-controls,
     .md-highlight-handle,
     .md-acronym-popup,
+    .md-comment-popover,
     .toc-layout-probe {
         display: none !important;
     }

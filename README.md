@@ -24,8 +24,9 @@ A beautiful, feature-rich Markdown viewer that runs entirely in your browser, wi
 - **Filters** to hide emojis or horizontal rules
 - **Prints cleanly:** dark-on-light, every page, without the app's buttons
 
-### 🖍️ Highlights and acronyms
-- **Highlights:** drag with the right mouse button to highlight text (a plain right-click still opens the browser menu). Click a highlight to remove it, or drag its handles to resize it. Highlights are saved with the document.
+### 🖍️ Highlights, comments and acronyms
+- **Highlights:** drag with the right mouse button to highlight text (a plain right-click still opens the browser menu). Drag a highlight's handles to resize it. Highlights are saved with the document.
+- **Comments:** click a highlight (or Tab to it and press Enter) to open a comment box under it. Comments save as you type. A highlight with a comment ends in a speech-bubble icon and shows the comment when you hover it. Remove a highlight from the same box; if it has a comment, you're asked to confirm.
 - **Acronym definitions:** click an ALL-CAPS word for its meaning, looked up with the free [STANDS4 Abbreviations API](https://www.abbreviations.com/api.php). Add your own API key under Settings → Acronym Definitions; it's stored only in your browser.
 
 ### 📊 Tables
@@ -97,7 +98,7 @@ Vanilla JavaScript ES modules and plain CSS, with no framework and no bundler.
     ├── codeBlockEnhancer.js, collapsibleSections.js, sortableTables.js,
     │   tableOverlay.js, listCardEnhancer.js, checkmarkLists.js
     ├── tocManager.js, tocScrollSpy.js, tocTrack.js, tocLayout.js
-    ├── highlights.js, acronyms.js
+    ├── highlights.js, highlightComments.js, acronyms.js
     ├── progressBar.js, waterProgressBar.js, waterFish.js
     └── paginationManager.js, clipboardAutoLoader.js, uiControls.js, ...
 ```

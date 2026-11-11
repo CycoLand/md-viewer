@@ -26,6 +26,7 @@ import {
     createDocumentFromModal
 } from './uiControls.js';
 import { initHighlights } from './highlights.js';
+import { initHighlightComments } from './highlightComments.js';
 import { initAcronyms } from './acronyms.js';
 import { initTocLayout } from './tocLayout.js';
 
@@ -46,8 +47,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize water progress bar
     const waterProgressBar = initWaterProgressBar();
 
-    // Text highlights
+    // Text highlights, and comments on them
     initHighlights();
+    initHighlightComments();
 
     // Acronym hover/click definitions
     initAcronyms();

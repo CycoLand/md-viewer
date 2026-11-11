@@ -1,7 +1,8 @@
 /**
  * Persistent text highlights.
  * - Right-click drag to paint (plain right-click keeps the context menu)
- * - Click a highlight to remove
+ * - Click a highlight (or Tab to it and press Enter) to comment on it or
+ *   remove it; highlightComments.js shows that popover
  * - Hover handles to resize
  */
 import { state, STORAGE_KEY } from './state.js';
@@ -339,7 +340,6 @@ function wrapRange(root, startOffset, endOffset, highlight) {
         const mark = document.createElement('mark');
         mark.className = 'md-highlight';
         mark.dataset.highlightId = highlight.id;
-        mark.title = 'Click to remove · drag handles to resize';
 
         try {
             range.surroundContents(mark);
@@ -355,7 +355,38 @@ function wrapRange(root, startOffset, endOffset, highlight) {
         }
     }
 
+    if (wrapped) decorateHighlight(root, highlight);
     return wrapped;
+}
+
+/**
+ * Comment cues on a highlight's marks: a tooltip with the comment, a class
+ * that draws a speech-bubble icon after the last mark (so "has a comment"
+ * isn't shown by color alone), and one Tab stop on the first mark.
+ */
+function decorateHighlight(root, highlight) {
+    const marks = queryHighlightMarks(root, highlight.id);
+    const comment = (highlight.comment || '').trim();
+    marks.forEach((mark, i) => {
+        mark.classList.toggle('has-comment', Boolean(comment));
+        mark.classList.toggle('md-highlight-end', i === marks.length - 1);
+        mark.title = comment
+            ? `${comment}\n\nClick to edit the comment · drag the handles to resize`
+            : 'Click to comment · drag the handles to resize';
+        if (i === 0) {
+            mark.tabIndex = 0;
+        } else {
+            mark.removeAttribute('tabindex');
+        }
+    });
+}
+
+/** Asks highlightComments.js to open the comment popover for a highlight. */
+function activateHighlight(mark) {
+    const id = mark?.dataset.highlightId;
+    if (!id) return;
+    hideFloatingHandles();
+    document.dispatchEvent(new CustomEvent('highlightActivate', { detail: { id } }));
 }
 
 function unwrapHighlight(root, highlightId) {
@@ -680,8 +711,40 @@ function maybeActivatePaintDrag(e) {
 
 // --- Public API ---
 
+/** The current document's highlight with this id, or null. */
+export function getHighlightById(id) {
+    const file = getCurrentFile();
+    return (file && ensureHighlights(file).find((h) => h.id === id)) || null;
+}
+
+/** The rendered <mark> elements for a highlight, in document order. */
+export function getHighlightMarks(id) {
+    const mdEl = getMdEl();
+    return mdEl ? Array.from(queryHighlightMarks(mdEl, id)) : [];
+}
+
+/** Saves a highlight's comment (an empty or blank comment removes it). */
+export function setHighlightComment(id, text) {
+    const highlight = getHighlightById(id);
+    if (!highlight) return;
+    if (text && text.trim()) {
+        highlight.comment = text;
+    } else {
+        delete highlight.comment;
+    }
+    saveHighlights();
+    const mdEl = getMdEl();
+    if (mdEl) decorateHighlight(mdEl, highlight);
+}
+
+/** Removes a highlight (and its comment) from the current document. */
+export function deleteHighlight(id) {
+    removeHighlight(id);
+}
+
 /** Clear highlight interaction UI (e.g. when switching to raw mode). */
 export function clearHighlightUI() {
+    document.dispatchEvent(new CustomEvent('highlightUiClear'));
     hideFloatingHandles();
     suppressContextMenu = false;
     exitPaintMode();
@@ -739,8 +802,10 @@ export function initHighlights() {
         const sel = window.getSelection();
         const hasDragSelect = sel && !sel.isCollapsed && sel.toString().trim().length > 0;
         if (!hasDragSelect) {
+            // Opens the comment popover (removing moved there, so a stray
+            // click can't delete a highlight and its comment)
             clearSelection();
-            removeHighlight(mark.dataset.highlightId);
+            activateHighlight(mark);
         }
     });
 
@@ -803,6 +868,12 @@ export function initHighlights() {
     });
 
     document.addEventListener('keydown', (e) => {
+        const mark = e.target.closest?.('mark.md-highlight');
+        if (mark && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            activateHighlight(mark);
+            return;
+        }
         if (e.key !== 'Escape') return;
         if (resizeState) {
             cancelResize();
