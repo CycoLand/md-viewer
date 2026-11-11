@@ -1,255 +1,129 @@
 # Ultimate Markdown Viewer
 
-A beautiful, feature-rich markdown viewer with powerful customization options and a clean, modern interface.
+A beautiful, feature-rich Markdown viewer that runs entirely in your browser, with a clean, modern interface and lots of reading aids.
+
+**Live:** https://cycoland.github.io/md-viewer/ (deployed from `main` by GitHub Pages)
 
 ## ✨ Features
 
-### 📝 Markdown Rendering
-- Full GitHub Flavored Markdown (GFM) support
-- Syntax highlighting for code blocks (powered by highlight.js)
-- Interactive task lists (checkboxes)
-- Mermaid diagram support
-- Mathematical expressions
-- Auto-generated table of contents
-- Collapsible sections
+### 📝 Markdown rendering
+- GitHub Flavored Markdown (tables, task lists, strikethrough, autolinks) via marked
+- Syntax highlighting for code blocks (highlight.js), colored to match the theme
+- Mermaid diagrams, with zoom, a source view, copy and SVG download
+- Output sanitized with DOMPurify
+- Interactive task lists: click a task to check it off
+- Lists where every item starts with ✅ get theme-styled check marks
+- Lists where every item is `**Label:** value` become a grid of cards
 
-### 🎨 Themes & Customization
-- 3 built-in themes: Default (Blue), Dark, Light
-- Full theme customizer with live preview
-- Customize colors, fonts, layout
-- Import/export custom themes
-- Persistent theme across sessions
+### 📖 Reading
+- **Table of contents** that tracks your scroll position. It appears beside the text whenever there's room for both.
+- **Collapsible sections:** click any heading from H2 down to fold its section
+- **Reading progress bar** along the top, plus an optional animated "water" progress bar beside the table of contents
+- **Reading mode** with adjustable characters per line and line height
+- **Views:** rendered, raw Markdown, or a two-page book layout (arrow keys turn pages)
+- **Filters** to hide emojis or horizontal rules
+- **Prints cleanly:** dark-on-light, every page, without the app's buttons
 
-### 📚 File Management
-- Multiple file support
-- Drag & drop file upload
-- Paste markdown directly
-- File search and filtering
-- Auto-save to browser localStorage
-- File metadata (word count, read time, last modified)
+### 🖍️ Highlights and acronyms
+- **Highlights:** drag with the right mouse button to highlight text (a plain right-click still opens the browser menu). Click a highlight to remove it, or drag its handles to resize it. Highlights are saved with the document.
+- **Acronym definitions:** click an ALL-CAPS word for its meaning, looked up with the free [STANDS4 Abbreviations API](https://www.abbreviations.com/api.php). Add your own API key under Settings → Acronym Definitions; it's stored only in your browser.
 
-### 📖 Viewing Modes
-- **Rendered View**: Beautiful styled markdown
-- **Raw View**: Plain markdown source
-- **Pages View**: Book-style two-page layout with pagination
-- Content filters (hide emojis, horizontal rules)
+### 📊 Tables
+- Click a column header to sort: descending, then ascending, then back to the original order. Sorts stack across columns.
+- Tables too wide for the text column get an expand button that opens them full screen.
 
-### 🎯 Advanced Features
-- Collapsible heading sections
-- Smooth scroll navigation
-- Table of contents with configurable depth
-- Code block enhancements:
-  - Copy to clipboard
-  - Language labels
-  - Toggle comments
-  - Line numbers
-- External link indicators
-- Keyboard shortcuts
+### 📋 Code blocks
+- Copy button and language label
+- Collapse a block by clicking its header
+- Hide or show comments
 
-### ⌨️ Keyboard Shortcuts
-- `Ctrl+O` - Open files
-- `Ctrl+Shift+V` - Paste markdown
-- `Ctrl+E` - Export to HTML
-- `Ctrl+R` - Toggle raw mode
-- `Ctrl+B` - Toggle sidebar
-- `Ctrl+,` - Theme settings
-- `Esc` - Close panels/modals
-- `Arrow Keys` - Navigate pages (in page view)
+### 🎨 Themes
+- 8 presets: Default, Dark, Light, Ocean, Sunset, Forest, Blue & Orange, Blue & Pink
+- Theme customizer for colors, font, font size, line height, sidebar width and content width
+- Import and export themes as JSON
 
-## 🏗️ Architecture
+### 📚 Files
+- Open `.md`, `.markdown` or `.txt` files, drag and drop them, or paste Markdown (the title is detected from the content)
+- Documents are saved in your browser's localStorage and listed with their read time, line count and date
+- Search filters the list by document name and content
+- Copy a document as Markdown, or export it as a standalone HTML file
 
-This project follows a modern, modular architecture:
+### 🤖 Opening content from cycod
+Opening the viewer with `?useClipboard=true` creates a new document from the clipboard, so a tool can copy its output and open the page in one step. The browser may ask for permission to read the clipboard.
 
-- **Vanilla JavaScript** with ES6 modules (no frameworks!)
-- **Modular CSS** organization
-- **State management** with single source of truth
-- **LocalStorage** for data persistence
-- **Event-driven** communication between modules
+### ⌨️ Keyboard shortcuts
+| Shortcut | Action |
+|---|---|
+| `Ctrl+O` | Open files |
+| `Ctrl+Shift+V` | Paste Markdown |
+| `Ctrl+E` | Export to HTML |
+| `Ctrl+R` | Switch between rendered and raw view |
+| `Ctrl+B` | Show or hide the sidebar |
+| `Ctrl+,` | Theme customizer |
+| `Esc` | Close panels and dialogs |
+| `←` / `→` | Turn pages in the book view |
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed documentation.
+## 🚀 Running it
 
-### Project Structure
-
-```
-├── index.html              # Main HTML
-├── styles.css              # Main stylesheet
-├── styles/                 # Modular CSS
-│   ├── base.css           # Variables, reset
-│   └── layout.css         # Layout structure
-├── scripts/               # Modular JavaScript
-│   ├── main.js            # Entry point
-│   ├── state.js           # State management
-│   ├── fileManager.js     # File operations
-│   ├── markdownRenderer.js # Markdown rendering
-│   ├── themeManager.js    # Theme system
-│   ├── themeLoader.js     # Theme loading
-│   ├── uiControls.js      # UI interactions
-│   ├── tocManager.js      # Table of contents
-│   ├── codeBlockEnhancer.js # Code features
-│   ├── collapsibleSections.js # Collapsible sections
-│   ├── paginationManager.js # Pagination
-│   └── loadingAnimations.js # Animations
-└── ARCHITECTURE.md        # Architecture docs
-```
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Modern web browser with ES6 module support
-- Static file server (or just open index.html directly)
-
-### Installation
-
-1. Clone or download this repository
-2. Open `index.html` in your browser
-
-That's it! No build step, no npm install, no dependencies to manage.
-
-### Using a Local Server
-
-For best results, use a local server:
+There is no build step and nothing to install. The page uses ES modules, so serve the folder over HTTP rather than opening `index.html` from disk:
 
 ```bash
-# Python 3
 python -m http.server 8000
-
-# Python 2
-python -m SimpleHTTPServer 8000
-
-# Node.js (http-server)
-npx http-server
-
-# PHP
-php -S localhost:8000
 ```
 
-Then navigate to `http://localhost:8000`
+Then open http://localhost:8000. Any static server works (for example `npx http-server`).
 
-## 📖 Usage
+The libraries (marked, DOMPurify, highlight.js, Mermaid, Font Awesome) and the fonts (Inter, Recursive, JetBrains Mono) load from CDNs, so the first load needs a network connection.
 
-### Adding Files
+## 🏗️ How it's built
 
-**Method 1: Drag & Drop**
-- Drag `.md` or `.markdown` files onto the welcome screen
+Vanilla JavaScript ES modules and plain CSS, with no framework and no bundler.
 
-**Method 2: File Browser**
-- Click "Select Files" button
-- Choose one or more markdown files
+```
+├── index.html              # Page markup: sidebar, panels, menus, dialogs
+├── styles.css              # Entry stylesheet; @imports everything in css/
+├── css/
+│   ├── tokens.css          # Design tokens: colors, type, spacing (theme variables)
+│   ├── base.css, layout.css, sidebar.css, toc.css, markdown.css, ...
+│   └── responsive-print.css  # Tablet/phone breakpoints and print styles
+└── scripts/
+    ├── main.js             # Entry point: wires up modules and shortcuts
+    ├── state.js            # Shared state and localStorage keys
+    ├── themeLoader.js      # Applies the saved theme before first paint
+    ├── themeManager.js     # Presets, customizer, highlight.js theme
+    ├── settingsManager.js  # Settings panel and quick menu
+    ├── fileManager.js      # Documents: storage, list, export
+    ├── markdownRenderer.js # Markdown → HTML, then runs the enhancers below
+    ├── codeBlockEnhancer.js, collapsibleSections.js, sortableTables.js,
+    │   tableOverlay.js, listCardEnhancer.js, checkmarkLists.js
+    ├── tocManager.js, tocScrollSpy.js, tocTrack.js, tocLayout.js
+    ├── highlights.js, acronyms.js
+    ├── progressBar.js, waterProgressBar.js, waterFish.js
+    └── paginationManager.js, clipboardAutoLoader.js, uiControls.js, ...
+```
 
-**Method 3: Paste Content**
-- Click "Paste Markdown" or press `Ctrl+Shift+V`
-- Paste your markdown content
-- Optionally provide a title (auto-detected from content if blank)
+- **Themes** are sets of CSS custom properties. `themeManager.js` holds the presets, and `tokens.css` holds the defaults, which match the Default preset.
+- **Rendering:** `markdownRenderer.js` parses with marked, sanitizes with DOMPurify, then runs each enhancer over the result.
+- **Storage:** documents, highlights, settings and the theme live in localStorage.
+- **Modules** talk through direct imports and a few custom DOM events (for example `togglePagination`).
 
-### Viewing Files
+### Adding a feature
 
-- Click any file in the sidebar to view it
-- Use the document menu (⋮) for view options:
-  - View Rendered (styled markdown)
-  - View Raw (plain text)
-  - View Pages (book layout)
-  - Export HTML
-
-### Customizing Themes
-
-1. Click the palette icon (🎨) in the sidebar header
-2. Choose a preset or customize colors
-3. Adjust typography and layout
-4. Export your theme to share or backup
-
-### Collapsible Sections
-
-- Click any heading (H2+) to collapse/expand that section
-- All subsections collapse with their parent
-- URL hashes auto-expand to target section
-
-### Table of Contents
-
-- Automatically generated for all headings
-- Click TOC items for smooth scroll navigation
-- Adjust depth filter (H1-H2, H1-H3, H1-H4, All)
-- Highlighted current section as you scroll
-
-## 🎨 Customization
-
-### Theme Presets
-
-**Default (Blue & Purple)**
-- Modern, professional look
-- Vibrant accent colors
-- Dark background
-
-**Dark**
-- True dark theme
-- Reduced contrast
-- Easy on the eyes
-
-**Light**
-- Clean, bright interface
-- High contrast
-- Perfect for daytime use
-
-### Custom Themes
-
-Create your own theme:
-1. Open theme customizer
-2. Adjust colors, fonts, sizes
-3. Export as JSON
-4. Share with others or import later
-
-## 🔧 Development
-
-### Code Organization
-
-- **Modular ES6**: Each feature is a self-contained module
-- **State Management**: Centralized state in `state.js`
-- **Event-Driven**: Custom events for cross-module communication
-- **No Build Step**: Pure vanilla JavaScript
-
-### Adding Features
-
-1. Create new module in `scripts/`
-2. Export functions/classes
-3. Import in `main.js`
-4. Initialize in `DOMContentLoaded`
-
-See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed guidelines.
-
-## 📦 Technologies
-
-- **marked.js** - Markdown parsing
-- **DOMPurify** - XSS protection
-- **highlight.js** - Syntax highlighting
-- **mermaid.js** - Diagram rendering
-- **Font Awesome** - Icons
-- **Inter & Recursive** - Fonts
+1. Add a module under `scripts/` and import it from `main.js` (or from `markdownRenderer.js` if it enhances rendered content).
+2. Put its styles in a file under `css/` and `@import` it from `styles.css`.
+3. Use the theme variables from `css/tokens.css` for colors, so it works in every preset.
 
 ## 🤝 Contributing
 
-Contributions welcome! Please:
+Contributions are welcome:
 
 1. Follow the existing code style
-2. Update documentation
-3. Test across browsers
-4. Consider accessibility
-
-## 📄 License
-
-MIT License - feel free to use this project however you'd like!
-
-## 🙏 Acknowledgments
-
-- Inspired by GitHub's markdown rendering
-- Built with modern web standards
-- No frameworks, just good code
-
-## 🐛 Known Issues
-
-- None currently! Report issues on GitHub.
+2. Update this README when behavior changes
+3. Check light and dark presets, a phone-width window and keyboard use
+4. Don't show state by color alone; pair it with an icon, text or shape
 
 ## 📈 Roadmap
 
-- [ ] Complete CSS modularization
 - [ ] TypeScript conversion
 - [ ] Unit tests
 - [ ] Offline PWA support
@@ -257,8 +131,10 @@ MIT License - feel free to use this project however you'd like!
 - [ ] Export to PDF
 - [ ] Plugin system
 
+## 📄 License
+
+MIT License: feel free to use this project however you'd like.
+
 ---
 
-**Made with ❤️ using vanilla JavaScript**
-
-*No frameworks were harmed in the making of this application*
+**Made with ❤️ using vanilla JavaScript.** *No frameworks were harmed in the making of this application.*
