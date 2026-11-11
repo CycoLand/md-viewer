@@ -5,21 +5,9 @@
 (function() {
     const savedPreset = localStorage.getItem('markdownViewerThemePreset');
     const savedTheme = localStorage.getItem('markdownViewerTheme');
-    
-    console.log('Inline script running - savedPreset:', savedPreset, 'savedTheme:', savedTheme);
-    
-    if (savedTheme) {
-        try {
-            const theme = JSON.parse(savedTheme);
-            const root = document.documentElement;
-            Object.keys(theme).forEach(key => {
-                root.style.setProperty(key, theme[key]);
-            });
-            console.log('Applied custom theme from localStorage');
-        } catch (e) {
-            console.error('Error applying custom theme:', e);
-        }
-    } else if (savedPreset) {
+
+    // Kept in sync with ThemeManager.presets (only the variables needed before first paint).
+    function getPresets() {
         const presets = {
             default: {
                 '--primary-color': '#6366f1',
@@ -152,24 +140,49 @@
                 '--error-color': '#ef4444'
             }
         };
-        
-        const preset = presets[savedPreset];
-        if (preset) {
-            const root = document.documentElement;
-            Object.keys(preset).forEach(key => {
-                root.style.setProperty(key, preset[key]);
-            });
-            console.log('Applied preset theme:', savedPreset);
-        }
-        var favicon = document.querySelector('link#dynamic-favicon');
-        if (favicon) {
-            favicon.href = savedPreset === 'light' ? 'favicon-light.svg' : savedPreset === 'dark' ? 'favicon-dark.svg' : 'favicon.svg';
+        return presets;
+    }
+
+    const presets = getPresets();
+    const root = document.documentElement;
+    const apply = (vars) => Object.keys(vars).forEach(key => root.style.setProperty(key, vars[key]));
+
+    // No saved preset means the default (dark) preset, same as ThemeManager.
+    const presetName = presets[savedPreset] ? savedPreset : 'default';
+    apply(presets[presetName]);
+
+    // A custom theme is saved as overrides on top of its preset.
+    if (savedTheme) {
+        try {
+            apply(JSON.parse(savedTheme));
+        } catch (e) {
+            console.error('Error applying custom theme:', e);
         }
     }
-    
-    // Use light highlight theme to match code block styling
+
+    // Text on the primary color: white or near-black, whichever contrasts more
+    // (same rule as ThemeManager.pickOnColor).
+    const primary = getComputedStyle(root).getPropertyValue('--primary-color').trim();
+    const hex = primary.match(/^#([0-9a-f]{6})$/i);
+    if (hex) {
+        const lum = (rgb) => rgb
+            .map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); })
+            .reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0);
+        const ratio = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+        const bg = lum([0, 2, 4].map(i => parseInt(hex[1].slice(i, i + 2), 16)));
+        root.style.setProperty('--on-primary', ratio(bg, 1) >= ratio(bg, lum([15, 23, 42])) ? '#ffffff' : '#0f172a');
+    }
+
+    const favicon = document.querySelector('link#dynamic-favicon');
+    if (favicon) {
+        favicon.href = presetName === 'light' ? 'favicon-light.svg' : presetName === 'dark' ? 'favicon-dark.svg' : 'favicon.svg';
+    }
+
+    // Match highlight.js to the preset's light/dark family (keep in sync with ThemeManager.updateHighlightTheme).
+    const lightPresets = ['light', 'bluePink'];
     const highlightLink = document.getElementById('highlight-theme');
     if (highlightLink) {
-        highlightLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+        const hlTheme = lightPresets.includes(presetName) ? 'github' : 'github-dark';
+        highlightLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/' + hlTheme + '.min.css';
     }
 })();

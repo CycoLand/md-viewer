@@ -147,74 +147,9 @@
     color: var(--text-color);
 }
 
+/* Active items brighten to the full text color (the track beside them marks
+   the range in the primary color), so they stand out by brightness, not hue
+   alone; in the Dark preset the primary and muted colors are identical. */
 .toc-link[data-active='true'] {
-    color: var(--primary-color);
-}
-
-.toc-document-controls {
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border-color);
-}
-
-.toc-document-controls h4 {
-    margin: 0 0 0.75rem 0;
-    color: var(--text-dim);
-    font-weight: var(--font-weight-medium);
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.view-mode-group {
-    display: flex;
-    flex-direction: column;
-    border-radius: 20px;
-    overflow: hidden;
-    border: 1px solid var(--border-color);
-    margin-bottom: 0.5rem;
-}
-
-.view-mode-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    font-size: 0.8rem;
-    font-weight: 500;
-    background-color: var(--surface-hover);
-    color: var(--text-muted);
-    border: none;
-    border-bottom: 1px solid var(--border-color);
-    cursor: pointer;
-    transition: var(--transition);
-    text-transform: none;
-    justify-content: flex-start;
-}
-
-.view-mode-btn:last-child {
-    border-bottom: none;
-}
-
-.view-mode-btn:hover {
-    background-color: var(--primary-color);
-    color: white;
-    z-index: 1;
-}
-
-.view-mode-btn.active {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
-    color: white;
-    z-index: 1;
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
-}
-
-.view-mode-btn.active:hover {
-    background-color: var(--primary-hover);
-}
-
-.doc-controls-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    color: var(--text-color);
 }

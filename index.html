@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MD Viewer</title>
     <link rel="icon" id="dynamic-favicon" href="favicon.svg" type="image/svg+xml">
+    <!-- highlight.js theme first, so the per-preset --code-token-* rules in styles.css win at equal specificity -->
+    <link id="highlight-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <link rel="stylesheet" href="styles.css">
-    <link id="highlight-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Recursive:wght,MONO@300..1000,1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -24,146 +25,166 @@
     <div id="theme-panel" class="theme-panel">
         <div class="theme-panel-header">
             <h3><i class="fas fa-palette"></i> Theme Customizer</h3>
-            <button id="close-theme-panel" class="close-btn">
+            <button id="close-theme-panel" class="close-btn" title="Close" aria-label="Close theme customizer">
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        
+
         <div class="theme-panel-content">
             <div class="theme-section">
                 <h4>Presets</h4>
-                <div class="theme-presets">
-                    <button class="theme-preset-btn active" data-theme="default">
-                        <div class="preset-colors">
+                <div class="settings-group theme-presets">
+                    <button class="setting-item theme-preset-btn active" data-theme="default" aria-pressed="true">
+                        <span class="preset-colors">
                             <span style="background: #6366f1"></span>
                             <span style="background: #0f172a"></span>
                             <span style="background: #1e293b"></span>
-                        </div>
-                        <span class="preset-name">Blue & Purple</span>
+                        </span>
+                        <span class="preset-name">Default</span>
+                        <i class="fas fa-check preset-check" aria-hidden="true"></i>
                     </button>
-                    <button class="theme-preset-btn" data-theme="dark">
-                        <div class="preset-colors">
+                    <button class="setting-item theme-preset-btn" data-theme="dark" aria-pressed="false">
+                        <span class="preset-colors">
                             <span style="background: #1f2937"></span>
                             <span style="background: #111827"></span>
                             <span style="background: #1f2937"></span>
-                        </div>
+                        </span>
                         <span class="preset-name">Dark</span>
+                        <i class="fas fa-check preset-check" aria-hidden="true"></i>
                     </button>
-                    <button class="theme-preset-btn" data-theme="light">
-                        <div class="preset-colors">
+                    <button class="setting-item theme-preset-btn" data-theme="light" aria-pressed="false">
+                        <span class="preset-colors">
                             <span style="background: #3b82f6"></span>
                             <span style="background: #ffffff"></span>
                             <span style="background: #f3f4f6"></span>
-                        </div>
+                        </span>
                         <span class="preset-name">Light</span>
+                        <i class="fas fa-check preset-check" aria-hidden="true"></i>
                     </button>
-                    <button class="theme-preset-btn" data-theme="ocean">
-                        <div class="preset-colors">
+                    <button class="setting-item theme-preset-btn" data-theme="ocean" aria-pressed="false">
+                        <span class="preset-colors">
                             <span style="background: #14b8a6"></span>
                             <span style="background: #0c1c2c"></span>
                             <span style="background: #1a2f3f"></span>
-                        </div>
+                        </span>
                         <span class="preset-name">Ocean</span>
+                        <i class="fas fa-check preset-check" aria-hidden="true"></i>
                     </button>
-                    <button class="theme-preset-btn" data-theme="sunset">
-                        <div class="preset-colors">
+                    <button class="setting-item theme-preset-btn" data-theme="sunset" aria-pressed="false">
+                        <span class="preset-colors">
                             <span style="background: #f97316"></span>
                             <span style="background: #1a1625"></span>
                             <span style="background: #2d2438"></span>
-                        </div>
+                        </span>
                         <span class="preset-name">Sunset</span>
+                        <i class="fas fa-check preset-check" aria-hidden="true"></i>
                     </button>
-                    <button class="theme-preset-btn" data-theme="forest">
-                        <div class="preset-colors">
+                    <button class="setting-item theme-preset-btn" data-theme="forest" aria-pressed="false">
+                        <span class="preset-colors">
                             <span style="background: #22c55e"></span>
                             <span style="background: #0f1a14"></span>
                             <span style="background: #1a2820"></span>
-                        </div>
+                        </span>
                         <span class="preset-name">Forest</span>
+                        <i class="fas fa-check preset-check" aria-hidden="true"></i>
                     </button>
-                    <button class="theme-preset-btn" data-theme="blueOrange">
-                        <div class="preset-colors">
+                    <button class="setting-item theme-preset-btn" data-theme="blueOrange" aria-pressed="false">
+                        <span class="preset-colors">
                             <span style="background: #3b82f6"></span>
                             <span style="background: #0a1929"></span>
                             <span style="background: #fb923c"></span>
-                        </div>
-                        <span class="preset-name">Blue & Orange</span>
+                        </span>
+                        <span class="preset-name">Blue &amp; Orange</span>
+                        <i class="fas fa-check preset-check" aria-hidden="true"></i>
                     </button>
-                    <button class="theme-preset-btn" data-theme="bluePink">
-                        <div class="preset-colors">
+                    <button class="setting-item theme-preset-btn" data-theme="bluePink" aria-pressed="false">
+                        <span class="preset-colors">
                             <span style="background: #60a5fa"></span>
                             <span style="background: #ffffff"></span>
                             <span style="background: #ec4899"></span>
-                        </div>
-                        <span class="preset-name">Blue & Pink</span>
+                        </span>
+                        <span class="preset-name">Blue &amp; Pink</span>
+                        <i class="fas fa-check preset-check" aria-hidden="true"></i>
                     </button>
                 </div>
             </div>
-            
+
             <div class="theme-section">
                 <h4>Colors</h4>
-                <div class="color-inputs">
-                    <div class="input-group">
-                        <label for="primary-color">Primary Color</label>
+                <div class="settings-group">
+                    <div class="setting-item">
+                        <label class="setting-label" for="primary-color">Primary Color</label>
                         <input type="color" id="primary-color" value="#6366f1">
                     </div>
-                    <div class="input-group">
-                        <label for="bg-color">Background</label>
+                    <div class="setting-item">
+                        <label class="setting-label" for="bg-color">Background</label>
                         <input type="color" id="bg-color" value="#0f172a">
                     </div>
-                    <div class="input-group">
-                        <label for="surface-color">Surface</label>
+                    <div class="setting-item">
+                        <label class="setting-label" for="surface-color">Surface</label>
                         <input type="color" id="surface-color" value="#1e293b">
                     </div>
-                    <div class="input-group">
-                        <label for="text-color">Text Color</label>
+                    <div class="setting-item">
+                        <label class="setting-label" for="text-color">Text Color</label>
                         <input type="color" id="text-color" value="#f8fafc">
                     </div>
-                    <div class="input-group">
-                        <label for="accent-color">Accent</label>
+                    <div class="setting-item">
+                        <label class="setting-label" for="accent-color">Accent</label>
                         <input type="color" id="accent-color" value="#06b6d4">
                     </div>
                 </div>
             </div>
-            
+
             <div class="theme-section">
                 <h4>Typography</h4>
-                <div class="input-group">
-                    <label for="font-family">Font Family</label>
-                    <select id="font-family">
-                        <option value="Inter, sans-serif">Inter</option>
-                        <option value="Arial, sans-serif">Arial</option>
-                        <option value="'Times New Roman', serif">Times New Roman</option>
-                        <option value="'Georgia', serif">Georgia</option>
-                        <option value="'Helvetica Neue', sans-serif">Helvetica Neue</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label for="font-size">Font Size</label>
-                    <input type="range" id="font-size" min="12" max="20" value="16">
-                    <span id="font-size-value">16px</span>
-                </div>
-                <div class="input-group">
-                    <label for="line-height">Line Height</label>
-                    <input type="range" id="line-height" min="1.2" max="2.0" step="0.025" value="1.625">
-                    <span id="line-height-value">1.625</span>
+                <div class="settings-group">
+                    <div class="setting-item">
+                        <label class="setting-label" for="font-family">Font Family</label>
+                        <select id="font-family">
+                            <option value="Inter, sans-serif">Inter</option>
+                            <option value="Arial, sans-serif">Arial</option>
+                            <option value="Times New Roman, serif">Times New Roman</option>
+                            <option value="Georgia, serif">Georgia</option>
+                            <option value="Helvetica Neue, sans-serif">Helvetica Neue</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label class="setting-label" for="font-size">Font Size</label>
+                        <span class="setting-control">
+                            <input type="range" id="font-size" min="12" max="20" value="16">
+                            <span id="font-size-value" class="setting-slider-value">16px</span>
+                        </span>
+                    </div>
+                    <div class="setting-item">
+                        <label class="setting-label" for="line-height">Line Height</label>
+                        <span class="setting-control">
+                            <input type="range" id="line-height" min="1.2" max="2.0" step="0.025" value="1.625">
+                            <span id="line-height-value" class="setting-slider-value">1.625</span>
+                        </span>
+                    </div>
                 </div>
             </div>
-            
+
             <div class="theme-section">
                 <h4>Layout</h4>
-                <div class="input-group">
-                    <label for="sidebar-width">Sidebar Width</label>
-                    <input type="range" id="sidebar-width" min="200" max="400" value="300">
-                    <span id="sidebar-width-value">300px</span>
-                </div>
-                <div class="input-group">
-                    <label for="content-width">Max Content Width</label>
-                    <input type="range" id="content-width" min="50" max="80" value="68">
-                    <span id="content-width-value">68ch</span>
+                <div class="settings-group">
+                    <div class="setting-item">
+                        <label class="setting-label" for="sidebar-width">Sidebar Width</label>
+                        <span class="setting-control">
+                            <input type="range" id="sidebar-width" min="200" max="400" value="300">
+                            <span id="sidebar-width-value" class="setting-slider-value">300px</span>
+                        </span>
+                    </div>
+                    <div class="setting-item">
+                        <label class="setting-label" for="content-width">Max Content Width</label>
+                        <span class="setting-control">
+                            <input type="range" id="content-width" min="50" max="80" value="68">
+                            <span id="content-width-value" class="setting-slider-value">68ch</span>
+                        </span>
+                    </div>
                 </div>
             </div>
-            
+
             <div class="theme-actions">
                 <button id="reset-theme" class="btn btn-secondary">Reset to Default</button>
                 <button id="export-theme" class="btn btn-primary">Export Theme</button>
@@ -175,39 +196,41 @@
 
     <!-- Settings Quick Menu (moved outside sidebar) -->
     <div id="settings-quick-menu" class="quick-menu">
-        <div class="setting-item quick-menu-setting">
-            <div class="setting-label">
-                <i class="fas fa-chart-line"></i>
-                <span>Progress Bar</span>
+        <div class="settings-group">
+            <div class="setting-item quick-menu-setting">
+                <label class="setting-label" for="quick-toggle-progress-bar">
+                    <i class="fas fa-chart-line" aria-hidden="true"></i>
+                    <span>Progress Bar</span>
+                </label>
+                <label class="toggle-switch toggle-switch-small">
+                    <input type="checkbox" id="quick-toggle-progress-bar" checked>
+                    <span class="toggle-slider"></span>
+                </label>
             </div>
-            <label class="toggle-switch toggle-switch-small">
-                <input type="checkbox" id="quick-toggle-progress-bar" checked>
-                <span class="toggle-slider"></span>
-            </label>
-        </div>
-        
-        <div class="setting-item quick-menu-setting">
-            <div class="setting-label">
-                <i class="fas fa-list"></i>
-                <span>Table of Contents</span>
+
+            <div class="setting-item quick-menu-setting">
+                <label class="setting-label" for="quick-toggle-toc">
+                    <i class="fas fa-list" aria-hidden="true"></i>
+                    <span>Table of Contents</span>
+                </label>
+                <label class="toggle-switch toggle-switch-small">
+                    <input type="checkbox" id="quick-toggle-toc" checked>
+                    <span class="toggle-slider"></span>
+                </label>
             </div>
-            <label class="toggle-switch toggle-switch-small">
-                <input type="checkbox" id="quick-toggle-toc" checked>
-                <span class="toggle-slider"></span>
-            </label>
+
+            <div class="setting-item quick-menu-setting">
+                <label class="setting-label" for="quick-toggle-water-progress-bar">
+                    <i class="fas fa-water" aria-hidden="true"></i>
+                    <span>Water Progress</span>
+                </label>
+                <label class="toggle-switch toggle-switch-small">
+                    <input type="checkbox" id="quick-toggle-water-progress-bar">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
         </div>
 
-        <div class="setting-item quick-menu-setting">
-            <div class="setting-label">
-                <i class="fas fa-water"></i>
-                <span>Water Progress</span>
-            </div>
-            <label class="toggle-switch toggle-switch-small">
-                <input type="checkbox" id="quick-toggle-water-progress-bar">
-                <span class="toggle-slider"></span>
-            </label>
-        </div>
-        
         <div class="quick-menu-separator"></div>
         <button id="open-full-settings-panel" class="quick-menu-item quick-menu-more">
             <i class="fas fa-sliders-h"></i>
@@ -218,68 +241,76 @@
     <!-- Theme Quick Menu (moved outside sidebar) -->
     <div id="theme-quick-menu" class="quick-menu">
         <button class="quick-menu-item" data-theme="default">
-            <div class="theme-preview">
+            <span class="theme-preview">
                 <span style="background: #6366f1"></span>
                 <span style="background: #0f172a"></span>
                 <span style="background: #1e293b"></span>
-            </div>
+            </span>
             <span>Default</span>
+            <i class="fas fa-check preset-check" aria-hidden="true"></i>
         </button>
         <button class="quick-menu-item" data-theme="dark">
-            <div class="theme-preview">
+            <span class="theme-preview">
                 <span style="background: #1f2937"></span>
                 <span style="background: #111827"></span>
                 <span style="background: #1f2937"></span>
-            </div>
+            </span>
             <span>Dark</span>
+            <i class="fas fa-check preset-check" aria-hidden="true"></i>
         </button>
         <button class="quick-menu-item" data-theme="light">
-            <div class="theme-preview">
+            <span class="theme-preview">
                 <span style="background: #3b82f6"></span>
                 <span style="background: #ffffff"></span>
                 <span style="background: #f3f4f6"></span>
-            </div>
+            </span>
             <span>Light</span>
+            <i class="fas fa-check preset-check" aria-hidden="true"></i>
         </button>
         <button class="quick-menu-item" data-theme="ocean">
-            <div class="theme-preview">
+            <span class="theme-preview">
                 <span style="background: #14b8a6"></span>
                 <span style="background: #0c1c2c"></span>
                 <span style="background: #1a2f3f"></span>
-            </div>
+            </span>
             <span>Ocean</span>
+            <i class="fas fa-check preset-check" aria-hidden="true"></i>
         </button>
         <button class="quick-menu-item" data-theme="sunset">
-            <div class="theme-preview">
+            <span class="theme-preview">
                 <span style="background: #f97316"></span>
                 <span style="background: #1a1625"></span>
                 <span style="background: #2d2438"></span>
-            </div>
+            </span>
             <span>Sunset</span>
+            <i class="fas fa-check preset-check" aria-hidden="true"></i>
         </button>
         <button class="quick-menu-item" data-theme="forest">
-            <div class="theme-preview">
+            <span class="theme-preview">
                 <span style="background: #22c55e"></span>
                 <span style="background: #0f1a14"></span>
                 <span style="background: #1a2820"></span>
-            </div>
+            </span>
             <span>Forest</span>
+            <i class="fas fa-check preset-check" aria-hidden="true"></i>
         </button>
         <button class="quick-menu-item" data-theme="blueOrange">
-            <div class="theme-preview">
+            <span class="theme-preview">
                 <span style="background: #3b82f6"></span>
                 <span style="background: #0a1929"></span>
                 <span style="background: #fb923c"></span>
-            </div>
-            <span>Blue & Orange</span>
+            </span>
+            <span>Blue &amp; Orange</span>
+            <i class="fas fa-check preset-check" aria-hidden="true"></i>
         </button>
         <button class="quick-menu-item" data-theme="bluePink">
-            <div class="theme-preview">
+            <span class="theme-preview">
                 <span style="background: #60a5fa"></span>
                 <span style="background: #ffffff"></span>
                 <span style="background: #ec4899"></span>
-            </div>
-            <span>Blue & Pink</span>
+            </span>
+            <span>Blue &amp; Pink</span>
+            <i class="fas fa-check preset-check" aria-hidden="true"></i>
         </button>
         <div class="quick-menu-separator"></div>
         <button id="open-full-theme-panel" class="quick-menu-item quick-menu-more">
@@ -295,130 +326,139 @@
     <div id="settings-panel" class="settings-panel">
         <div class="settings-panel-header">
             <h3><i class="fas fa-cog"></i> Settings</h3>
-            <button id="close-settings-panel" class="close-btn">
+            <button id="close-settings-panel" class="close-btn" title="Close" aria-label="Close settings">
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        
+
         <div class="settings-panel-content">
             <div class="settings-section">
                 <h4>Display Options</h4>
-                
-                <div class="setting-item">
-                    <div class="setting-label">
-                        <i class="fas fa-chart-line"></i>
-                        <span>Reading Progress Bar</span>
+                <div class="settings-group">
+                    <div class="setting-item">
+                        <label class="setting-label" for="toggle-progress-bar">
+                            <i class="fas fa-chart-line" aria-hidden="true"></i>
+                            <span>Reading Progress Bar</span>
+                        </label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle-progress-bar" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
                     </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="toggle-progress-bar" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                
-                <div class="setting-item">
-                    <div class="setting-label">
-                        <i class="fas fa-list"></i>
-                        <span>Table of Contents</span>
+
+                    <div class="setting-item">
+                        <label class="setting-label" for="toggle-toc">
+                            <i class="fas fa-list" aria-hidden="true"></i>
+                            <span>Table of Contents</span>
+                        </label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle-toc" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
                     </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="toggle-toc" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
+
+                    <div class="setting-item">
+                        <label class="setting-label" for="toggle-water-progress-bar">
+                            <i class="fas fa-water" aria-hidden="true"></i>
+                            <span>Water Progress Bar</span>
+                        </label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle-water-progress-bar">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <label class="setting-label" for="toggle-plain-text-headings">
+                            <i class="fas fa-heading" aria-hidden="true"></i>
+                            <span>Plain Text Headings</span>
+                        </label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle-plain-text-headings" checked aria-describedby="plain-text-headings-description">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
                 </div>
 
-                <div class="setting-item">
-                    <div class="setting-label">
-                        <i class="fas fa-water"></i>
-                        <span>Water Progress Bar</span>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="toggle-water-progress-bar">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-
-                <div class="setting-item">
-                    <div class="setting-label">
-                        <i class="fas fa-heading"></i>
-                        <span>Plain Text Headings</span>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="toggle-plain-text-headings" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-
-                <p class="setting-description">
-                    When on, headings ignore inline markdown and show as plain text. Turn off to render bold, code, links, and other formatting inside headings.
+                <p class="setting-description" id="plain-text-headings-description">
+                    Plain Text Headings: when on, headings ignore inline markdown and show as plain text. Turn off to render bold, code, links, and other formatting inside headings.
                 </p>
             </div>
 
             <div class="settings-section">
                 <h4>Reading</h4>
-
-                <div class="setting-item">
-                    <div class="setting-label">
-                        <i class="fas fa-book-open"></i>
-                        <span>Reading Mode</span>
+                <div class="settings-group">
+                    <div class="setting-item">
+                        <label class="setting-label" for="toggle-reading-mode">
+                            <i class="fas fa-book-open" aria-hidden="true"></i>
+                            <span>Reading Mode</span>
+                        </label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle-reading-mode" aria-describedby="reading-mode-description">
+                            <span class="toggle-slider"></span>
+                        </label>
                     </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="toggle-reading-mode">
-                        <span class="toggle-slider"></span>
-                    </label>
+
+                    <div class="setting-item">
+                        <label class="setting-label" for="reading-characters-per-line">Characters per Line</label>
+                        <span class="setting-control">
+                            <input type="range" id="reading-characters-per-line" min="45" max="80" value="68">
+                            <span id="reading-characters-per-line-value" class="setting-slider-value">68ch</span>
+                        </span>
+                    </div>
+
+                    <div class="setting-item">
+                        <label class="setting-label" for="reading-line-height">Line Height</label>
+                        <span class="setting-control">
+                            <input type="range" id="reading-line-height" min="1.2" max="2.0" step="0.025" value="1.625">
+                            <span id="reading-line-height-value" class="setting-slider-value">1.625</span>
+                        </span>
+                    </div>
                 </div>
 
-                <p class="setting-description">
-                    Uses shorter lines and extra spacing for easier long-form reading. Fine-tune below.
+                <p class="setting-description" id="reading-mode-description">
+                    Reading Mode uses shorter lines and extra spacing for easier long-form reading. Fine-tune it with the sliders above.
                 </p>
-
-                <div class="setting-slider-group">
-                    <label for="reading-characters-per-line">Characters per Line</label>
-                    <input type="range" id="reading-characters-per-line" min="45" max="80" value="68">
-                    <span id="reading-characters-per-line-value" class="setting-slider-value">68ch</span>
-                </div>
-
-                <div class="setting-slider-group">
-                    <label for="reading-line-height">Line Height</label>
-                    <input type="range" id="reading-line-height" min="1.2" max="2.0" step="0.025" value="1.625">
-                    <span id="reading-line-height-value" class="setting-slider-value">1.625</span>
-                </div>
             </div>
 
             <div class="settings-section">
                 <h4>Acronym Definitions</h4>
+                <div class="settings-group">
+                    <div class="setting-item">
+                        <label class="setting-label" for="toggle-acronym-underline">
+                            <i class="fas fa-underline" aria-hidden="true"></i>
+                            <span>Always Show Underline</span>
+                        </label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle-acronym-underline" aria-describedby="acronym-underline-description">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <label class="setting-label" for="acronym-api-uid">API User ID</label>
+                        <input type="text" id="acronym-api-uid" placeholder="e.g. 123456" autocomplete="off" spellcheck="false">
+                    </div>
+
+                    <div class="setting-item">
+                        <label class="setting-label" for="acronym-api-tokenid">Developer Token</label>
+                        <input type="password" id="acronym-api-tokenid" placeholder="Your token ID" autocomplete="off" spellcheck="false">
+                    </div>
+
+                    <div class="setting-item">
+                        <span class="setting-label">Cached Definitions</span>
+                        <button type="button" id="clear-acronym-cache-btn" class="btn btn-secondary btn-small">
+                            <i class="fas fa-trash" aria-hidden="true"></i> Clear
+                        </button>
+                    </div>
+                </div>
 
                 <p class="setting-description">
                     Hover an acronym in a document to see it underlined; click it for its definition, filtered to IT/technology categories via the free <a href="https://www.abbreviations.com/api.php" target="_blank" rel="noopener noreferrer">STANDS4 Abbreviations API</a> (100 lookups/day). Your key is stored only in this browser, never sent anywhere but stands4.com.
                 </p>
-
-                <div class="setting-item">
-                    <div class="setting-label">
-                        <i class="fas fa-underline"></i>
-                        <span>Always Show Underline</span>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="toggle-acronym-underline">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-
-                <p class="setting-description">
-                    When off, the dotted underline only appears on hover — handy if you use ALL CAPS for emphasis elsewhere, since not every underlined word turns out to be a real acronym.
+                <p class="setting-description" id="acronym-underline-description">
+                    With Always Show Underline off, the dotted underline only appears on hover — handy if you use ALL CAPS for emphasis elsewhere, since not every underlined word turns out to be a real acronym.
                 </p>
-
-                <div class="setting-text-group">
-                    <label for="acronym-api-uid">API User ID</label>
-                    <input type="text" id="acronym-api-uid" placeholder="e.g. 123456" autocomplete="off" spellcheck="false">
-                </div>
-
-                <div class="setting-text-group">
-                    <label for="acronym-api-tokenid">Developer Token</label>
-                    <input type="password" id="acronym-api-tokenid" placeholder="Your token ID" autocomplete="off" spellcheck="false">
-                </div>
-
-                <button type="button" id="clear-acronym-cache-btn" class="btn btn-secondary btn-small">
-                    <i class="fas fa-trash"></i> Clear Cached Definitions
-                </button>
             </div>
         </div>
     </div>
@@ -483,7 +523,7 @@
             <div id="welcome-screen" class="welcome-screen">
                 <div class="welcome-content">
                     <div class="welcome-icon">
-                        <i class="fas fa-markdown"></i>
+                        <i class="fa-brands fa-markdown" aria-hidden="true"></i>
                     </div>
                     <h1>Ultimate Markdown Viewer</h1>
                     <p>A beautiful, customizable markdown viewer with powerful features</p>
@@ -625,11 +665,10 @@
         </div>
     </div>
 
-    <!-- Overlay -->
-    <div id="overlay" class="overlay"></div>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Pinned: the unversioned URL serves 15.0.12 today, the last release with this file at the package root -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>

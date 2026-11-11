@@ -107,28 +107,36 @@ export class ClipboardAutoLoader {
             fontFamily: 'Inter, sans-serif',
             fontSize: '14px',
             fontWeight: '500',
-            animation: 'slideIn 0.3s ease-out',
+            animation: 'notificationSlideIn 0.3s ease-out',
             transition: 'opacity 0.3s ease-out'
         });
         
-        // Set colors based on type
+        // Type is shown by an icon as well as the color. Dark text: white on
+        // these fills measured 2.2-3.8:1; #0f172a is 4.7:1 or better on each.
         const colors = {
-            success: { bg: '#10b981', text: '#ffffff' },
-            error: { bg: '#ef4444', text: '#ffffff' },
-            warning: { bg: '#f59e0b', text: '#ffffff' },
-            info: { bg: '#3b82f6', text: '#ffffff' }
+            success: { bg: '#10b981', text: '#0f172a', icon: 'fa-circle-check' },
+            error: { bg: '#ef4444', text: '#0f172a', icon: 'fa-circle-xmark' },
+            warning: { bg: '#f59e0b', text: '#0f172a', icon: 'fa-triangle-exclamation' },
+            info: { bg: '#3b82f6', text: '#0f172a', icon: 'fa-circle-info' }
         };
         
         const color = colors[type] || colors.info;
         notification.style.backgroundColor = color.bg;
         notification.style.color = color.text;
+        notification.style.display = 'flex';
+        notification.style.alignItems = 'center';
+        notification.style.gap = '10px';
+        const icon = document.createElement('i');
+        icon.className = 'fas ' + color.icon;
+        icon.setAttribute('aria-hidden', 'true');
+        notification.prepend(icon);
         
         // Add animation styles if not already in document
         if (!document.getElementById('notification-styles')) {
             const style = document.createElement('style');
             style.id = 'notification-styles';
             style.textContent = `
-                @keyframes slideIn {
+                @keyframes notificationSlideIn {
                     from {
                         transform: translateX(400px);
                         opacity: 0;
@@ -138,7 +146,7 @@ export class ClipboardAutoLoader {
                         opacity: 1;
                     }
                 }
-                @keyframes slideOut {
+                @keyframes notificationSlideOut {
                     from {
                         transform: translateX(0);
                         opacity: 1;
@@ -157,7 +165,7 @@ export class ClipboardAutoLoader {
         
         // Auto-remove after duration
         setTimeout(() => {
-            notification.style.animation = 'slideOut 0.3s ease-out';
+            notification.style.animation = 'notificationSlideOut 0.3s ease-out';
             setTimeout(() => {
                 if (notification.parentNode) {
                     notification.parentNode.removeChild(notification);

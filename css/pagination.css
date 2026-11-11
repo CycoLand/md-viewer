@@ -93,11 +93,11 @@
     height: 48px;
     border: none;
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
-    color: white;
+    color: var(--on-primary);
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--primary-color) 30%, transparent);
     font-size: 1.25rem;
     flex-shrink: 0;
     position: relative;
@@ -107,7 +107,7 @@
 .page-nav-btn:hover:not(:disabled) {
     background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary-color) 100%);
     transform: scale(1.15);
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--primary-color) 40%, transparent);
 }
 
 .page-nav-btn:active:not(:disabled) {
@@ -195,7 +195,7 @@
 
 .page-container blockquote {
     border-left: 4px solid var(--primary-color);
-    background-color: rgba(99, 102, 241, 0.05);
+    background-color: color-mix(in srgb, var(--primary-color) 5%, transparent);
     padding: 1rem 1.5rem;
     margin: 1rem 0;
     border-radius: 0 var(--border-radius) var(--border-radius) 0;
@@ -231,7 +231,7 @@
 
 .page-container th {
     background-color: var(--primary-color);
-    color: white;
+    color: var(--on-primary);
     font-weight: var(--font-weight-semibold);
 }
 

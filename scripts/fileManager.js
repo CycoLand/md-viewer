@@ -150,7 +150,7 @@ export class FileManager {
             });
             
             return `
-                <div class="file-item ${state.currentFileId === file.id ? 'active' : ''}" data-file-id="${file.id}">
+                <div class="file-item ${state.currentFileId === file.id ? 'active' : ''}" data-file-id="${file.id}" tabindex="0"${state.currentFileId === file.id ? ' aria-current="true"' : ''}>
                     <div class="file-item-header">
                         <span class="file-name" title="${file.name}">${file.name}</span>
                         <div class="file-actions">
@@ -161,9 +161,9 @@ export class FileManager {
                     </div>
                     <div class="file-meta">
                         <span class="meta-item"><i class="fas fa-clock"></i> ${readTime} min</span>
-                        <span class="meta-separator">•</span>
+                        <span class="meta-separator" aria-hidden="true">•</span>
                         <span class="meta-item"><i class="fas fa-list-ol"></i> ${lineCount.toLocaleString()}</span>
-                        <span class="meta-separator">•</span>
+                        <span class="meta-separator" aria-hidden="true">•</span>
                         <span class="meta-item"><i class="fas fa-calendar"></i> ${formattedDate}</span>
                     </div>
                 </div>
@@ -176,6 +176,12 @@ export class FileManager {
                     const fileId = item.dataset.fileId;
                     this.selectFile(fileId);
                 }
+            });
+            // Keyboard: the item is focusable (it already had a :focus-visible style)
+            item.addEventListener('keydown', (e) => {
+                if (e.target !== item || (e.key !== 'Enter' && e.key !== ' ')) return;
+                e.preventDefault();
+                this.selectFile(item.dataset.fileId);
             });
         });
     }

@@ -33,12 +33,14 @@ export function closeThemePanel() {
 
 export function toggleRawMode(FileManager) {
     state.rawMode = !state.rawMode;
+    // The old toolbar button is gone (views moved to the document menu), so
+    // Ctrl+R used to throw here before switching views.
     const btn = document.getElementById('toggle-raw-btn');
-    
-    if (state.rawMode) {
+
+    if (btn && state.rawMode) {
         btn.innerHTML = '<i class="fas fa-eye"></i> Rendered';
         btn.classList.add('active');
-    } else {
+    } else if (btn) {
         btn.innerHTML = '<i class="fas fa-code"></i> Raw';
         btn.classList.remove('active');
     }

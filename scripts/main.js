@@ -27,9 +27,13 @@ import {
 } from './uiControls.js';
 import { initHighlights } from './highlights.js';
 import { initAcronyms } from './acronyms.js';
+import { initTocLayout } from './tocLayout.js';
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
+    // Show the TOC column only when it fits beside the text
+    initTocLayout();
+
     // Initialize managers
     const themeManager = new ThemeManager();
     const settingsManager = new SettingsManager();
@@ -61,9 +65,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // NOW initialize clipboard auto-loader (after FileManager is ready)
     const clipboardAutoLoader = new ClipboardAutoLoader();
-
-    // Load files from localStorage
-    FileManager.loadFiles();
 
     // Search functionality
     const globalSearchInput = document.getElementById('global-search');
@@ -300,8 +301,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Pagination keyboard navigation
-        if (paginationManager.paginationActive) {
+        // Pagination keyboard navigation (not while typing in a field)
+        const typing = e.target.closest?.('input, textarea, select, [contenteditable="true"]');
+        if (paginationManager.paginationActive && !typing) {
             if (e.key === 'ArrowLeft') {
                 e.preventDefault();
                 paginationManager.prevPage();

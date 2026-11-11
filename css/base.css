@@ -23,6 +23,14 @@ body {
     font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
 }
 
+/* Form controls don't inherit the page font by default, so buttons fell back to Arial. */
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+}
+
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;

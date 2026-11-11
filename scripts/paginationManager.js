@@ -22,9 +22,10 @@ export class PaginationManager {
             // First create pages while content is still visible
             this.createPages();
             
-            // Then update UI
-            btn.classList.add('active');
-            btn.innerHTML = '<i class="fas fa-scroll"></i> Scroll';
+            // Then update UI (the old toolbar button may no longer exist;
+            // "View Pages" in the document menu used to throw here)
+            btn?.classList.add('active');
+            if (btn) btn.innerHTML = '<i class="fas fa-scroll"></i> Scroll';
             contentBody.classList.add('paginated');
             pageNav.classList.add('active');
             markdownContent.style.display = 'none';
@@ -32,8 +33,8 @@ export class PaginationManager {
             
             this.renderPages();
         } else {
-            btn.classList.remove('active');
-            btn.innerHTML = '<i class="fas fa-book-open"></i> Pages';
+            btn?.classList.remove('active');
+            if (btn) btn.innerHTML = '<i class="fas fa-book-open"></i> Pages';
             contentBody.classList.remove('paginated');
             pageNav.classList.remove('active');
             markdownContent.style.display = 'block';

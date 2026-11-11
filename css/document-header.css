@@ -10,6 +10,10 @@
     max-width: none !important;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     backdrop-filter: blur(10px);
+    /* backdrop-filter makes a stacking context, so the open menu inside can only
+       sit above later content if the header itself does. */
+    position: relative;
+    z-index: 3;
 }
 
 .document-header-top {
@@ -29,12 +33,17 @@
     line-height: 1.2;
     letter-spacing: -0.02em;
     text-align: center;
+    /* Room for the absolutely positioned menu button on both sides, so long
+       titles don't run underneath it and stay centered. */
+    padding-inline: 2.75rem;
+    min-width: 0;
+    overflow-wrap: break-word;
 }
 
 .document-menu-btn {
     color: var(--primary-color);
     background-color: transparent;
-    border: 1px solid rgba(99, 102, 241, 0.35);
+    border: 1px solid color-mix(in srgb, var(--primary-color) 35%, transparent);
     flex-shrink: 0;
     position: absolute;
     right: 0;
@@ -43,13 +52,18 @@
     transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.btn.btn-icon.document-menu-btn:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
 /* Override .btn-icon:hover: no scale (keeps translateY(-50%) stable for clicking). */
 .btn.btn-icon.document-menu-btn:hover,
 .btn.btn-icon.document-menu-btn:focus-visible {
     color: var(--text-color);
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--primary-color) 10%, transparent) 0%, color-mix(in srgb, var(--primary-color) 5%, transparent) 100%);
     border-color: var(--primary-color);
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--primary-color) 20%, transparent);
     transform: translateY(-50%);
 }
 
@@ -98,7 +112,7 @@
 }
 
 .menu-item:hover {
-    background: linear-gradient(90deg, rgba(99, 102, 241, 0.1) 0%, transparent 100%);
+    background: linear-gradient(90deg, color-mix(in srgb, var(--primary-color) 10%, transparent) 0%, transparent 100%);
     color: var(--primary-color);
     transform: translateX(4px);
 }
@@ -119,11 +133,13 @@
     margin: 0.25rem 0;
 }
 
+/* Items are separated by spacing and their icons, so a wrapped row never
+   starts or ends with a stray separator dot. */
 .document-meta {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
+    gap: 0.5rem 1.25rem;
     font-size: 0.8rem;
     color: var(--text-muted);
     flex-wrap: wrap;
@@ -144,9 +160,12 @@
     color: var(--accent-color);
 }
 
-.document-meta .meta-separator {
-    color: var(--text-dim);
-    opacity: 0.4;
+/* "Filter" and its buttons wrap as one unit */
+.filter-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
 }
 
 .filter-label {
@@ -172,7 +191,7 @@
     background-color: var(--surface-hover);
     color: var(--text-muted);
     border: none;
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-right: 1px solid var(--border-color);
     cursor: pointer;
     transition: var(--transition);
     text-transform: uppercase;
@@ -183,21 +202,35 @@
     border-right: none;
 }
 
+/* Hover must not look like "on": it only lightens the button */
 .filter-toggle:hover {
-    background-color: var(--primary-color);
-    color: white;
+    background-color: var(--border-color);
+    color: var(--text-color);
     z-index: 1;
 }
 
+.filter-toggle:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: -2px;
+}
+
+/* On: filled, plus a check mark so the state isn't shown by color alone */
 .filter-toggle.active {
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
-    color: white;
+    color: var(--on-primary);
     z-index: 1;
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--primary-color) 30%, transparent);
+}
+
+.filter-toggle.active::before {
+    content: '\f00c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 0.65rem;
 }
 
 .filter-toggle.active:hover {
-    background-color: var(--primary-hover);
+    background: var(--primary-hover);
 }
 
 .document-separator {

@@ -13,7 +13,8 @@
     transition: var(--transition-slow);
 }
 
-.main-content.sidebar-collapsed {
+.main-content.sidebar-collapsed,
+.sidebar.collapsed ~ .main-content {
     margin-left: 0;
 }
 
@@ -31,18 +32,41 @@
     opacity: 0;
 }
 
+/* Widths add up explicitly (box-sizing is border-box): the text column is
+   --content-max-width plus .markdown-content's 1.5rem side padding, the body
+   adds 2rem padding per side, and the TOC column adds a 1rem gap. Leaving any
+   of these out squeezes the text below the "Characters per Line" setting. */
 .content-body {
+    --content-column-width: calc(var(--content-max-width) + 3rem);
     display: grid;
-    grid-template-columns: 1fr var(--toc-column-width);
+    grid-template-columns: minmax(0, 1fr);
     gap: 1rem;
-    max-width: calc(var(--content-max-width) + 1rem + var(--toc-column-width));
+    width: 100%;
+    max-width: calc(var(--content-column-width) + 4rem);
     margin: 0 auto;
     padding: 0 2rem;
 }
 
-.content-body:has(.toc.force-hidden) {
-    grid-template-columns: 1fr;
-    max-width: var(--content-max-width);
+/* tocLayout.js adds .toc-fits only when the TOC column fits beside a
+   full-width text column (and the TOC setting is on). */
+.content-body.toc-fits {
+    grid-template-columns: minmax(0, 1fr) var(--toc-column-width);
+    max-width: calc(var(--content-column-width) + 1rem + var(--toc-column-width) + 4rem);
+}
+
+.content-body:not(.toc-fits) > .toc {
+    display: none !important;
+}
+
+/* Invisible ruler for tocLayout.js. Fixed so its width never adds scrollable overflow. */
+.toc-layout-probe {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--content-column-width);
+    height: 0;
+    visibility: hidden;
+    pointer-events: none;
 }
 
 .markdown-content {

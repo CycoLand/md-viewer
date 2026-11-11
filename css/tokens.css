@@ -13,30 +13,36 @@
     --success-color: #10b981;
     --warning-color: #f59e0b;
     --error-color: #ef4444;
-    --code-color: #000000;
-    --selection-bg: rgba(99, 102, 241, 0.3);
+    /* Text drawn on --primary-color; ThemeManager picks black or white by contrast */
+    --on-primary: #ffffff;
+    --code-color: #e5c07b;
+    --selection-bg: color-mix(in srgb, var(--primary-color) 30%, transparent);
     --selection-color: var(--text-color);
 
-    --box-bg: rgba(99, 102, 241, 0.08);
-    --box-bg-alt: rgba(99, 102, 241, 0.12);
-    --box-border: rgba(99, 102, 241, 0.3);
-    /* Code blocks follow the selected surface/text theme. */
+    /* Tints derive from --primary-color so every preset (and custom themes) recolors them. */
+    --box-bg: color-mix(in srgb, var(--primary-color) 8%, transparent);
+    --box-bg-alt: color-mix(in srgb, var(--primary-color) 12%, transparent);
+    --box-border: color-mix(in srgb, var(--primary-color) 30%, transparent);
+    /* Defaults match the "default" preset (a dark theme), so a first visit with
+       no saved preset still gets readable dark-theme code colors. */
     --code-block-bg: var(--surface-color);
     --code-block-color: var(--text-color);
     --code-block-border: var(--border-color);
     --code-block-header-bg: var(--surface-hover);
-    --code-button-bg: var(--surface-hover);
+    --code-button-bg: #475569;
     --code-button-color: var(--text-color);
-    --code-token-keyword: #d73a49;
-    --code-token-string: #032f62;
-    --code-token-comment: #6a737d;
-    --code-token-number: #005cc5;
-    --code-token-function: #6f42c1;
+    --code-token-keyword: #ff7b72;
+    --code-token-string: #a5d6ff;
+    --code-token-comment: #8b949e;
+    --code-token-number: #79c0ff;
+    --code-token-function: #d2a8ff;
     --inline-code-bg: var(--code-block-bg);
     --inline-code-color: var(--code-block-color);
     --list-marker-color: color-mix(in srgb, var(--text-muted) 42%, transparent);
-    --blockquote-bg: rgba(99, 102, 241, 0.08);
-    --blockquote-accent: #6366f1;
+    --blockquote-bg: color-mix(in srgb, var(--primary-color) 8%, transparent);
+    --blockquote-accent: var(--primary-color);
+    /* Swatch outline that stays visible on light and dark panels. */
+    --swatch-border: color-mix(in srgb, var(--text-color) 25%, transparent);
 
     --font-family: 'Inter', sans-serif;
     --font-mono: 'Recursive', monospace;

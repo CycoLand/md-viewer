@@ -38,7 +38,7 @@
 
 .btn:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 40%, transparent);
     border-radius: var(--border-radius);
 }
 
@@ -49,22 +49,23 @@
 
 .btn-primary {
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
-    color: white;
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    color: var(--on-primary);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--primary-color) 30%, transparent);
 }
 
 .btn-primary:hover:not(:disabled) {
     background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary-color) 100%);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--primary-color) 40%, transparent);
 }
 
 .btn-primary:active:not(:disabled) {
     transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 2px 4px color-mix(in srgb, var(--primary-color) 30%, transparent);
 }
 
-.btn-primary:focus {
+/* :focus-visible, not :focus, so a mouse click doesn't leave a ring behind */
+.btn-primary:focus-visible {
     outline: none;
     box-shadow: 0 0 0 3px var(--text-color);
 }
@@ -86,26 +87,9 @@
     transform: translateY(0);
 }
 
-.btn-secondary:focus {
+.btn-secondary:focus-visible {
     outline: none;
     box-shadow: 0 0 0 3px var(--text-color);
-}
-
-.btn-outline {
-    background-color: transparent;
-    color: var(--text-muted);
-    border: 1px solid var(--border-color);
-}
-
-.btn-outline:hover:not(:disabled) {
-    background-color: var(--surface-hover);
-    color: var(--text-color);
-}
-
-.btn-outline.active {
-    background-color: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
 }
 
 .btn-icon {

@@ -1,18 +1,5 @@
-/* Breakpoints: wide layout, tablets, print */
-@media (max-width: 1599px) {
-    .content-body {
-        grid-template-columns: 1fr;
-    }
-
-    .toc {
-        display: none !important;
-    }
-
-    .water-progress-container {
-        display: none;
-    }
-}
-
+/* Breakpoints: tablets, phones, print. Whether the TOC column shows depends on
+   the space actually available (see tocLayout.js), not on the window width. */
 @media (max-width: 1200px) {
     .page-viewer {
         gap: 1rem;
@@ -38,10 +25,6 @@
         align-items: center;
     }
 
-    .color-inputs {
-        grid-template-columns: 1fr;
-    }
-
     .theme-panel {
         left: 0;
         width: 100%;
@@ -55,6 +38,46 @@
     .markdown-content,
     .raw-content {
         padding: 1rem;
+    }
+
+    /* Phones: the collapsed-sidebar buttons become a top bar instead of
+       floating over the left edge of the text. */
+    .collapsed-controls {
+        top: 0;
+        left: 0;
+        right: 0;
+        flex-direction: row;
+        padding: 0.5rem 0.75rem;
+        background: var(--bg-color);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    body:has(#sidebar.collapsed) .main-content {
+        padding-top: calc(40px + 1rem + 1px);
+    }
+
+    .quick-menu.from-collapsed-settings,
+    .quick-menu.from-collapsed-theme {
+        top: calc(40px + 1.5rem);
+        left: 0.75rem;
+    }
+
+    .content-body {
+        padding: 0 0.5rem;
+    }
+
+    .document-header {
+        padding: 1.25rem 1rem;
+    }
+
+    .document-title {
+        font-size: 1.75rem;
+        padding-inline: 2.25rem;
+    }
+
+    body:has(#sidebar.collapsed) .settings-panel,
+    body:has(#sidebar.collapsed) .theme-panel {
+        left: 0;
     }
 }
 
@@ -96,18 +119,76 @@
 }
 
 @media print {
-    .sidebar,
-    .theme-panel,
-    .settings-panel {
-        display: none !important;
+    /* Print in dark-on-light whatever the screen theme is */
+    :root {
+        --bg-color: #ffffff !important;
+        --surface-color: #ffffff !important;
+        --surface-hover: #f3f4f6 !important;
+        --text-color: #111827 !important;
+        --text-muted: #4b5563 !important;
+        --text-dim: #6b7280 !important;
+        --border-color: #d1d5db !important;
+        --code-block-bg: #f6f8fa !important;
+        --code-block-color: #111827 !important;
+        --code-block-border: #d1d5db !important;
+        --code-block-header-bg: #eaeef2 !important;
+        --code-token-keyword: #cf222e !important;
+        --code-token-string: #0a3069 !important;
+        --code-token-comment: #57606a !important;
+        --code-token-number: #0550ae !important;
+        --code-token-function: #8250df !important;
+    }
+
+    /* The app scrolls inside .content-area at a fixed 100vh height; undo that
+       so every page of the document prints, not just one screenful. */
+    html,
+    body,
+    .app-container,
+    .main-content,
+    .content-area {
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    .app-container {
+        display: block;
+        width: auto;
     }
 
     .main-content {
         width: 100% !important;
+        margin-left: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    .content-body {
+        display: block !important;
+        max-width: none !important;
+        padding: 0 !important;
     }
 
     .markdown-content {
         max-width: none !important;
         padding: 0 !important;
+    }
+
+    /* UI chrome */
+    .sidebar,
+    .theme-panel,
+    .settings-panel,
+    .quick-menu,
+    .collapsed-controls,
+    .reading-progress-bar,
+    .toc,
+    .document-menu-btn,
+    .document-menu-dropdown,
+    .filter-group,
+    .code-button-group,
+    .table-expand-btn,
+    .mermaid-zoom-controls,
+    .md-highlight-handle,
+    .md-acronym-popup,
+    .toc-layout-probe {
+        display: none !important;
     }
 }

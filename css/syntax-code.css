@@ -121,10 +121,14 @@
     overflow: hidden;
 }
 
+.code-block-body.is-resting {
+    max-height: none !important;
+}
+
 .code-block-toggle-icon {
     display: inline-flex;
     align-items: center;
-    color: #57606a;
+    color: var(--text-muted);
     transition: transform 0.2s ease, color 0.2s ease;
 }
 
@@ -174,14 +178,15 @@
 
 .code-copy-btn:hover {
     background-color: var(--primary-color);
-    color: white;
+    color: var(--on-primary);
     z-index: 1;
     transform: scale(1.05);
 }
 
 .code-copy-btn.copied {
     background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
-    color: white;
+    /* White on these greens is about 2.5:1; dark text passes 4.5:1 */
+    color: #0f172a;
     z-index: 1;
     animation: successPulse 0.3s ease;
 }
