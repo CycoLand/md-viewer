@@ -58,7 +58,7 @@
 .zoom-btn:hover {
     background: var(--surface-hover);
     border-color: var(--primary-color);
-    color: var(--primary-color);
+    color: var(--primary-text);
 }
 
 .zoom-btn:active {

@@ -41,7 +41,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: var(--primary-color);
+    color: var(--primary-text);
     font-weight: var(--font-weight-bold);
 }
 
@@ -84,7 +84,7 @@
 }
 
 .theme-preset-btn:focus-visible {
-    outline: 2px solid var(--primary-color);
+    outline: 2px solid var(--primary-text);
     outline-offset: -2px;
 }
 
@@ -94,7 +94,7 @@
 }
 
 .preset-check {
-    color: var(--primary-color);
+    color: var(--primary-text);
     visibility: hidden;
 }
 
@@ -170,7 +170,7 @@
 .input-group input:focus-visible,
 .input-group select:focus-visible,
 .input-group textarea:focus-visible {
-    outline: 2px solid var(--primary-color);
+    outline: 2px solid var(--primary-text);
     outline-offset: 2px;
 }
 

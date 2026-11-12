@@ -221,14 +221,14 @@
 }
 
 .page-container a {
-    color: var(--primary-color);
+    color: var(--primary-text);
     text-decoration: none;
     border-bottom: 1px solid transparent;
     transition: var(--transition);
 }
 
 .page-container a:hover {
-    border-bottom-color: var(--primary-color);
+    border-bottom-color: var(--primary-text);
 }
 
 .page-container table {
