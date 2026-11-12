@@ -91,10 +91,13 @@ body.highlight-paint-mode .markdown-content {
     transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
 }
 
+/* Become visible at once when opening (no visibility transition), so the
+   comment box can take focus right away; only the closing fade is delayed. */
 .md-comment-popover.show {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
+    transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
 .md-comment-header {

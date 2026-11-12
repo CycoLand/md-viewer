@@ -117,6 +117,9 @@ function onRemoveClick() {
     clearTimeout(saveTimer);
     saveTimer = null;
     activeId = null;
+    // Focus is on the Remove button inside the box that's about to hide; let
+    // it go rather than leave it on an invisible control.
+    removeBtn.blur();
     hide();
     deleteHighlight(id);
 }

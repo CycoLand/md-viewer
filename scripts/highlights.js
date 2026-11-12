@@ -202,7 +202,11 @@ function getHighlightClientRects(mdEl, highlightId) {
     const marks = queryHighlightMarks(mdEl, highlightId);
     const rects = [];
     marks.forEach((mark) => {
-        const list = mark.getClientRects();
+        // Rects of the text only: the mark's own box also covers the ::after
+        // comment icon, which put the end handle on top of the icon.
+        const range = document.createRange();
+        range.selectNodeContents(mark);
+        const list = range.getClientRects();
         for (let i = 0; i < list.length; i++) {
             const r = list[i];
             if (r.width > 0 && r.height > 0) rects.push(r);
@@ -374,9 +378,15 @@ function decorateHighlight(root, highlight) {
             ? `${comment}\n\nClick to edit the comment · drag the handles to resize`
             : 'Click to comment · drag the handles to resize';
         if (i === 0) {
+            // A button named by its highlighted text; the tooltip (comment and
+            // hint) becomes its description instead of replacing the text.
             mark.tabIndex = 0;
+            mark.setAttribute('role', 'button');
+            mark.setAttribute('aria-haspopup', 'dialog');
         } else {
             mark.removeAttribute('tabindex');
+            mark.removeAttribute('role');
+            mark.removeAttribute('aria-haspopup');
         }
     });
 }
