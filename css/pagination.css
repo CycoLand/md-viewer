@@ -16,12 +16,28 @@
     display: flex !important;
 }
 
+/* The page view uses the full width, not the single text column */
+.content-body.paginated {
+    max-width: none;
+}
+
+/* Way back to the normal view (Esc does the same) */
+.page-exit-btn {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.75rem;
+    z-index: 2;
+}
+
 .page-viewer {
     display: flex;
     gap: 2rem;
     justify-content: center;
     align-items: flex-start;
     flex: 1;
+    /* Without this, wide content (diagrams, long code lines) set the
+       viewer's minimum width and pushed the arrow buttons out of view */
+    min-width: 0;
     max-width: 1600px;
     height: 100%;
     position: relative;
@@ -40,7 +56,10 @@
     height: calc(100vh - 200px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
     display: none;
-    flex-shrink: 0;
+    /* Two pages share the row; without shrinking, a spread was two full
+       text columns wide and ran under the sidebar and off-screen. */
+    flex: 1 1 0;
+    min-width: 0;
     min-height: 400px;
     backdrop-filter: blur(10px);
 }

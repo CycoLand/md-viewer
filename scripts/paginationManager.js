@@ -56,36 +56,24 @@ export class PaginationManager {
         
         console.log(`Available page height: ${availableHeight}px`);
 
-        // Get all content - handle both regular and collapsible section structures
-        let children = [];
-        
-        // Check if we have collapsible sections
-        const sections = markdownContent.querySelectorAll('.md-section');
-        if (sections.length > 0) {
-            console.log('Found collapsible sections, extracting content');
-            
-            sections.forEach(section => {
-                const heading = section.querySelector('.md-heading');
-                const body = section.querySelector('.md-section-body');
-                
-                if (heading) {
-                    const headingClone = heading.cloneNode(true);
-                    const toggleIcon = headingClone.querySelector('.md-toggle-icon');
-                    if (toggleIcon) toggleIcon.remove();
-                    children.push(headingClone);
+        // Collect the document's blocks in reading order. Collapsible sections
+        // wrap the content (H1 sections directly, deeper ones in a section
+        // body), so walk into them. Reading only section bodies dropped the
+        // text before the first heading and everything under an H1.
+        const children = [];
+        const collect = (parent) => {
+            Array.from(parent.children).forEach(child => {
+                if (child.matches('.document-header, .document-separator')) return;
+                if (child.matches('.md-section, .md-section-body')) {
+                    collect(child);
+                    return;
                 }
-                
-                if (body) {
-                    Array.from(body.children).forEach(child => {
-                        if (!child.classList.contains('md-section')) {
-                            children.push(child.cloneNode(true));
-                        }
-                    });
-                }
+                const clone = child.cloneNode(true);
+                clone.querySelectorAll('.md-toggle-icon').forEach(icon => icon.remove());
+                children.push(clone);
             });
-        } else {
-            children = Array.from(markdownContent.children).map(child => child.cloneNode(true));
-        }
+        };
+        collect(markdownContent);
         
         if (children.length === 0) {
             console.error('No content to paginate');
