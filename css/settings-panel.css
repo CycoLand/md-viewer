@@ -14,12 +14,23 @@
     transform: translateX(-100%);
     opacity: 0;
     pointer-events: none;
+    /* Hidden panels must also leave the Tab order; visibility switches at the
+       end of the closing transition, so the slide-out still shows. */
+    visibility: hidden;
 }
 
 .settings-panel.open {
     transform: translateX(0);
     opacity: 1;
     pointer-events: auto;
+    visibility: visible;
+}
+
+/* With the sidebar collapsed, open next to the floating buttons instead of
+   leaving a sidebar-wide gap. */
+body:has(#sidebar.collapsed) .settings-panel,
+body:has(#sidebar.collapsed) .theme-panel {
+    left: calc(2rem + 40px);
 }
 
 .settings-panel-header {
@@ -46,55 +57,145 @@
 }
 
 .settings-panel-header i {
-    color: var(--primary-color);
+    color: var(--primary-text);
 }
 
 .settings-panel-content {
     padding: 1.5rem;
 }
 
-.settings-section {
-    margin-bottom: 2rem;
+/* Grouped lists (settings panel, theme panel, quick settings menu):
+   a section heading above one bordered, rounded box; rows inside it are
+   separated by hairlines, with each row's control on the right. */
+.settings-section,
+.theme-section {
+    margin-bottom: 1.75rem;
 }
 
-.settings-section h4 {
-    font-size: 0.875rem;
+.settings-section h4,
+.theme-section h4 {
+    font-size: 0.75rem;
     font-weight: var(--font-weight-semibold);
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-bottom: 1rem;
+    margin: 0 0 0.5rem 0.25rem;
+}
+
+.settings-group {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
 }
 
 .setting-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem;
-    background: var(--bg-color);
-    border-radius: var(--border-radius);
-    margin-bottom: 0.75rem;
-    transition: var(--transition);
+    gap: 1rem;
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.625rem 1rem;
+    background: transparent;
+    color: var(--text-color);
 }
 
-.setting-item:hover {
-    background: var(--surface-hover);
+.setting-item + .setting-item {
+    border-top: 1px solid var(--border-color);
 }
 
 .setting-label {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    flex: 1 1 auto;
+    min-width: 0;
     color: var(--text-color);
+    font-size: 0.9375rem;
     font-weight: var(--font-weight-medium);
 }
 
-.setting-label i {
-    color: var(--primary-color);
-    width: 20px;
-    text-align: center;
+label.setting-label {
+    cursor: pointer;
 }
 
+.setting-label i {
+    color: var(--primary-text);
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+/* Row controls stay at their natural size on the right */
+.setting-item > :not(.setting-label) {
+    flex-shrink: 0;
+}
+
+.setting-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.settings-group input[type="range"] {
+    width: 5.5rem;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+}
+
+.setting-slider-value {
+    min-width: 2.75rem;
+    text-align: right;
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-medium);
+    color: var(--text-color);
+    font-variant-numeric: tabular-nums;
+}
+
+.settings-group input[type="text"],
+.settings-group input[type="password"],
+.settings-group select {
+    width: 10rem;
+    padding: 0.4rem 0.6rem;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    color: var(--text-color);
+    font-size: 0.875rem;
+}
+
+.settings-group input[type="color"] {
+    width: 3rem;
+    height: 2rem;
+    padding: 2px;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+}
+
+.settings-group input:focus-visible,
+.settings-group select:focus-visible {
+    outline: 2px solid var(--primary-text);
+    outline-offset: 2px;
+}
+
+/* Notes for a section sit under its box */
+.setting-description {
+    margin: 0.5rem 0.25rem 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+.setting-description a {
+    color: var(--primary-text);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* Toggle switch: on/off is shown by the knob's position as well as the track color */
 .toggle-switch {
     position: relative;
     display: inline-block;
@@ -104,6 +205,7 @@
 }
 
 .toggle-switch input {
+    position: absolute;
     opacity: 0;
     width: 0;
     height: 0;
@@ -111,12 +213,9 @@
 
 .toggle-slider {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background-color: var(--border-color);
-    transition: var(--transition);
+    transition: background-color 0.2s ease;
     border-radius: 26px;
 }
 
@@ -128,7 +227,7 @@
     left: 3px;
     bottom: 3px;
     background-color: var(--text-color);
-    transition: var(--transition);
+    transition: transform 0.2s ease;
     border-radius: 50%;
 }
 
@@ -140,78 +239,17 @@
     transform: translateX(22px);
 }
 
-.toggle-switch:hover .toggle-slider {
-    background-color: var(--surface-hover);
+/* --border-color equals --surface-hover in some presets, so hover uses --text-dim */
+.toggle-switch:hover input:not(:checked) + .toggle-slider {
+    background-color: var(--text-dim);
 }
 
 .toggle-switch input:checked:hover + .toggle-slider {
     background-color: var(--primary-hover);
 }
 
-.setting-description {
-    margin: -0.25rem 0 1rem;
-    padding: 0 0.25rem;
-    font-size: 0.8125rem;
-    line-height: 1.5;
-    color: var(--text-dim);
-}
-
-.setting-slider-group {
-    margin-bottom: 1rem;
-    padding: 1rem;
-    background: var(--bg-color);
-    border-radius: var(--border-radius);
-}
-
-.setting-slider-group label {
-    display: block;
-    margin-bottom: 0.75rem;
-    font-size: 0.875rem;
-    font-weight: var(--font-weight-medium);
-    color: var(--text-muted);
-}
-
-.setting-slider-group input[type="range"] {
-    width: 100%;
-    margin-bottom: 0.5rem;
-    accent-color: var(--primary-color);
-}
-
-.setting-slider-value {
-    display: inline-block;
-    font-size: 0.875rem;
-    font-weight: var(--font-weight-medium);
-    color: var(--text-color);
-    font-variant-numeric: tabular-nums;
-}
-
-.setting-text-group {
-    margin-bottom: 0.75rem;
-}
-
-.setting-text-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: var(--font-weight-medium);
-    color: var(--text-muted);
-}
-
-.setting-text-group input[type="text"],
-.setting-text-group input[type="password"] {
-    width: 100%;
-    padding: 0.625rem 0.75rem;
-    background: var(--bg-color);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    color: var(--text-color);
-    font-family: var(--font-family);
-    font-size: 0.875rem;
-    transition: var(--transition);
-}
-
-.setting-text-group input[type="text"]:focus,
-.setting-text-group input[type="password"]:focus {
-    outline: none;
-    border-color: var(--primary-color);
+/* The real checkbox is invisible, so draw the keyboard focus ring on the track */
+.toggle-switch input:focus-visible + .toggle-slider {
+    outline: 2px solid var(--primary-text);
+    outline-offset: 2px;
 }

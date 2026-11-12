@@ -2,7 +2,8 @@
 .quick-menu {
     position: fixed;
     top: 5rem;
-    left: calc(var(--sidebar-width) - 240px);
+    /* Anchored under the header buttons; never off-screen at narrow sidebar widths */
+    left: max(0.75rem, calc(var(--sidebar-width) - 240px));
     background: var(--surface-color);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-lg);
@@ -12,12 +13,14 @@
     z-index: 1001;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.2s ease;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s;
 }
 
 .quick-menu.show {
     opacity: 1;
     pointer-events: auto;
+    visibility: visible;
 }
 
 .quick-menu.from-collapsed-settings {
@@ -57,9 +60,18 @@
     background: var(--surface-hover);
 }
 
+.quick-menu-item:focus-visible {
+    outline: 2px solid var(--primary-text);
+    outline-offset: -2px;
+}
+
+/* Active preset: check mark (see .preset-check in theme-panel.css) plus a tint */
 .quick-menu-item.active {
-    background: rgba(99, 102, 241, 0.15);
-    color: var(--primary-color);
+    background: color-mix(in srgb, var(--primary-color) 15%, transparent);
+}
+
+.quick-menu-item .preset-check {
+    margin-left: auto;
 }
 
 .quick-menu-separator {
@@ -69,7 +81,7 @@
 }
 
 .quick-menu-more {
-    color: var(--primary-color);
+    color: var(--primary-text);
 }
 
 .quick-menu-more i {
@@ -86,18 +98,13 @@
     width: 14px;
     height: 14px;
     border-radius: 3px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--swatch-border);
 }
 
+/* Quick settings rows are a compact grouped list */
 .quick-menu-setting {
-    padding: 0.75rem;
-    margin-bottom: 0.5rem;
-    background: var(--bg-color);
-    border-radius: var(--border-radius);
-}
-
-.quick-menu-setting:hover {
-    background: var(--surface-hover);
+    min-height: 2.75rem;
+    padding: 0.5rem 0.75rem;
 }
 
 .quick-menu-setting .setting-label {

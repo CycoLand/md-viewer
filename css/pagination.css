@@ -16,12 +16,28 @@
     display: flex !important;
 }
 
+/* The page view uses the full width, not the single text column */
+.content-body.paginated {
+    max-width: none;
+}
+
+/* Way back to the normal view (Esc does the same) */
+.page-exit-btn {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.75rem;
+    z-index: 2;
+}
+
 .page-viewer {
     display: flex;
     gap: 2rem;
     justify-content: center;
     align-items: flex-start;
     flex: 1;
+    /* Without this, wide content (diagrams, long code lines) set the
+       viewer's minimum width and pushed the arrow buttons out of view */
+    min-width: 0;
     max-width: 1600px;
     height: 100%;
     position: relative;
@@ -40,7 +56,10 @@
     height: calc(100vh - 200px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
     display: none;
-    flex-shrink: 0;
+    /* Two pages share the row; without shrinking, a spread was two full
+       text columns wide and ran under the sidebar and off-screen. */
+    flex: 1 1 0;
+    min-width: 0;
     min-height: 400px;
     backdrop-filter: blur(10px);
 }
@@ -93,11 +112,11 @@
     height: 48px;
     border: none;
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
-    color: white;
+    color: var(--on-primary);
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--primary-color) 30%, transparent);
     font-size: 1.25rem;
     flex-shrink: 0;
     position: relative;
@@ -107,7 +126,7 @@
 .page-nav-btn:hover:not(:disabled) {
     background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary-color) 100%);
     transform: scale(1.15);
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--primary-color) 40%, transparent);
 }
 
 .page-nav-btn:active:not(:disabled) {
@@ -195,21 +214,21 @@
 
 .page-container blockquote {
     border-left: 4px solid var(--primary-color);
-    background-color: rgba(99, 102, 241, 0.05);
+    background-color: color-mix(in srgb, var(--primary-color) 5%, transparent);
     padding: 1rem 1.5rem;
     margin: 1rem 0;
     border-radius: 0 var(--border-radius) var(--border-radius) 0;
 }
 
 .page-container a {
-    color: var(--primary-color);
+    color: var(--primary-text);
     text-decoration: none;
     border-bottom: 1px solid transparent;
     transition: var(--transition);
 }
 
 .page-container a:hover {
-    border-bottom-color: var(--primary-color);
+    border-bottom-color: var(--primary-text);
 }
 
 .page-container table {
@@ -231,7 +250,7 @@
 
 .page-container th {
     background-color: var(--primary-color);
-    color: white;
+    color: var(--on-primary);
     font-weight: var(--font-weight-semibold);
 }
 

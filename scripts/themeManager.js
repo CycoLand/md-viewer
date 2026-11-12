@@ -1,12 +1,14 @@
 // Theme management
 import { getSettingsManager } from './settingsManager.js';
 import { parseCharactersPerLine, parseLineHeight } from './typography.js';
+import { state } from './state.js';
+import { refreshRenderedView } from './markdownRenderer.js';
 
 export class ThemeManager {
     constructor() {
         this.presets = {
             default: {
-                '--primary-color': '#6366f1',
+                '--primary-color': '#5f63ee',
                 '--primary-hover': '#5b5ff1',
                 '--bg-color': '#0f172a',
                 '--surface-color': '#1e293b',
@@ -28,7 +30,7 @@ export class ThemeManager {
                 '--code-token-comment': '#8b949e',
                 '--code-token-number': '#79c0ff',
                 '--code-token-function': '#d2a8ff',
-                '--box-border': 'rgba(99, 102, 241, 0.3)',
+                '--box-border': 'rgba(95, 99, 238, 0.3)',
                 '--success-color': '#10b981',
                 '--warning-color': '#f59e0b',
                 '--error-color': '#ef4444'
@@ -87,7 +89,11 @@ export class ThemeManager {
                 '--box-border': '#d1d5db',
                 '--success-color': '#10b981',
                 '--warning-color': '#f59e0b',
-                '--error-color': '#ef4444'
+                '--error-color': '#ef4444',
+                // Same as themeLoader.js, so Light looks the same whether it was
+                // restored on load or picked from the menu
+                '--selection-bg': '#fef08a',
+                '--selection-color': '#1f2937'
             },
             ocean: {
                 '--primary-color': '#14b8a6',
@@ -239,20 +245,16 @@ export class ThemeManager {
 
     loadTheme() {
         const savedTheme = localStorage.getItem('markdownViewerTheme');
-        const savedPreset = localStorage.getItem('markdownViewerThemePreset');
-        
-        // If there's a saved preset, apply it first (provides base theme)
-        if (savedPreset && this.presets[savedPreset]) {
-            this.applyTheme(this.presets[savedPreset]);
-            this.updateHighlightTheme(savedPreset);
-            this.updateFaviconForPreset(savedPreset);
-            // Update active state on preset buttons after DOM is ready
-            setTimeout(() => {
-                document.querySelectorAll('.theme-preset-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.theme === savedPreset);
-                });
-            }, 0);
-        }
+        // No saved preset (first visit) means the default preset, so the code
+        // colors and highlight.js theme match the dark default instead of a light one.
+        const presetName = this.getActivePresetName();
+
+        // Apply the preset first (provides the base theme)
+        this.applyTheme(this.presets[presetName]);
+        this.updateHighlightTheme(presetName);
+        this.updateFaviconForPreset(presetName);
+        // Update active state on preset buttons after DOM is ready
+        setTimeout(() => this.updatePresetActiveState(presetName), 0);
         
         // If there's a custom theme, apply it on top (overrides preset)
         if (savedTheme) {
@@ -270,7 +272,30 @@ export class ThemeManager {
         Object.entries(theme).forEach(([property, value]) => {
             root.style.setProperty(property, value);
         });
+        this.updateDerivedColors();
     }
+
+    /**
+     * Removes every variable any preset sets (including the few themeLoader.js
+     * adds before first paint), so switching presets can't leave one behind,
+     * e.g. Light's yellow selection color carrying over into a dark preset.
+     */
+    clearPresetVariables() {
+        const root = document.documentElement;
+        const keys = new Set(['--selection-bg', '--selection-color']);
+        Object.values(this.presets).forEach(preset => Object.keys(preset).forEach(key => keys.add(key)));
+        keys.forEach(key => root.style.removeProperty(key));
+    }
+
+    /**
+     * Recomputes the colors derived from the theme (--on-primary and
+     * --primary-text) with the helpers themeLoader.js shares, so custom
+     * colors from the customizer stay readable too.
+     */
+    updateDerivedColors() {
+        window.mdThemeColors?.applyDerived(document.documentElement);
+    }
+
 
     getCurrentTheme() {
         const root = document.documentElement;
@@ -282,7 +307,7 @@ export class ThemeManager {
             '--surface-color': computedStyle.getPropertyValue('--surface-color').trim(),
             '--text-color': computedStyle.getPropertyValue('--text-color').trim(),
             '--accent-color': computedStyle.getPropertyValue('--accent-color').trim(),
-            '--font-family': computedStyle.getPropertyValue('---font-family').trim(),
+            '--font-family': computedStyle.getPropertyValue('--font-family').trim(),
             '--font-size': computedStyle.getPropertyValue('--font-size').trim(),
             '--line-height': computedStyle.getPropertyValue('--line-height').trim(),
             '--sidebar-width': computedStyle.getPropertyValue('--sidebar-width').trim(),
@@ -303,7 +328,8 @@ export class ThemeManager {
     applyPreset(presetName) {
         const preset = this.presets[presetName];
         if (!preset) return;
-        
+
+        this.clearPresetVariables();
         this.applyTheme(preset);
         
         // Clear custom theme and only save preset name
@@ -312,20 +338,43 @@ export class ThemeManager {
         localStorage.setItem('markdownViewerThemePreset', presetName);
         
         this.updateThemeInputs();
-        
+
         // Update active state on preset buttons
-        document.querySelectorAll('.theme-preset-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.theme === presetName);
-        });
-        
+        this.updatePresetActiveState(presetName);
+
         // Switch highlight.js theme based on the preset
         this.updateHighlightTheme(presetName);
         this.updateFaviconForPreset(presetName);
         
         // Re-highlight all code blocks with the new theme
         this.rehighlightCode();
+
+        // Mermaid picks its light/dark palette at render time, so re-render
+        // an open document that has diagrams.
+        if (state.currentFileId && !state.rawMode && document.querySelector('#markdown-content .mermaid-wrapper')) {
+            refreshRenderedView();
+        }
     }
     
+    /** Saved preset name, or 'default' when none is saved yet (matches themeLoader.js). */
+    getActivePresetName() {
+        const savedPreset = localStorage.getItem('markdownViewerThemePreset');
+        return this.presets[savedPreset] ? savedPreset : 'default';
+    }
+
+    /**
+     * Marks the active preset in the theme panel and the quick menu. The class
+     * draws a check mark, and aria-pressed tells screen readers, so the
+     * selection isn't shown by color alone.
+     */
+    updatePresetActiveState(presetName = this.getActivePresetName()) {
+        document.querySelectorAll('.theme-preset-btn, #theme-quick-menu .quick-menu-item[data-theme]').forEach(btn => {
+            const active = btn.dataset.theme === presetName;
+            btn.classList.toggle('active', active);
+            btn.setAttribute('aria-pressed', String(active));
+        });
+    }
+
     updateFaviconForPreset(presetName) {
         const favicon = document.getElementById('dynamic-favicon');
         if (!favicon) return;
@@ -378,16 +427,19 @@ export class ThemeManager {
         document.getElementById('primary-color').addEventListener('input', (e) => {
             document.documentElement.style.setProperty('--primary-color', e.target.value);
             document.documentElement.style.setProperty('--primary-hover', this.adjustBrightness(e.target.value, -10));
+            this.updateDerivedColors();
             this.saveTheme();
         });
 
         document.getElementById('bg-color').addEventListener('input', (e) => {
             document.documentElement.style.setProperty('--bg-color', e.target.value);
+            this.updateDerivedColors();
             this.saveTheme();
         });
 
         document.getElementById('surface-color').addEventListener('input', (e) => {
             document.documentElement.style.setProperty('--surface-color', e.target.value);
+            this.updateDerivedColors();
             this.saveTheme();
         });
 
@@ -584,12 +636,7 @@ export class ThemeManager {
     }
     
     updateQuickMenuActiveState() {
-        const savedPreset = localStorage.getItem('markdownViewerThemePreset');
-        const quickMenuItems = document.querySelectorAll('#theme-quick-menu .quick-menu-item[data-theme]');
-        
-        quickMenuItems.forEach(item => {
-            item.classList.toggle('active', item.dataset.theme === savedPreset);
-        });
+        this.updatePresetActiveState();
     }
 
 }

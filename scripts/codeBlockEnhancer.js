@@ -781,6 +781,8 @@ async function renderMermaidDiagram(codeBlock, pre) {
                     const measuredHeight = bodyWrap.scrollHeight;
                     bodyWrap.dataset.measuredHeight = String(measuredHeight);
                     bodyWrap.style.maxHeight = measuredHeight + 'px';
+                    // Rest uncapped once open (see toggleCodeBlock), so font-size changes can't clip it
+                    if (!wrapper.classList.contains('collapsed')) bodyWrap.classList.add('is-resting');
                     remeasureAncestorSections(wrapper);
                 });
             }
@@ -1055,6 +1057,8 @@ export function enhanceCodeBlocks(mdEl) {
                     const measuredHeight = bodyWrap.scrollHeight;
                     bodyWrap.dataset.measuredHeight = String(measuredHeight);
                     bodyWrap.style.maxHeight = measuredHeight + 'px';
+                    // Rest uncapped once open (see toggleCodeBlock), so font-size changes can't clip it
+                    if (!wrapper.classList.contains('collapsed')) bodyWrap.classList.add('is-resting');
                     remeasureAncestorSections(wrapper);
                 });
             }
@@ -1129,6 +1133,9 @@ export function enhanceCodeBlocks(mdEl) {
         const measuredHeight = bodyWrap.scrollHeight + 12;
         bodyWrap.dataset.measuredHeight = String(measuredHeight);
         bodyWrap.style.maxHeight = measuredHeight + 'px';
+        // Open blocks rest without a height cap (like .md-section-body), so a
+        // larger font or narrower column can't clip the last lines.
+        bodyWrap.classList.add('is-resting');
         
         header.addEventListener('click', (e) => {
             if (e.target.closest('.code-button-group')) return;
@@ -1147,10 +1154,23 @@ function toggleCodeBlock(wrapper, bodyWrap, toggleIcon) {
     const isCollapsed = wrapper.classList.contains('collapsed');
     if (isCollapsed) {
         wrapper.classList.remove('collapsed');
-        const measuredHeight = bodyWrap.dataset.measuredHeight || '5000';
-        bodyWrap.style.maxHeight = measuredHeight + 'px';
+        // Animate to the current content height, then drop the cap again
+        bodyWrap.style.maxHeight = bodyWrap.scrollHeight + 'px';
         if (toggleIcon) toggleIcon.classList.remove('collapsed');
+        const rest = () => {
+            if (!wrapper.classList.contains('collapsed')) bodyWrap.classList.add('is-resting');
+        };
+        bodyWrap.addEventListener('transitionend', function onExpanded(e) {
+            if (e.target !== bodyWrap || e.propertyName !== 'max-height') return;
+            bodyWrap.removeEventListener('transitionend', onExpanded);
+            rest();
+        });
+        setTimeout(rest, 600); // in case no transition runs
     } else {
+        // Start from a pixel height so the transition to 0 has something to animate from
+        bodyWrap.classList.remove('is-resting');
+        bodyWrap.style.maxHeight = bodyWrap.scrollHeight + 'px';
+        void bodyWrap.offsetHeight;
         wrapper.classList.add('collapsed');
         bodyWrap.style.maxHeight = '0';
         if (toggleIcon) toggleIcon.classList.add('collapsed');
@@ -1229,11 +1249,11 @@ function createToggleCommentsButton(wrapper) {
     toggleCommentsBtn.addEventListener('click', () => {
         const isHidden = wrapper.classList.contains('hide-comments');
         
-        // Lock the width on first toggle to prevent width changes
-        if (!wrapper.style.width) {
-            const currentWidth = wrapper.offsetWidth;
-            wrapper.style.width = currentWidth + 'px';
-        }
+        // Lock the width while comment lines animate out/in, then release it so
+        // the block still follows later window and sidebar resizes.
+        wrapper.style.width = wrapper.offsetWidth + 'px';
+        clearTimeout(wrapper._widthLockTimer);
+        wrapper._widthLockTimer = setTimeout(() => { wrapper.style.width = ''; }, 400);
         
         if (!isHidden) {
             // Hiding comments with CSS transition

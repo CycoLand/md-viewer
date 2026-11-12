@@ -7,10 +7,11 @@
    end where the text does) while still wrapping like normal text. Not a flex
    container: that would turn every inline span (e.g. acronym annotations)
    into its own unwrappable item and push long headings past the column. */
+/* collapsibleSections.js sets cursor: pointer on the headings it makes
+   clickable (H2 and below); H1s don't toggle, so no pointer here. */
 .md-section .md-heading {
     position: relative;
     padding-right: 0;
-    cursor: pointer;
     display: inline-block;
     overflow-wrap: anywhere;
     transition: padding-right var(--collapse-duration) ease var(--collapse-delay);
@@ -70,7 +71,7 @@
 
 .md-section.collapsed .md-heading:hover .md-toggle-icon:not(.hidden) {
     opacity: 1;
-    color: var(--primary-color);
+    color: var(--primary-text);
     transform: translateY(calc(-50% - var(--chevron-slide-distance)));
 }
 

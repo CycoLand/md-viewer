@@ -23,7 +23,7 @@
 }
 
 .add-option h4 i {
-    color: var(--primary-color);
+    color: var(--primary-text);
 }
 
 .paste-option textarea {
@@ -46,7 +46,7 @@
 .paste-option textarea:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15), inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 15%, transparent), inset 0 2px 4px rgba(0, 0, 0, 0.05);
     background-color: var(--bg-color);
 }
 
@@ -102,16 +102,16 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--primary-color) 10%, transparent), transparent);
     transition: left 0.6s ease;
 }
 
 .file-drop-zone:hover,
 .file-drop-zone.drag-over {
     border-color: var(--primary-color);
-    background-color: rgba(99, 102, 241, 0.08);
+    background-color: color-mix(in srgb, var(--primary-color) 8%, transparent);
     transform: scale(1.01);
-    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--primary-color) 20%, transparent);
 }
 
 .file-drop-zone:hover::before,
@@ -134,16 +134,16 @@
     align-items: center;
     gap: 0.75rem;
     padding: 1.25rem;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0.03) 100%);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--primary-color) 8%, transparent) 0%, color-mix(in srgb, var(--primary-color) 3%, transparent) 100%);
     border: 1px solid var(--primary-color);
     border-radius: var(--border-radius-lg);
     margin-top: 1rem;
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--primary-color) 15%, transparent);
     animation: slideIn 0.3s ease-out;
 }
 
 .selected-file-info i {
-    color: var(--primary-color);
+    color: var(--primary-text);
     font-size: 1.5rem;
 }
 
@@ -205,7 +205,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: var(--primary-color);
+    color: var(--primary-text);
     font-weight: var(--font-weight-bold);
 }
 
@@ -232,27 +232,9 @@
 }
 
 .close-modal:hover {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--primary-color) 10%, transparent) 0%, color-mix(in srgb, var(--primary-color) 5%, transparent) 100%);
     color: var(--text-color);
     transform: rotate(90deg) scale(1.1);
-}
-
-.overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 500;
-    opacity: 0;
-    visibility: hidden;
-    transition: var(--transition);
-}
-
-.overlay.show {
-    opacity: 1;
-    visibility: visible;
 }
 
 @keyframes fadeIn {

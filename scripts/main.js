@@ -27,9 +27,13 @@ import {
 } from './uiControls.js';
 import { initHighlights } from './highlights.js';
 import { initAcronyms } from './acronyms.js';
+import { initTocLayout } from './tocLayout.js';
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
+    // Show the TOC column only when it fits beside the text
+    initTocLayout();
+
     // Initialize managers
     const themeManager = new ThemeManager();
     const settingsManager = new SettingsManager();
@@ -61,9 +65,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // NOW initialize clipboard auto-loader (after FileManager is ready)
     const clipboardAutoLoader = new ClipboardAutoLoader();
-
-    // Load files from localStorage
-    FileManager.loadFiles();
 
     // Search functionality
     const globalSearchInput = document.getElementById('global-search');
@@ -236,6 +237,12 @@ document.addEventListener('DOMContentLoaded', function() {
         paginationManager.toggle();
     });
 
+    // The document menu lives in the hidden scrolling view, so page view needs
+    // its own way out
+    document.getElementById('exit-pages-btn')?.addEventListener('click', () => {
+        if (paginationManager.paginationActive) paginationManager.toggle();
+    });
+
     if (prevPageBtn) {
         prevPageBtn.addEventListener('click', () => {
             paginationManager.prevPage();
@@ -286,6 +293,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         if (e.key === 'Escape') {
+            // Esc leaves page view, unless it's closing a panel or dialog first
+            const panelOrDialogOpen =
+                document.getElementById('settings-panel').classList.contains('open') ||
+                document.getElementById('theme-panel').classList.contains('open') ||
+                document.getElementById('paste-modal').classList.contains('show') ||
+                document.getElementById('add-document-modal').classList.contains('show');
+            if (!panelOrDialogOpen && paginationManager.paginationActive) {
+                paginationManager.toggle();
+            }
             if (document.getElementById('settings-panel').classList.contains('open')) {
                 settingsManager.closePanel();
             }
@@ -300,8 +316,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Pagination keyboard navigation
-        if (paginationManager.paginationActive) {
+        // Pagination keyboard navigation (not while typing in a field)
+        const typing = e.target.closest?.('input, textarea, select, [contenteditable="true"]');
+        if (paginationManager.paginationActive && !typing) {
             if (e.key === 'ArrowLeft') {
                 e.preventDefault();
                 paginationManager.prevPage();

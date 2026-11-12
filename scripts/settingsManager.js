@@ -14,6 +14,7 @@ import {
     parseLineHeight
 } from './typography.js';
 import { clearAcronymCache } from './acronyms.js';
+import { refreshTocLayout } from './tocLayout.js';
 
 export class SettingsManager {
     constructor() {
@@ -383,6 +384,7 @@ export class SettingsManager {
                 toc.classList.add('force-hidden');
             }
         }
+        refreshTocLayout();
 
         this.applyWaterProgressBarSetting();
     }

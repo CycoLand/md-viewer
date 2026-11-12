@@ -24,13 +24,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, transparent 100%);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--primary-color) 5%, transparent) 0%, transparent 100%);
 }
 
 .sidebar-header h1 {
     font-size: 1.25rem;
     font-weight: var(--font-weight-bold);
-    color: var(--primary-color);
+    color: var(--primary-text);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -46,11 +46,11 @@
 }
 
 .sidebar-header .btn-icon:hover {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--primary-color) 10%, transparent) 0%, color-mix(in srgb, var(--primary-color) 5%, transparent) 100%);
     border-color: var(--primary-color);
-    color: var(--primary-color);
+    color: var(--primary-text);
     transform: scale(1.05);
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--primary-color) 20%, transparent);
 }
 
 .sidebar-header .btn-icon:active {
@@ -70,7 +70,7 @@
     display: flex;
     gap: 0.75rem;
     align-items: center;
-    background: linear-gradient(180deg, rgba(99, 102, 241, 0.03) 0%, transparent 100%);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--primary-color) 3%, transparent) 0%, transparent 100%);
 }
 
 .sidebar .search-icon {
@@ -98,13 +98,13 @@
 .sidebar .search-input:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 15%, transparent);
     background-color: var(--bg-color);
     transform: scale(1.01);
 }
 
 .sidebar .search-input:focus-visible {
-    outline: 2px solid var(--primary-color);
+    outline: 2px solid var(--primary-text);
     outline-offset: 2px;
 }
 
@@ -133,13 +133,14 @@
     display: flex;
 }
 
+/* Opaque, so text scrolling underneath doesn't show through */
 .collapsed-control-btn {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: transparent;
+    background: var(--surface-color);
     color: var(--text-color);
-    border: 1px solid rgba(148, 163, 184, 0.2);
+    border: 1px solid var(--border-color);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -151,12 +152,17 @@
 .collapsed-control-btn:hover {
     background-color: var(--surface-hover);
     border-color: var(--primary-color);
-    color: var(--primary-color);
+    color: var(--primary-text);
     transform: scale(1.05);
 }
 
 .collapsed-control-btn:active {
     transform: scale(0.95);
+}
+
+.collapsed-control-btn:focus-visible {
+    outline: 2px solid var(--primary-text);
+    outline-offset: 2px;
 }
 
 .file-list-container {
@@ -183,7 +189,7 @@
 }
 
 .file-item:focus-visible {
-    outline: 2px solid var(--primary-color);
+    outline: 2px solid var(--primary-text);
     outline-offset: 2px;
 }
 
@@ -194,14 +200,14 @@
 }
 
 .file-item.active {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0.08) 100%);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--primary-color) 15%, transparent) 0%, color-mix(in srgb, var(--primary-color) 8%, transparent) 100%);
     color: var(--text-color);
     border-color: var(--primary-color);
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--primary-color) 20%, transparent);
 }
 
 .file-item.active .file-name {
-    color: var(--primary-color);
+    color: var(--primary-text);
     font-weight: var(--font-weight-semibold);
 }
 
@@ -242,7 +248,8 @@
     pointer-events: none;
 }
 
-.file-item:hover .file-actions {
+.file-item:hover .file-actions,
+.file-item:focus-within .file-actions {
     opacity: 1;
     pointer-events: auto;
 }

@@ -10,6 +10,8 @@ import { applyHighlights, clearHighlightUI } from './highlights.js';
 import { annotateAcronyms } from './acronyms.js';
 import { stripHeadingInlineMarkdown } from './markdownText.js';
 
+let taskLabelCount = 0;
+
 function shouldUsePlainTextHeadings() {
     return state.settings.plainTextHeadings !== false;
 }
@@ -88,20 +90,15 @@ function createDocumentHeader(file, content) {
             </div>
             <div class="document-meta">
                 <span class="meta-item"><i class="fas fa-clock"></i> ${readTime} min read</span>
-                <span class="meta-separator">•</span>
                 <span class="meta-item"><i class="fas fa-list-ol"></i> ${lineCount.toLocaleString()} lines</span>
-                <span class="meta-separator">•</span>
                 <span class="meta-item"><i class="fas fa-calendar"></i> ${formattedDate}</span>
-                <span class="meta-separator">•</span>
-                <span class="filter-label">Filter</span>
-                <div class="filter-button-group">
-                    <button class="filter-toggle" data-filter="emojis" title="Toggle Emoji Filter">
-                        Emojis
-                    </button>
-                    <button class="filter-toggle" data-filter="hr" title="Toggle Horizontal Rule Filter">
-                        HRs
-                    </button>
-                </div>
+                <span class="filter-group">
+                    <span class="filter-label">Filter</span>
+                    <span class="filter-button-group">
+                        <button class="filter-toggle" data-filter="emojis" title="Hide emojis" aria-pressed="false">Emojis</button>
+                        <button class="filter-toggle" data-filter="hr" title="Hide horizontal rules" aria-pressed="false">HRs</button>
+                    </span>
+                </span>
             </div>
         </div>
         <hr class="document-separator">
@@ -137,16 +134,9 @@ export function showRenderedContent(content) {
         contentToRender = lines[0] + '\n' + lines.slice(2).join('\n');
     }
     
-    // Configure marked with syntax highlighting
+    // Syntax highlighting happens later in enhanceCodeBlocks(); marked dropped
+    // its "highlight" option, so passing one here did nothing.
     marked.setOptions({
-        highlight: function(code, lang) {
-            if (lang && hljs.getLanguage(lang)) {
-                try {
-                    return hljs.highlight(code, { language: lang }).value;
-                } catch (err) {}
-            }
-            return hljs.highlightAuto(code).value;
-        },
         breaks: true,
         gfm: true
     });
@@ -358,6 +348,7 @@ function setupFilterToggles(mdEl) {
         if (state.contentFilters[filterType]) {
             btn.classList.add('active');
         }
+        btn.setAttribute('aria-pressed', String(Boolean(state.contentFilters[filterType])));
         
         // Add click handler
         btn.addEventListener('click', () => {
@@ -572,6 +563,11 @@ function setupTaskListCheckboxes(mdEl) {
         // Create a label wrapper for the text content
         const label = document.createElement('label');
         label.className = 'task-label';
+        // Name the checkbox by its text for screen readers. (The label isn't
+        // tied to it with "for", because its click handler below already
+        // toggles the box and a native label would toggle it twice.)
+        label.id = `task-label-${++taskLabelCount}`;
+        checkbox.setAttribute('aria-labelledby', label.id);
         label.style.cursor = 'pointer';
         label.style.flex = '1';
         
