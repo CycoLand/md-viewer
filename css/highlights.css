@@ -54,6 +54,11 @@ body.highlight-paint-mode .markdown-content {
     cursor: cell;
 }
 
+/* Page view copies are read-only */
+.page-container .md-highlight {
+    cursor: default;
+}
+
 .md-highlight:focus-visible {
     outline: 2px solid var(--primary-color);
     outline-offset: 2px;

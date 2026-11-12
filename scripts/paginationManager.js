@@ -153,6 +153,17 @@ export class PaginationManager {
 
         leftPage.innerHTML = '';
         rightPage.innerHTML = '';
+
+        // Highlights in the copied pages are read-only (their comment still
+        // shows on hover), so drop the copies' Tab stop and button role
+        const readOnlyHighlights = (content) => {
+            content.querySelectorAll('mark.md-highlight').forEach(mark => {
+                mark.removeAttribute('tabindex');
+                mark.removeAttribute('role');
+                mark.removeAttribute('aria-haspopup');
+            });
+            return content;
+        };
         leftPage.classList.remove('visible', 'single');
         rightPage.classList.remove('visible', 'single');
 
@@ -164,11 +175,11 @@ export class PaginationManager {
         }
 
         if (totalPages === 1) {
-            const content = this.pages[0].cloneNode(true);
+            const content = readOnlyHighlights(this.pages[0].cloneNode(true));
             leftPage.appendChild(content);
             leftPage.classList.add('visible', 'single');
         } else if (this.currentPageIndex === 0) {
-            const content = this.pages[0].cloneNode(true);
+            const content = readOnlyHighlights(this.pages[0].cloneNode(true));
             leftPage.appendChild(content);
             leftPage.classList.add('visible', 'single');
         } else {
@@ -176,13 +187,13 @@ export class PaginationManager {
             const rightPageIndex = this.currentPageIndex + 1;
 
             if (leftPageIndex < totalPages) {
-                const leftContent = this.pages[leftPageIndex].cloneNode(true);
+                const leftContent = readOnlyHighlights(this.pages[leftPageIndex].cloneNode(true));
                 leftPage.appendChild(leftContent);
                 leftPage.classList.add('visible');
             }
 
             if (rightPageIndex < totalPages) {
-                const rightContent = this.pages[rightPageIndex].cloneNode(true);
+                const rightContent = readOnlyHighlights(this.pages[rightPageIndex].cloneNode(true));
                 rightPage.appendChild(rightContent);
                 rightPage.classList.add('visible');
             }

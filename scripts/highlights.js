@@ -395,6 +395,8 @@ function decorateHighlight(root, highlight) {
 function activateHighlight(mark) {
     const id = mark?.dataset.highlightId;
     if (!id) return;
+    // Page view shows copies of the text; comments are edited in the normal view
+    if (!mark.closest('#markdown-content')) return;
     hideFloatingHandles();
     document.dispatchEvent(new CustomEvent('highlightActivate', { detail: { id } }));
 }
