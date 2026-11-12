@@ -237,6 +237,12 @@ document.addEventListener('DOMContentLoaded', function() {
         paginationManager.toggle();
     });
 
+    // The document menu lives in the hidden scrolling view, so page view needs
+    // its own way out
+    document.getElementById('exit-pages-btn')?.addEventListener('click', () => {
+        if (paginationManager.paginationActive) paginationManager.toggle();
+    });
+
     if (prevPageBtn) {
         prevPageBtn.addEventListener('click', () => {
             paginationManager.prevPage();
@@ -287,6 +293,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         if (e.key === 'Escape') {
+            // Esc leaves page view, unless it's closing a panel or dialog first
+            const panelOrDialogOpen =
+                document.getElementById('settings-panel').classList.contains('open') ||
+                document.getElementById('theme-panel').classList.contains('open') ||
+                document.getElementById('paste-modal').classList.contains('show') ||
+                document.getElementById('add-document-modal').classList.contains('show');
+            if (!panelOrDialogOpen && paginationManager.paginationActive) {
+                paginationManager.toggle();
+            }
             if (document.getElementById('settings-panel').classList.contains('open')) {
                 settingsManager.closePanel();
             }

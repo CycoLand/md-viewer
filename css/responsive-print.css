@@ -109,6 +109,8 @@
     .page-container {
         max-width: 100%;
         height: calc(50vh - 100px);
+        /* Stacked vertically here, so keep the fixed height (no flex sizing) */
+        flex: none;
     }
 
     .page-nav-btn {

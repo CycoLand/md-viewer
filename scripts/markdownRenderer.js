@@ -10,6 +10,8 @@ import { applyHighlights, clearHighlightUI } from './highlights.js';
 import { annotateAcronyms } from './acronyms.js';
 import { stripHeadingInlineMarkdown } from './markdownText.js';
 
+let taskLabelCount = 0;
+
 function shouldUsePlainTextHeadings() {
     return state.settings.plainTextHeadings !== false;
 }
@@ -561,6 +563,11 @@ function setupTaskListCheckboxes(mdEl) {
         // Create a label wrapper for the text content
         const label = document.createElement('label');
         label.className = 'task-label';
+        // Name the checkbox by its text for screen readers. (The label isn't
+        // tied to it with "for", because its click handler below already
+        // toggles the box and a native label would toggle it twice.)
+        label.id = `task-label-${++taskLabelCount}`;
+        checkbox.setAttribute('aria-labelledby', label.id);
         label.style.cursor = 'pointer';
         label.style.flex = '1';
         
