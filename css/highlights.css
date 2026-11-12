@@ -60,7 +60,7 @@ body.highlight-paint-mode .markdown-content {
 }
 
 .md-highlight:focus-visible {
-    outline: 2px solid var(--primary-color);
+    outline: 2px solid var(--primary-text);
     outline-offset: 2px;
 }
 
@@ -73,7 +73,7 @@ body.highlight-paint-mode .markdown-content {
     font-size: 0.7em;
     margin-left: 0.3em;
     vertical-align: 0.15em;
-    color: var(--primary-color);
+    color: var(--primary-text);
 }
 
 /* Comment popover, anchored under the highlight (see highlightComments.js) */
@@ -120,7 +120,7 @@ body.highlight-paint-mode .markdown-content {
 }
 
 .md-comment-title i {
-    color: var(--primary-color);
+    color: var(--primary-text);
     margin-right: 0.25rem;
 }
 
@@ -140,7 +140,7 @@ body.highlight-paint-mode .markdown-content {
 }
 
 .md-comment-close:focus-visible {
-    outline: 2px solid var(--primary-color);
+    outline: 2px solid var(--primary-text);
     outline-offset: 1px;
 }
 
@@ -177,7 +177,7 @@ body.highlight-paint-mode .markdown-content {
 }
 
 .md-comment-input:focus-visible {
-    outline: 2px solid var(--primary-color);
+    outline: 2px solid var(--primary-text);
     outline-offset: 1px;
 }
 
