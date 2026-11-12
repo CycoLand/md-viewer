@@ -8,7 +8,7 @@ export class ThemeManager {
     constructor() {
         this.presets = {
             default: {
-                '--primary-color': '#6366f1',
+                '--primary-color': '#5f63ee',
                 '--primary-hover': '#5b5ff1',
                 '--bg-color': '#0f172a',
                 '--surface-color': '#1e293b',
@@ -30,7 +30,7 @@ export class ThemeManager {
                 '--code-token-comment': '#8b949e',
                 '--code-token-number': '#79c0ff',
                 '--code-token-function': '#d2a8ff',
-                '--box-border': 'rgba(99, 102, 241, 0.3)',
+                '--box-border': 'rgba(95, 99, 238, 0.3)',
                 '--success-color': '#10b981',
                 '--warning-color': '#f59e0b',
                 '--error-color': '#ef4444'
@@ -272,7 +272,7 @@ export class ThemeManager {
         Object.entries(theme).forEach(([property, value]) => {
             root.style.setProperty(property, value);
         });
-        this.updateOnPrimary();
+        this.updateDerivedColors();
     }
 
     /**
@@ -288,37 +288,12 @@ export class ThemeManager {
     }
 
     /**
-     * Black-ish or white text for a background color, whichever has the higher
-     * WCAG contrast ratio. Used for --on-primary (button and toggle text on
-     * the primary color), which white alone fails in most presets.
+     * Recomputes the colors derived from the theme (--on-primary and
+     * --primary-text) with the helpers themeLoader.js shares, so custom
+     * colors from the customizer stay readable too.
      */
-    static pickOnColor(color) {
-        const rgb = ThemeManager.parseColor(color);
-        if (!rgb) return '#ffffff';
-        const lum = ([r, g, b]) => [r, g, b]
-            .map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); })
-            .reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0);
-        const ratio = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
-        const bg = lum(rgb);
-        const dark = '#0f172a';
-        return ratio(bg, 1) >= ratio(bg, lum([15, 23, 42])) ? '#ffffff' : dark;
-    }
-
-    static parseColor(color) {
-        const value = (color || '').trim();
-        const hex = value.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
-        if (hex) {
-            const h = hex[1].length === 3 ? hex[1].split('').map(c => c + c).join('') : hex[1];
-            return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16));
-        }
-        const rgb = value.match(/^rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/i);
-        return rgb ? rgb.slice(1, 4).map(Number) : null;
-    }
-
-    updateOnPrimary() {
-        const root = document.documentElement;
-        const primary = getComputedStyle(root).getPropertyValue('--primary-color');
-        root.style.setProperty('--on-primary', ThemeManager.pickOnColor(primary));
+    updateDerivedColors() {
+        window.mdThemeColors?.applyDerived(document.documentElement);
     }
 
 
@@ -452,17 +427,19 @@ export class ThemeManager {
         document.getElementById('primary-color').addEventListener('input', (e) => {
             document.documentElement.style.setProperty('--primary-color', e.target.value);
             document.documentElement.style.setProperty('--primary-hover', this.adjustBrightness(e.target.value, -10));
-            this.updateOnPrimary();
+            this.updateDerivedColors();
             this.saveTheme();
         });
 
         document.getElementById('bg-color').addEventListener('input', (e) => {
             document.documentElement.style.setProperty('--bg-color', e.target.value);
+            this.updateDerivedColors();
             this.saveTheme();
         });
 
         document.getElementById('surface-color').addEventListener('input', (e) => {
             document.documentElement.style.setProperty('--surface-color', e.target.value);
+            this.updateDerivedColors();
             this.saveTheme();
         });
 

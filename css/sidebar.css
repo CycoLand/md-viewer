@@ -30,7 +30,7 @@
 .sidebar-header h1 {
     font-size: 1.25rem;
     font-weight: var(--font-weight-bold);
-    color: var(--primary-color);
+    color: var(--primary-text);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -48,7 +48,7 @@
 .sidebar-header .btn-icon:hover {
     background: linear-gradient(135deg, color-mix(in srgb, var(--primary-color) 10%, transparent) 0%, color-mix(in srgb, var(--primary-color) 5%, transparent) 100%);
     border-color: var(--primary-color);
-    color: var(--primary-color);
+    color: var(--primary-text);
     transform: scale(1.05);
     box-shadow: 0 2px 8px color-mix(in srgb, var(--primary-color) 20%, transparent);
 }
@@ -104,7 +104,7 @@
 }
 
 .sidebar .search-input:focus-visible {
-    outline: 2px solid var(--primary-color);
+    outline: 2px solid var(--primary-text);
     outline-offset: 2px;
 }
 
@@ -152,7 +152,7 @@
 .collapsed-control-btn:hover {
     background-color: var(--surface-hover);
     border-color: var(--primary-color);
-    color: var(--primary-color);
+    color: var(--primary-text);
     transform: scale(1.05);
 }
 
@@ -161,7 +161,7 @@
 }
 
 .collapsed-control-btn:focus-visible {
-    outline: 2px solid var(--primary-color);
+    outline: 2px solid var(--primary-text);
     outline-offset: 2px;
 }
 
@@ -189,7 +189,7 @@
 }
 
 .file-item:focus-visible {
-    outline: 2px solid var(--primary-color);
+    outline: 2px solid var(--primary-text);
     outline-offset: 2px;
 }
 
@@ -207,7 +207,7 @@
 }
 
 .file-item.active .file-name {
-    color: var(--primary-color);
+    color: var(--primary-text);
     font-weight: var(--font-weight-semibold);
 }
 

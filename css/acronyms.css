@@ -21,13 +21,13 @@
 .md-acronym:hover,
 .md-acronym:focus-visible {
     text-decoration-line: underline;
-    text-decoration-color: var(--primary-color);
+    text-decoration-color: var(--primary-text);
     background: var(--box-bg);
     outline: none;
 }
 
 .md-acronym:focus-visible {
-    outline: 2px solid var(--primary-color);
+    outline: 2px solid var(--primary-text);
     outline-offset: 1px;
 }
 
@@ -65,7 +65,7 @@
 
 .md-acronym-popup-term {
     font-weight: var(--font-weight-bold);
-    color: var(--primary-color);
+    color: var(--primary-text);
     font-family: var(--font-mono);
     letter-spacing: 0.02em;
 }

@@ -71,7 +71,7 @@
 
 .md-section.collapsed .md-heading:hover .md-toggle-icon:not(.hidden) {
     opacity: 1;
-    color: var(--primary-color);
+    color: var(--primary-text);
     transform: translateY(calc(-50% - var(--chevron-slide-distance)));
 }
 

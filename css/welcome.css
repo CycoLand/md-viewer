@@ -33,7 +33,7 @@
 
 .welcome-icon i {
     font-size: 4rem;
-    color: var(--primary-color);
+    color: var(--primary-text);
     animation: iconPulse 2s ease-in-out infinite;
 }
 

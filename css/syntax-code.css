@@ -137,7 +137,7 @@
 }
 
 .code-block-header:hover .code-block-toggle-icon {
-    color: var(--primary-color);
+    color: var(--primary-text);
 }
 
 .code-language {

@@ -1,6 +1,6 @@
 /* Design tokens — colors, typography, layout, motion */
 :root {
-    --primary-color: #6366f1;
+    --primary-color: #5f63ee;
     --primary-hover: #5b5ff1;
     --bg-color: #0f172a;
     --surface-color: #1e293b;
@@ -15,6 +15,10 @@
     --error-color: #ef4444;
     /* Text drawn on --primary-color; ThemeManager picks black or white by contrast */
     --on-primary: #ffffff;
+    /* The accent color for text, icons and focus rings drawn on the page or a
+       panel. The fill color can be too dark (or light) to read as text, so
+       themeLoader.js derives this to reach 4.5:1 on both backgrounds. */
+    --primary-text: var(--primary-color);
     --code-color: #e5c07b;
     --selection-bg: color-mix(in srgb, var(--primary-color) 30%, transparent);
     --selection-color: var(--text-color);

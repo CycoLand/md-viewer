@@ -57,7 +57,7 @@ body:has(#sidebar.collapsed) .theme-panel {
 }
 
 .settings-panel-header i {
-    color: var(--primary-color);
+    color: var(--primary-text);
 }
 
 .settings-panel-content {
@@ -121,7 +121,7 @@ label.setting-label {
 }
 
 .setting-label i {
-    color: var(--primary-color);
+    color: var(--primary-text);
     width: 20px;
     text-align: center;
     flex-shrink: 0;
@@ -177,7 +177,7 @@ label.setting-label {
 
 .settings-group input:focus-visible,
 .settings-group select:focus-visible {
-    outline: 2px solid var(--primary-color);
+    outline: 2px solid var(--primary-text);
     outline-offset: 2px;
 }
 
@@ -190,7 +190,7 @@ label.setting-label {
 }
 
 .setting-description a {
-    color: var(--primary-color);
+    color: var(--primary-text);
     text-decoration: underline;
     text-underline-offset: 2px;
 }
@@ -250,6 +250,6 @@ label.setting-label {
 
 /* The real checkbox is invisible, so draw the keyboard focus ring on the track */
 .toggle-switch input:focus-visible + .toggle-slider {
-    outline: 2px solid var(--primary-color);
+    outline: 2px solid var(--primary-text);
     outline-offset: 2px;
 }
