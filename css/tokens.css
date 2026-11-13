@@ -13,7 +13,12 @@
     --success-color: #10b981;
     --warning-color: #f59e0b;
     --error-color: #ef4444;
-    /* Text drawn on --primary-color; ThemeManager picks black or white by contrast */
+    /* Filled controls with text (buttons, filter toggles): a gradient from --button-fill
+       to --button-fill-end with --on-primary text. themeLoader.js derives all
+       three from --primary-color so the text reads at 4.5:1 across the whole
+       gradient. */
+    --button-fill: var(--primary-color);
+    --button-fill-end: var(--primary-hover);
     --on-primary: #ffffff;
     /* The accent color for text, icons and focus rings drawn on the page or a
        panel. The fill color can be too dark (or light) to read as text, so

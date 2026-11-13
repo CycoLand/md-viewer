@@ -186,11 +186,22 @@
         toHex(rgb) {
             return '#' + rgb.map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
         },
-        // Text drawn on a fill: white or near-black, whichever contrasts more
-        onColor(fill) {
-            const rgb = this.parse(fill);
-            if (!rgb) return '#ffffff';
-            return this.contrast(rgb, [255, 255, 255]) >= this.contrast(rgb, [15, 23, 42]) ? '#ffffff' : '#0f172a';
+        // Filled controls with text (buttons, filter toggles): white text when the theme
+        // color needs at most a slight darkening (15%) for white to pass,
+        // otherwise near-black text. Their gradient always shades toward more
+        // contrast for that text: darker behind white, lighter behind dark.
+        buttonColors(primary) {
+            const white = [255, 255, 255], black = [0, 0, 0], dark = [15, 23, 42];
+            const p = this.parse(primary);
+            if (!p) return { fill: primary, end: primary, text: '#ffffff' };
+            const shade = (rgb, t, toward) => rgb.map((v, i) => v + (toward[i] - v) * t);
+            let t = 0;
+            while (this.contrast(white, shade(p, t, black)) < 4.5 && t < 1) t = Math.min(1, t + 0.02);
+            if (t <= 0.15 || this.contrast(dark, p) < 4.5) {
+                const fill = shade(p, t, black);
+                return { fill: this.toHex(fill), end: this.toHex(shade(fill, 0.1, black)), text: '#ffffff' };
+            }
+            return { fill: this.toHex(p), end: this.toHex(shade(p, 0.12, white)), text: '#0f172a' };
         },
         // The accent itself when it reads at 4.5:1 on both the page and the
         // panels; otherwise mixed toward white (dark themes) or black (light
@@ -210,7 +221,10 @@
             const style = getComputedStyle(el);
             const get = name => style.getPropertyValue(name).trim();
             const primary = get('--primary-color');
-            el.style.setProperty('--on-primary', this.onColor(primary));
+            const button = this.buttonColors(primary);
+            el.style.setProperty('--button-fill', button.fill);
+            el.style.setProperty('--button-fill-end', button.end);
+            el.style.setProperty('--on-primary', button.text);
             el.style.setProperty('--primary-text', this.readableAccent(primary, get('--bg-color'), get('--surface-color')));
         }
     };

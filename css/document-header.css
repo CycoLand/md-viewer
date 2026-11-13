@@ -216,7 +216,7 @@
 
 /* On: filled, plus a check mark so the state isn't shown by color alone */
 .filter-toggle.active {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    background: linear-gradient(135deg, var(--button-fill) 0%, var(--button-fill-end) 100%);
     color: var(--on-primary);
     z-index: 1;
     box-shadow: 0 2px 8px color-mix(in srgb, var(--primary-color) 30%, transparent);
@@ -230,7 +230,7 @@
 }
 
 .filter-toggle.active:hover {
-    background: var(--primary-hover);
+    background: var(--button-fill-end);
 }
 
 .document-separator {
