@@ -66,7 +66,7 @@
 }
 
 .zoom-btn.active {
-    background: var(--primary-color);
+    background: var(--button-fill);
     color: var(--on-primary);
     border-color: var(--primary-color);
 }

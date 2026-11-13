@@ -177,7 +177,7 @@
 }
 
 .code-copy-btn:hover {
-    background-color: var(--primary-color);
+    background-color: var(--button-fill);
     color: var(--on-primary);
     z-index: 1;
     transform: scale(1.05);
