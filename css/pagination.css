@@ -111,7 +111,7 @@
     width: 48px;
     height: 48px;
     border: none;
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    background: linear-gradient(135deg, var(--button-fill) 0%, var(--button-fill-end) 100%);
     color: var(--on-primary);
     border-radius: 50%;
     cursor: pointer;
@@ -124,7 +124,7 @@
 }
 
 .page-nav-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary-color) 100%);
+    background: linear-gradient(135deg, var(--button-fill-end) 0%, var(--button-fill) 100%);
     transform: scale(1.15);
     box-shadow: 0 6px 20px color-mix(in srgb, var(--primary-color) 40%, transparent);
 }
@@ -249,7 +249,7 @@
 }
 
 .page-container th {
-    background-color: var(--primary-color);
+    background-color: var(--button-fill);
     color: var(--on-primary);
     font-weight: var(--font-weight-semibold);
 }
